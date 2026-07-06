@@ -114,3 +114,123 @@ body {
     transition: 0.2s ease;
 }
 .dept-card:hover .btn-access { background: white; color: black; }
+
+/* --- Map Layout --- */
+.map-layout {
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+}
+
+#map-container {
+    flex: 1;
+    height: 100vh;
+    background-color: #000; /* Fond noir derrière la carte */
+    z-index: 1;
+}
+
+/* --- Sidebars (Glassmorphism sur la carte) --- */
+.sidebar {
+    width: 280px;
+    height: calc(100vh - 2rem);
+    margin: 1rem;
+    position: absolute;
+    left: 0;
+    z-index: 1000; /* Au dessus de Leaflet */
+    display: flex;
+    flex-direction: column;
+}
+
+.right-panel {
+    width: 320px;
+    height: calc(100vh - 2rem);
+    margin: 1rem;
+    position: absolute;
+    right: 0;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Headers & Badges */
+.sidebar-header, .panel-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.badge-dept {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 800;
+    margin-top: 0.5rem;
+}
+.badge-dept.bcso { background: var(--bcso-color); }
+.badge-dept.lspd { background: var(--lspd-color); }
+.badge-dept.all { background: var(--all-color); }
+
+/* Navigation */
+.sidebar-nav { padding: 1rem 0; }
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: 0.2s;
+}
+.nav-item svg { width: 20px; height: 20px; }
+.nav-item:hover:not(.disabled), .nav-item.active {
+    color: white;
+    background: rgba(255, 255, 255, 0.05);
+    border-left: 3px solid var(--accent);
+}
+.nav-item.disabled { opacity: 0.3; cursor: not-allowed; }
+
+/* Boutons */
+.btn-primary {
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    width: 100%;
+    transition: 0.2s;
+}
+.btn-primary:hover { filter: brightness(1.2); }
+
+/* Liste des unités */
+.units-list {
+    padding: 1rem;
+    flex: 1;
+    overflow-y: auto;
+}
+.unit-card {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background: rgba(0,0,0,0.2);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+}
+.unit-color { width: 12px; height: 12px; border-radius: 50%; }
+.unit-name { flex: 1; font-weight: 600; font-size: 0.9rem; }
+.btn-select { background: none; border: 1px solid white; color: white; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; }
+.btn-delete { background: none; border: none; color: #ff4444; cursor: pointer; font-size: 1rem; }
+
+/* Cacher le logo Leaflet pour faire pro (optionnel mais recommandé pour les dash internes) */
+.leaflet-control-attribution { display: none !important; }
+
+.unit-color { 
+    width: 12px; 
+    height: 12px; 
+    border-radius: 50%; 
+    background-color: var(--u-color);
+    box-shadow: 0 0 10px var(--u-color);
+}

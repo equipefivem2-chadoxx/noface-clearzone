@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/css/style.css">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+<body class="map-layout">
+    
+    <%- include('partials/sidebar') %>
+
+    <!-- Conteneur de la carte plein écran -->
+    <main id="map-container"></main>
+
+    <%- include('partials/right-panel') %>
+
+    <!-- Configuration injectée pour le JS client -->
+    <script>
+        const MAP_ID = "<%= mapId %>";
+    </script>
+
+    <!-- Dépendances -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    
+    <!-- Scripts Modulaires -->
+    <script src="/js/map.core.js"></script>
+    <!-- On ajoutera map.draw.js et socket.client.js à la prochaine étape -->
+
+    <!-- Dépendances -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    
+    <!-- Scripts Modulaires Front -->
+    <script src="/js/map.core.js"></script>
+    <script src="/js/socket.client.js"></script>
+    <script src="/js/map.draw.js"></script>
+    
+</body>
+</html>
