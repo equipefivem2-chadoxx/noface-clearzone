@@ -1,10 +1,10 @@
 document.addEventListener('DOMContentLoaded', () => {
     const socket = io();
 
-    // 1. Rejoindre la room correspondante à la carte actuelle
+    // 1. Rejoindre la room
     socket.emit('join-map', MAP_ID);
 
-    // 2. Gestion de l'UI - Modale Unité
+    // 2. Gestion de l'UI
     const btnNewUnit = document.getElementById('btn-new-unit');
     const modalUnit = document.getElementById('modal-unit');
     const btnCancelUnit = document.getElementById('btn-cancel-unit');
@@ -12,8 +12,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const inputUnitName = document.getElementById('unit-name-input');
     const modalError = document.getElementById('modal-error');
     const unitsList = document.getElementById('units-list');
+    const tacticalTools = document.getElementById('tactical-tools');
 
-    // Variable globale pour stocker l'unité actuellement sélectionnée
     window.selectedUnit = null;
 
     btnNewUnit.addEventListener('click', () => {
@@ -27,7 +27,6 @@ document.addEventListener('DOMContentLoaded', () => {
         modalError.textContent = '';
     });
 
-    // Demande de création au serveur
     btnConfirmUnit.addEventListener('click', () => {
         const name = inputUnitName.value.trim();
         if (!name) return;
@@ -39,14 +38,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 modalUnit.classList.add('hidden');
                 inputUnitName.value = '';
                 modalError.textContent = '';
-                // L'unité sera ajoutée visuellement via l'événement 'unit-added' ci-dessous
             }
         });
     });
 
-    // 3. Réception des événements Serveur -> Client
+    // 3. Réception Serveur -> Client
     socket.on('unit-added', (unit) => {
-        // Enlever le message "Aucune unité" s'il existe
         const emptyState = document.querySelector('.empty-state');
         if (emptyState) emptyState.remove();
 
@@ -58,8 +55,9 @@ document.addEventListener('DOMContentLoaded', () => {
         card.innerHTML = `
             <div class="unit-color" style="--u-color: ${unit.color};"></div>
             <span class="unit-name">${unit.name}</span>
-            <button class="btn-select">Sélectionner</button>
-            <button class="btn-delete">✕</button>
+            <button class="btn-delete" title="Retirer l'unité">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
         `;
         unitsList.appendChild(card);
     });
@@ -68,18 +66,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const card = document.querySelector(`.unit-card[data-id="${unitId}"]`);
         if (card) card.remove();
         
-        // Si l'unité supprimée était celle sélectionnée, on désélectionne
         if (window.selectedUnit && window.selectedUnit.id === unitId) {
             window.selectedUnit = null;
-            document.querySelectorAll('.unit-card').forEach(c => c.style.borderColor = 'var(--glass-border)');
+            tacticalTools.classList.add('hidden'); // Cache les outils si l'unité disparaît
         }
 
         if (unitsList.children.length === 0) {
-            unitsList.innerHTML = '<div class="empty-state">Aucune unité déployée.</div>';
+            unitsList.innerHTML = '<div class="empty-state">Aucune unité n\'est déployée sur ce secteur.</div>';
         }
     });
 
-    // 4. Délégation d'événements pour Sélection / Suppression (Remplace les onclick)
+    // 4. Délégation d'événements pour Sélectionner (carte entière) / Supprimer
     unitsList.addEventListener('click', (e) => {
         const card = e.target.closest('.unit-card');
         if (!card) return;
@@ -87,19 +84,26 @@ document.addEventListener('DOMContentLoaded', () => {
         const unitId = card.dataset.id;
         const unitColor = card.dataset.color;
 
-        if (e.target.classList.contains('btn-delete')) {
+        // Clic sur Corbeille
+        if (e.target.closest('.btn-delete')) {
             socket.emit('delete-unit', unitId);
-        } else if (e.target.classList.contains('btn-select')) {
-            // Effet visuel de sélection
-            document.querySelectorAll('.unit-card').forEach(c => c.style.borderColor = 'var(--glass-border)');
-            card.style.borderColor = unitColor;
-            
-            // On assigne l'unité sélectionnée à la variable globale utilisée par Leaflet
-            window.selectedUnit = { id: unitId, color: unitColor };
-            console.log(`[UI] Unité activée : ${unitId}`);
+            return;
         }
+
+        // Clic sur le reste de la carte = Sélection
+        document.querySelectorAll('.unit-card').forEach(c => {
+            c.classList.remove('active');
+            c.style.borderColor = 'var(--border-light)';
+        });
+        
+        card.classList.add('active');
+        card.style.borderColor = unitColor;
+        
+        window.selectedUnit = { id: unitId, color: unitColor };
+        
+        // Affiche l'équipement tactique !
+        tacticalTools.classList.remove('hidden');
     });
 
-    // On rend le socket global pour que map.draw.js puisse l'utiliser pour émettre les tracés
     window.tacticalSocket = socket;
 });

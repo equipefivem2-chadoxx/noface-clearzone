@@ -1,7 +1,10 @@
 <aside class="right-panel glass-panel">
     <div class="panel-header">
-        <h3>Unités Actives</h3>
-        <button id="btn-new-unit" class="btn-primary">+ Nouvelle Unité</button>
+        <h3>Déploiement</h3>
+        <button id="btn-new-unit" class="btn-primary">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            Nouvelle Unité
+        </button>
     </div>
 
     <div id="units-list" class="units-list">
@@ -11,25 +14,39 @@
                 <div class="unit-card" data-id="<%= unit.id %>" data-color="<%= unit.color %>">
                     <div class="unit-color" style="--u-color: <%= unit.color %>;"></div>
                     <span class="unit-name"><%= unit.name %></span>
-                    <button class="btn-select">Sélectionner</button>
-                    <button class="btn-delete">✕</button>
+                    
+                    <button class="btn-delete" title="Retirer l'unité">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
                 </div>
             <% }); %>
         <% } else { %>
-            <div class="empty-state">Aucune unité déployée.</div>
+            <div class="empty-state">Aucune unité n'est déployée sur ce secteur.</div>
         <% } %>
+    </div>
+
+    <!-- Panneau d'outils tactiques caché par défaut -->
+    <div id="tactical-tools" class="tactical-tools hidden">
+        <h4>Équipement Tactique</h4>
+        <div class="tools-grid">
+            <button class="tool-btn" data-tool="draw" data-size="4" title="Tracé Fin">Fin</button>
+            <button class="tool-btn active" data-tool="draw" data-size="8" title="Tracé Normal">Normal</button>
+            <button class="tool-btn" data-tool="draw" data-size="14" title="Tracé Épais">Épais</button>
+            <button class="tool-btn" data-tool="eraser" title="Gomme ciblée">Gomme</button>
+            <button class="tool-btn text-danger" id="btn-clear-all" title="Nettoyer la carte">Clear All</button>
+        </div>
     </div>
 </aside>
 
 <!-- Modal Création d'unité -->
 <div id="modal-unit" class="modal-overlay hidden">
-    <div class="modal glass-panel">
-        <h3>Déployer une unité</h3>
-        <input type="text" id="unit-name-input" placeholder="Ex: Charlie-2, A141..." autocomplete="off">
+    <div class="modal">
+        <h3>Identifiant de l'unité</h3>
+        <input type="text" id="unit-name-input" placeholder="Ex: ALPHA-1, M-14..." autocomplete="off">
         <div id="modal-error" class="error-text"></div>
         <div class="modal-actions">
             <button id="btn-cancel-unit" class="btn-secondary">Annuler</button>
-            <button id="btn-confirm-unit" class="btn-primary">Confirmer</button>
+            <button id="btn-confirm-unit" class="btn-primary">Déployer</button>
         </div>
     </div>
 </div>

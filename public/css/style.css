@@ -1,8 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700;900&display=swap');
 
 :root {
-    --bg-main: #07080a; /* Noir abyssal */
-    --surface-1: rgba(20, 21, 27, 0.7); /* Transparence sombre */
+    --bg-main: #07080a;
+    --surface-1: rgba(20, 21, 27, 0.7);
     --surface-2: rgba(30, 31, 40, 0.9);
     --border-light: rgba(255, 255, 255, 0.05);
     --border-glow: rgba(255, 255, 255, 0.1);
@@ -30,10 +30,9 @@ body {
     background-color: var(--bg-main);
     color: var(--text-primary);
     min-height: 100vh;
-    overflow: hidden; /* Empêche le scroll sur la map */
+    overflow: hidden;
 }
 
-/* --- Utilities (Le nouveau standard premium) --- */
 .glass-panel {
     background: var(--surface-1);
     backdrop-filter: blur(20px);
@@ -42,7 +41,6 @@ body {
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
 }
 
-/* --- Layout Map --- */
 .map-layout {
     display: flex;
     height: 100vh;
@@ -53,7 +51,6 @@ body {
 #map-container {
     flex: 1;
     height: 100vh;
-    /* Fond de secours si pas d'image (Grille tactique) */
     background-color: #050505;
     background-image: 
         linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
@@ -62,7 +59,6 @@ body {
     z-index: 1;
 }
 
-/* --- Interface Superposée (UI) --- */
 .sidebar, .right-panel {
     position: absolute;
     top: 1rem;
@@ -79,7 +75,6 @@ body {
 .sidebar { left: 1rem; }
 .right-panel { right: 1rem; }
 
-/* En-têtes des panneaux */
 .sidebar-header, .panel-header {
     padding: 1.5rem;
     border-bottom: 1px solid var(--border-light);
@@ -102,7 +97,6 @@ body {
     margin-bottom: 1rem;
 }
 
-/* Badges dynamiques */
 .badge-dept {
     display: inline-flex;
     align-items: center;
@@ -117,7 +111,6 @@ body {
 .badge-dept.lspd { background: rgba(37, 99, 235, 0.2); color: var(--lspd-color); border: 1px solid rgba(37, 99, 235, 0.3); }
 .badge-dept.all { background: rgba(16, 185, 129, 0.2); color: var(--all-color); border: 1px solid rgba(16, 185, 129, 0.3); }
 
-/* --- Navigation --- */
 .sidebar-nav {
     padding: 1rem 0;
     display: flex;
@@ -156,7 +149,6 @@ body {
     cursor: not-allowed;
 }
 
-/* --- Boutons --- */
 .btn-primary {
     background: var(--accent-blue);
     color: white;
@@ -176,12 +168,12 @@ body {
 }
 
 .btn-primary:hover {
-    background: #4f46e5; /* Bleu plus profond au survol */
+    background: #4f46e5;
     transform: translateY(-1px);
     box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
 }
 
-/* --- Liste des unités --- */
+/* --- Panel des Unités --- */
 .units-list {
     padding: 1rem;
     flex: 1;
@@ -208,7 +200,6 @@ body {
     background: rgba(255, 255, 255, 0.03);
 }
 
-/* L'unité active aura cette bordure dynamique définie en JS */
 .unit-card.active {
     background: linear-gradient(90deg, rgba(255,255,255,0.05) 0%, transparent 100%);
 }
@@ -216,7 +207,7 @@ body {
 .unit-color { 
     width: 14px; 
     height: 14px; 
-    border-radius: 4px; /* Un carré arrondi fait plus "logiciel" qu'un rond */
+    border-radius: 4px;
     background-color: var(--u-color);
     box-shadow: 0 0 12px var(--u-color);
     border: 1px solid rgba(255,255,255,0.5);
@@ -256,10 +247,73 @@ body {
     font-style: italic;
 }
 
-/* Cache l'attribution Leaflet */
+/* --- Outils Tactiques --- */
+.tactical-tools {
+    padding: 1.5rem;
+    border-top: 1px solid var(--border-light);
+    background: linear-gradient(0deg, rgba(255,255,255,0.02) 0%, transparent 100%);
+}
+
+.tactical-tools h4 {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 1rem;
+}
+
+.tools-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.tool-btn {
+    background: rgba(0,0,0,0.4);
+    border: 1px solid var(--border-light);
+    color: var(--text-secondary);
+    padding: 0.6rem 0.8rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex: 1;
+    min-width: 30%;
+    text-align: center;
+}
+
+.tool-btn:hover { 
+    background: rgba(255,255,255,0.05); 
+    color: white; 
+}
+
+.tool-btn.active { 
+    background: rgba(59, 130, 246, 0.15); 
+    border-color: var(--accent-blue); 
+    color: white; 
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.2);
+}
+
+.tool-btn.text-danger { 
+    color: var(--danger); 
+    border-color: rgba(239, 68, 68, 0.2); 
+}
+
+.tool-btn.text-danger:hover { 
+    background: var(--danger); 
+    color: white; 
+    border-color: var(--danger);
+}
+
+/* Curseur Gomme */
+.cursor-eraser {
+    cursor: crosshair !important;
+}
+
 .leaflet-control-attribution { display: none !important; }
 
-/* --- Modale Création d'Unité (Rendue plus premium) --- */
+/* --- Modale --- */
 .hidden { display: none !important; }
 
 .modal-overlay {
