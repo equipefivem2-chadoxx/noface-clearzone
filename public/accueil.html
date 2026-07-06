@@ -3,189 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dispatch - Sélection du Service</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+    <title>MDT - Accueil</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary: #bda581;
-            --primary-bright: #d8c3a5;
-            --primary-glow: rgba(189, 165, 129, 0.3);
             --bg-dark: #07090e;
-            --bg-card: rgba(15, 23, 42, 0.65);
         }
-
         body {
-            margin: 0;
-            padding: 0;
+            margin: 0; padding: 0;
             background-color: var(--bg-dark);
-            background-image: 
-                radial-gradient(circle at 50% 40%, rgba(189, 165, 129, 0.12), transparent 60%),
-                linear-gradient(rgba(189, 165, 129, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(189, 165, 129, 0.03) 1px, transparent 1px);
-            background-size: 100% 100%, 40px 40px, 40px 40px;
+            background-image: radial-gradient(circle at 50% 50%, rgba(189, 165, 129, 0.08), transparent 70%);
             font-family: 'Montserrat', sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            overflow: hidden;
-            color: #fff;
+            display: flex; justify-content: center; align-items: center;
+            height: 100vh; overflow: hidden; color: #fff;
         }
-
-        @keyframes scaleUp {
-            0% { opacity: 0; transform: scale(0.95) translateY(20px); }
-            100% { opacity: 1; transform: scale(1) translateY(0); }
+        .container {
+            display: flex; flex-direction: column; gap: 20px;
+            width: 100%; max-width: 400px; text-align: center;
         }
-
-        @keyframes pulseGlow {
-            0% { box-shadow: 0 0 40px rgba(189, 165, 129, 0.05); }
-            50% { box-shadow: 0 0 60px rgba(189, 165, 129, 0.15); }
-            100% { box-shadow: 0 0 40px rgba(189, 165, 129, 0.05); }
+        h1 {
+            font-size: 28px; font-weight: 900; letter-spacing: 4px;
+            color: #fff; text-transform: uppercase; margin-bottom: 30px;
         }
-
-        .login-card {
-            background: var(--bg-card);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(189, 165, 129, 0.25);
-            border-radius: 16px;
-            padding: 50px;
-            width: 100%;
-            max-width: 450px;
-            text-align: center;
-            position: relative;
-            animation: scaleUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards, pulseGlow 4s infinite ease-in-out;
-            box-shadow: inset 0 0 30px rgba(189, 165, 129, 0.05), 0 20px 50px rgba(0,0,0,0.8);
-        }
-
-        .card-decoration-top, .card-decoration-bottom {
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 40%;
-            height: 2px;
-            background: var(--primary);
-            box-shadow: 0 0 10px var(--primary);
-        }
-        .card-decoration-top { top: 0; }
-        .card-decoration-bottom { bottom: 0; }
-
-        .login-title {
-            font-size: 32px;
-            font-weight: 900;
-            margin: 0 0 10px 0;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-        }
-
-        .login-title span {
-            background: linear-gradient(to right, #fff, var(--primary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .login-subtitle {
-            font-family: monospace;
-            color: var(--primary);
-            font-size: 12px;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            margin-bottom: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            opacity: 0.8;
-        }
-
-        .login-subtitle::before, .login-subtitle::after {
-            content: '///';
-            color: rgba(189, 165, 129, 0.4);
-            letter-spacing: -1px;
-        }
-
-        .btn-group {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .faction-btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
+        h1 span { color: var(--primary); }
+        .btn {
             background: rgba(189, 165, 129, 0.05);
-            border: 1px solid var(--primary);
-            color: var(--primary-bright);
-            padding: 16px 20px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 700;
-            font-size: 14px;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
-            position: relative;
-            overflow: hidden;
-            cursor: pointer;
-            width: 100%;
+            border: 1px solid rgba(189, 165, 129, 0.3);
+            color: #fff; padding: 20px; font-weight: 700;
+            font-size: 16px; letter-spacing: 2px; text-transform: uppercase;
+            border-radius: 8px; cursor: pointer; transition: all 0.3s ease;
         }
-
-        .faction-btn i { font-size: 18px; }
-
-        .faction-btn:hover {
-            background: var(--primary);
-            color: var(--bg-dark);
-            box-shadow: 0 0 25px var(--primary-glow), inset 0 0 10px rgba(255,255,255,0.5);
-            transform: translateY(-3px);
-        }
-
-        .faction-btn:hover i {
-            animation: bounce 0.5s ease;
-        }
-
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-3px); }
-        }
-        
-        .joint-force {
-            border-style: dashed;
-            background: rgba(189, 165, 129, 0.1);
+        .btn:hover {
+            background: var(--primary); color: var(--bg-dark);
+            box-shadow: 0 0 25px rgba(189, 165, 129, 0.4);
+            transform: translateY(-2px);
         }
     </style>
 </head>
 <body>
 
-    <div class="login-card">
-        <div class="card-decoration-top"></div>
-        
-        <h2 class="login-title">DISPATCH <span>CENTER</span></h2>
-        <div class="login-subtitle">Sélection du service actif</div>
-
-        <div class="btn-group">
-            <button class="faction-btn" onclick="selectFaction('LSPD')">
-                <i class="fas fa-building-shield"></i> LSPD
-            </button>
-            
-            <button class="faction-btn" onclick="selectFaction('BCSO')">
-                <i class="fas fa-star"></i> BCSO
-            </button>
-            
-            <button class="faction-btn joint-force" onclick="selectFaction('SASP')">
-                <i class="fas fa-handshake"></i> LSPD & BCSO
-            </button>
-        </div>
-
-        <div class="card-decoration-bottom"></div>
+    <div class="container">
+        <h1>MDT <span>SYSTEM</span></h1>
+        <button class="btn" onclick="select('LSPD')">LSPD</button>
+        <button class="btn" onclick="select('BCSO')">BCSO</button>
+        <button class="btn" onclick="select('SASP')">LES DEUX (SASP)</button>
     </div>
 
     <script>
-        function selectFaction(faction) {
-            // Redirige vers la carte (index.html) en passant la faction dans l'URL
+        function select(faction) {
             window.location.href = '/index.html?faction=' + faction;
         }
     </script>
