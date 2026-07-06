@@ -1,64 +1,62 @@
+/* =====================================================
+   CLEARZONE // HOME TERMINAL UI
+===================================================== */
+
+
 .home-container {
 
     min-height:100vh;
 
-    display:flex;
-    flex-direction:column;
-
-    align-items:center;
-    justify-content:center;
-
+    width:100%;
 
     position:relative;
 
-    padding:40px;
-
-
     overflow:hidden;
 
-}
+    display:flex;
 
+    flex-direction:column;
 
-/* grille tactique */
+    justify-content:center;
 
-.home-container::before {
+    align-items:center;
 
-    content:"";
-
-    position:absolute;
-
-    inset:0;
-
+    padding:40px;
 
     background:
 
+        radial-gradient(
+            circle at center,
+            rgba(22,119,255,.18),
+            transparent 45%
+        ),
+
         linear-gradient(
-            rgba(255,255,255,.025) 1px,
+            rgba(255,255,255,.03) 1px,
             transparent 1px
         ),
 
         linear-gradient(
             90deg,
-            rgba(255,255,255,.025) 1px,
+            rgba(255,255,255,.03) 1px,
             transparent 1px
-        );
+        ),
+
+        #05070a;
 
 
-    background-size:50px 50px;
-
-
-    mask-image:
-        radial-gradient(
-            circle,
-            black,
-            transparent 75%
-        );
+    background-size:
+        auto,
+        50px 50px,
+        50px 50px,
+        auto;
 
 }
 
 
 
-/* halo central */
+
+/* SCAN EFFECT */
 
 .home-container::after {
 
@@ -66,121 +64,442 @@
 
     position:absolute;
 
-    width:700px;
+    left:0;
 
-    height:700px;
+    top:-200px;
 
+    width:100%;
+
+    height:150px;
 
     background:
 
-        radial-gradient(
-            circle,
+        linear-gradient(
+            transparent,
             rgba(22,119,255,.15),
-            transparent 70%
+            transparent
         );
 
 
-    top:50%;
+    animation:
 
-    left:50%;
-
-    transform:
-        translate(-50%,-50%);
+        scan 7s linear infinite;
 
 
-    filter:blur(20px);
+    pointer-events:none;
+
+}
+
+
+
+@keyframes scan {
+
+    from {
+
+        transform:translateY(-200px);
+
+    }
+
+
+    to {
+
+        transform:translateY(120vh);
+
+    }
 
 }
 
 
 
 
-/* TITRE */
+
+/* =====================================================
+   BOOT SCREEN
+===================================================== */
+
+
+.boot-overlay {
+
+    position:fixed;
+
+    inset:0;
+
+    background:#020304;
+
+    z-index:99999;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    transition:1s;
+
+}
+
+
+.boot-overlay.hide {
+
+    opacity:0;
+
+    pointer-events:none;
+
+}
+
+
+
+.boot-content {
+
+    text-align:center;
+
+}
+
+
+
+.boot-logo {
+
+    font-family:var(--font-hud);
+
+    font-size:80px;
+
+    font-weight:700;
+
+    letter-spacing:15px;
+
+    color:white;
+
+    text-shadow:
+
+        0 0 40px #1677ff;
+
+}
+
+
+
+.boot-content p {
+
+    margin-top:25px;
+
+    color:#64748b;
+
+    font-size:12px;
+
+    letter-spacing:5px;
+
+}
+
+
+
+
+
+.boot-loader {
+
+    width:300px;
+
+    height:4px;
+
+    background:#111827;
+
+    margin:30px auto;
+
+    overflow:hidden;
+
+}
+
+
+
+.boot-loader span {
+
+    display:block;
+
+    width:40%;
+
+    height:100%;
+
+    background:#1677ff;
+
+    animation:load 1.5s infinite;
+
+}
+
+
+
+@keyframes load {
+
+    from {
+
+        transform:translateX(-100%);
+
+    }
+
+    to {
+
+        transform:translateX(300%);
+
+    }
+
+}
+
+
+
+
+
+
+/* =====================================================
+   TOP HUD
+===================================================== */
+
+
+.top-hud {
+
+    position:absolute;
+
+    top:30px;
+
+    left:40px;
+
+    right:40px;
+
+    height:70px;
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    padding:0 25px;
+
+    background:
+
+        rgba(5,10,18,.8);
+
+
+    border:
+
+        1px solid rgba(255,255,255,.1);
+
+
+    backdrop-filter:blur(15px);
+
+}
+
+
+
+.hud-brand {
+
+    display:flex;
+
+    align-items:center;
+
+    gap:15px;
+
+    font-family:var(--font-hud);
+
+    font-size:28px;
+
+    letter-spacing:5px;
+
+}
+
+
+
+.hud-brand small {
+
+    color:#64748b;
+
+    font-size:10px;
+
+    letter-spacing:3px;
+
+}
+
+
+
+.hud-square {
+
+    width:12px;
+
+    height:12px;
+
+    background:#1677ff;
+
+    box-shadow:
+
+        0 0 20px #1677ff;
+
+}
+
+
+
+
+.hud-status {
+
+    display:flex;
+
+    gap:35px;
+
+}
+
+
+
+.hud-status div {
+
+    display:flex;
+
+    flex-direction:column;
+
+    font-size:10px;
+
+    color:#64748b;
+
+    letter-spacing:2px;
+
+}
+
+
+
+.hud-status strong {
+
+    margin-top:5px;
+
+    color:white;
+
+}
+
+
+
+.hud-status .online {
+
+    color:#10b981;
+
+}
+
+
+
+
+
+
+/* =====================================================
+   HERO
+===================================================== */
+
+
+.hero {
+
+    position:relative;
+
+    text-align:center;
+
+    z-index:2;
+
+}
+
+
+
+.system-warning {
+
+    font-family:var(--font-hud);
+
+    color:#10b981;
+
+    letter-spacing:4px;
+
+    font-size:13px;
+
+}
+
+
+
+.system-warning span {
+
+    display:inline-block;
+
+    width:8px;
+
+    height:8px;
+
+    background:#10b981;
+
+    border-radius:50%;
+
+    margin-right:10px;
+
+    box-shadow:
+
+        0 0 15px #10b981;
+
+    animation:pulse 1.5s infinite;
+
+}
+
+
+
+@keyframes pulse {
+
+    50% {
+
+        opacity:.3;
+
+    }
+
+}
+
+
+
 
 
 .home-title {
 
+    margin:20px 0;
 
-    position:relative;
+    font-family:var(--font-hud);
 
-
-    font-family:"Rajdhani", sans-serif;
-
-
-    font-size:72px;
-
+    font-size:100px;
 
     font-weight:700;
 
-
-    letter-spacing:8px;
-
-
-    text-transform:uppercase;
-
-
-    margin-bottom:5px;
-
+    letter-spacing:20px;
 
     color:white;
 
-
     text-shadow:
 
-        0 0 30px rgba(255,255,255,.15);
+        0 0 40px rgba(22,119,255,.5);
 
 }
-
-
-
-.home-title::before {
-
-
-    content:"CLEARZONE";
-
-
-    position:absolute;
-
-
-    inset:0;
-
-
-    color:#1677ff;
-
-
-    opacity:.15;
-
-
-    transform:
-        translate(3px,3px);
-
-
-}
-
-
 
 
 
 .home-subtitle {
 
+    color:#94a3b8;
 
-    position:relative;
-
-
-    color:#8492a6;
-
-
-    letter-spacing:5px;
-
+    letter-spacing:8px;
 
     font-size:15px;
 
+}
 
-    text-transform:uppercase;
 
 
-    margin-bottom:60px;
+.hero-line {
 
+    width:400px;
+
+    height:1px;
+
+    margin:35px auto;
+
+    background:
+
+        linear-gradient(
+            90deg,
+            transparent,
+            #1677ff,
+            transparent
+        );
 
 }
 
@@ -188,23 +507,21 @@
 
 
 
-/* CARTES */
+
+/* =====================================================
+   CARDS
+===================================================== */
 
 
 .cards-grid {
 
-
     position:relative;
 
+    z-index:2;
 
     display:flex;
 
-
-    gap:25px;
-
-
-    flex-wrap:wrap;
-
+    gap:30px;
 
     justify-content:center;
 
@@ -213,14 +530,25 @@
 
 
 
-
 .dept-card {
 
+    width:350px;
 
-    width:360px;
+    height:430px;
 
 
-    min-height:400px;
+    position:relative;
+
+    overflow:hidden;
+
+
+    display:flex;
+
+    flex-direction:column;
+
+    justify-content:center;
+
+    align-items:center;
 
 
     padding:35px;
@@ -228,27 +556,15 @@
 
     text-decoration:none;
 
-
     color:white;
-
-
-    display:flex;
-
-    flex-direction:column;
-
-    align-items:center;
-
-
-    justify-content:center;
-
 
 
     background:
 
         linear-gradient(
             145deg,
-            rgba(255,255,255,.06),
-            rgba(0,0,0,.5)
+            rgba(255,255,255,.08),
+            rgba(0,0,0,.65)
         );
 
 
@@ -257,47 +573,10 @@
         1px solid rgba(255,255,255,.1);
 
 
-
-    position:relative;
-
-
-    overflow:hidden;
-
+    backdrop-filter:blur(15px);
 
 
     transition:.35s;
-
-
-}
-
-
-
-
-/* ligne HUD */
-
-.dept-card::before {
-
-
-    content:"";
-
-
-    position:absolute;
-
-
-    top:0;
-
-    left:0;
-
-
-    width:100%;
-
-    height:3px;
-
-
-    background:white;
-
-
-    opacity:.2;
 
 }
 
@@ -306,44 +585,76 @@
 
 .dept-card:hover {
 
-
     transform:
 
-        translateY(-12px);
+        translateY(-15px)
+        scale(1.03);
+
+}
 
 
-    background:
 
-        rgba(15,20,30,.9);
+.card-id {
 
+    position:absolute;
+
+    top:20px;
+
+    left:20px;
+
+    color:#64748b;
+
+    font-size:11px;
+
+    letter-spacing:3px;
 
 }
 
 
 
 
-/* LOGOS */
+.card-glow {
+
+    position:absolute;
+
+    inset:0;
+
+    background:
+
+        radial-gradient(
+            circle,
+            rgba(255,255,255,.15),
+            transparent 60%
+        );
+
+
+    opacity:0;
+
+    transition:.4s;
+
+}
+
+
+
+.dept-card:hover .card-glow {
+
+    opacity:1;
+
+}
+
+
+
 
 
 .dept-logo {
 
+    width:130px;
 
-    width:120px;
-
-
-    height:120px;
-
+    height:130px;
 
     object-fit:contain;
 
-
-    margin-bottom:25px;
-
-
-    filter:
-
-        grayscale(40%);
-
+    margin-bottom:20px;
 
     transition:.35s;
 
@@ -351,62 +662,35 @@
 
 
 
-
 .dept-card:hover .dept-logo {
 
-
-    transform:
-
-        scale(1.15);
-
-
-    filter:
-
-        grayscale(0);
+    transform:scale(1.15);
 
 }
-
 
 
 
 
 .dept-icon {
 
+    width:130px;
 
-    width:110px;
+    height:130px;
 
-    height:110px;
-
-
-    margin-bottom:25px;
-
-
-    color:#64748b;
-
+    margin-bottom:20px;
 
 }
 
 
 
 
-
-/* TEXTE */
-
-
 .dept-card h2 {
 
+    font-family:var(--font-hud);
 
-    font-family:"Rajdhani",sans-serif;
+    font-size:45px;
 
-
-    font-size:42px;
-
-
-    letter-spacing:5px;
-
-
-    margin-bottom:10px;
-
+    letter-spacing:8px;
 
 }
 
@@ -414,75 +698,83 @@
 
 .dept-card p {
 
+    text-align:center;
 
     color:#94a3b8;
 
+    line-height:1.7;
 
-    text-align:center;
-
-
-    line-height:1.6;
-
-
-    font-size:14px;
-
-
-    min-height:65px;
+    font-size:13px;
 
 }
 
 
 
 
+.card-data {
 
-/* BOUTON */
+    display:flex;
+
+    gap:15px;
+
+    margin-top:20px;
+
+    font-size:11px;
+
+    letter-spacing:3px;
+
+}
+
+
+
+.card-data span {
+
+    color:#64748b;
+
+}
+
+
+
+.card-data b {
+
+    color:#10b981;
+
+}
+
+
+
 
 
 .btn-access {
 
-
-    margin-top:30px;
-
-
     width:100%;
 
+    margin-top:25px;
 
     padding:14px;
 
-
     text-align:center;
-
 
     border:
 
-        1px solid rgba(255,255,255,.15);
+        1px solid rgba(255,255,255,.2);
 
 
-    font-size:13px;
-
-
-    font-weight:700;
-
+    font-size:12px;
 
     letter-spacing:3px;
 
+    font-weight:700;
 
-    text-transform:uppercase;
-
-
-    transition:.25s;
+    transition:.3s;
 
 }
-
-
 
 
 
 .dept-card:hover .btn-access {
 
-
     background:white;
-
 
     color:black;
 
@@ -492,18 +784,18 @@
 
 
 
-/* BCSO */
+
+
+/* COLORS */
 
 
 .bcso:hover {
 
-
     border-color:#d97706;
-
 
     box-shadow:
 
-        0 0 40px rgba(217,119,6,.25);
+        0 0 60px rgba(217,119,6,.35);
 
 }
 
@@ -511,38 +803,21 @@
 
 .bcso:hover h2 {
 
-
     color:#f59e0b;
 
 }
 
 
 
-.bcso:hover .btn-access {
-
-
-    background:#d97706;
-
-    color:white;
-
-}
-
-
-
-
-
-/* LSPD */
 
 
 .lspd:hover {
 
-
     border-color:#1677ff;
-
 
     box-shadow:
 
-        0 0 40px rgba(22,119,255,.3);
+        0 0 60px rgba(22,119,255,.35);
 
 }
 
@@ -550,38 +825,21 @@
 
 .lspd:hover h2 {
 
-
     color:#3b82f6;
 
 }
 
 
 
-.lspd:hover .btn-access {
-
-
-    background:#1677ff;
-
-    color:white;
-
-}
-
-
-
-
-
-/* COMMUN */
 
 
 .all:hover {
 
-
     border-color:#10b981;
-
 
     box-shadow:
 
-        0 0 40px rgba(16,185,129,.25);
+        0 0 60px rgba(16,185,129,.35);
 
 }
 
@@ -589,18 +847,67 @@
 
 .all:hover h2 {
 
-
     color:#10b981;
 
 }
 
 
 
-.all:hover .btn-access {
 
 
-    background:#10b981;
 
-    color:white;
+
+/* =====================================================
+   FOOTER
+===================================================== */
+
+
+.system-footer {
+
+    position:absolute;
+
+    bottom:25px;
+
+    display:flex;
+
+    gap:80px;
+
+    z-index:3;
+
+}
+
+
+
+.system-footer div {
+
+    display:flex;
+
+    flex-direction:column;
+
+    text-align:center;
+
+}
+
+
+
+.system-footer span {
+
+    color:#64748b;
+
+    font-size:10px;
+
+    letter-spacing:3px;
+
+}
+
+
+
+.system-footer strong {
+
+    margin-top:6px;
+
+    font-family:var(--font-hud);
+
+    letter-spacing:3px;
 
 }
