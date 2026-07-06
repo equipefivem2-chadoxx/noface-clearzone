@@ -1,294 +1,206 @@
 <!DOCTYPE html>
 <html lang="fr">
-
 <head>
-
     <meta charset="UTF-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title><%= title %></title>
-
-
+    <title><%= title %> // TACTICAL OVERVIEW</title>
     <link rel="stylesheet" href="/css/style.css">
-
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-
-
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
 </head>
+<body class="crt-effect theme-<%= mapId %>">
 
+    <svg style="position: absolute; width: 0; height: 0;" width="0" height="0">
+        <filter id="neon-glow-filter" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="6" result="blur1" />
+            <feGaussianBlur stdDeviation="20" result="blur2" />
+            <feMerge>
+                <feMergeNode in="blur2" />
+                <feMergeNode in="blur1" />
+                <feMergeNode in="SourceGraphic" />
+            </feMerge>
+        </filter>
+    </svg>
 
-<body class="map-layout">
+    <div id="hud-notifier-container"></div>
 
-
-
-    <!-- OVERLAY HUD GLOBAL -->
-
-    <div class="hud-overlay">
-
-
-        <div class="scan-line"></div>
-
-
-        <div class="hud-grid"></div>
-
-
-    </div>
-
-
-
-
-
-    <!-- TOP BAR COMMAND CENTER -->
-
-    <header class="command-header">
-
-
-        <div class="command-brand">
-
-
-            <div class="brand-icon">
-
-                C
-
-            </div>
-
-
-
-            <div>
-
-
-                <h1>
-
-                    CLEARZONE
-
-                </h1>
-
-
-                <span>
-
-                    TACTICAL COMMAND SYSTEM
-
-                </span>
-
-
-            </div>
-
-
-
+    <header class="command-header glass-panel">
+        <div class="header-left">
+            <span class="terminal-prompt">></span>
+            <span class="system-title">GRID MONITOR // MAP_ID: <span class="highlight"><%= mapId.toUpperCase() %></span></span>
         </div>
-
-
-
-
-
-        <div class="command-status">
-
-
-            <div class="status-item">
-
-
-                <span class="status-light"></span>
-
-
-                SERVER ONLINE
-
-
-            </div>
-
-
-
-            <div class="status-item">
-
-
-                SECURE CHANNEL
-
-
-                <strong>
-
-                    ENCRYPTED
-
-                </strong>
-
-
-            </div>
-
-
-
-
-            <div class="status-item">
-
-
-                SECTOR
-
-
-                <strong>
-
-                    <%= mapId.toUpperCase() %>
-
-                </strong>
-
-
-            </div>
-
-
-
+        <div class="header-center">
+            <div class="clock-display" id="hud-clock">00:00:00</div>
         </div>
-
-
-
+        <div class="header-right">
+            <a href="/" class="btn-tactical">DISCONNECT TERMINAL</a>
+        </div>
     </header>
-
-
-
-
-
-
-
-
-    <!-- CARTE -->
 
     <main id="map-container"></main>
 
-
-
-
-
-
-
-
-    <!-- COORDINATES HUD -->
-
-
-    <div class="map-hud-left">
-
-
-        <div class="hud-box">
-
-
-            <span>
-
-                SYSTEM
-
-            </span>
-
-
-            <strong>
-
-                ACTIVE
-
-            </strong>
-
-
+    <div id="modal-unit" class="modal-overlay hidden">
+        <div class="modal-content glass-panel">
+            <div class="modal-header">
+                <h3>INITIALIZE DEPLOYMENT LINK</h3>
+            </div>
+            <div class="modal-body">
+                <label for="unit-name-input">ASSIGN UNIT DESIGNATION (ex: LINCOLN-10, MARY-2)</label>
+                <input type="text" id="unit-name-input" maxlength="15" placeholder="ENTER DESIGNATION..." autocomplete="off">
+                <div id="modal-error" class="error-msg"></div>
+            </div>
+            <div class="modal-footer">
+                <button id="btn-cancel-unit" class="btn-tactical" style="border-color: var(--text-muted);">ABORT</button>
+                <button id="btn-confirm-unit" class="btn-tactical">CONFIRM LINK</button>
+            </div>
         </div>
-
-
-
-        <div class="hud-box">
-
-
-            <span>
-
-                DATABASE
-
-            </span>
-
-
-            <strong>
-
-                SAN ANDREAS
-
-            </strong>
-
-
-        </div>
-
-
     </div>
-
-
-
-
-
-
-    <div class="map-hud-right">
-
-
-        <div class="radar-circle">
-
-
-            <div class="radar-line"></div>
-
-
-        </div>
-
-
-
-    </div>
-
-
-
-
-
-
-
-
-    <!-- PANNEAUX -->
-
 
     <%- include('partials/sidebar') %>
 
-
-    <%- include('partials/right-panel') %>
-
-
-
-
-
-
-
-
-    <!-- CONFIG -->
-
-
     <script>
-
-        const MAP_ID = "<%= mapId %>";
-
+        window.MAP_ID = "<%= mapId %>";
     </script>
-
-
-
-
-
-    <!-- LIBS -->
-
-
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-
-    <script src="/socket.io/socket.io.js"></script>
-
-
-
-
-
-    <!-- CLIENT -->
-
-
     <script src="/js/map.core.js"></script>
-
-
+    <script src="/js/map.draw.js"></script>
     <script src="/js/socket.client.js"></script>
 
-
-    <script src="/js/map.draw.js"></script>
-
-
-
-
-
+    <script>
+        // Horloge temps réel militaire pour le HUD
+        function updateClock() {
+            const now = new Date();
+            const pad = (n) => String(n).padStart(2, '0');
+            document.getElementById('hud-clock').textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+    </script>
 </body>
-
-
 </html>
+
+<style>
+.command-header {
+    position: fixed;
+    top: 15px;
+    left: 20px;
+    right: 20px;
+    height: 50px;
+    z-index: 1000;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    clip-path: polygon(0 0, 100% 0, calc(100% - 10px) 100%, 10px 100%) !important;
+}
+#map-container {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+}
+.terminal-prompt {
+    color: var(--accent);
+    font-family: var(--font-mono);
+    font-weight: bold;
+    margin-right: 8px;
+    animation: flash 1s infinite steps(2);
+}
+@keyframes flash { 0% { opacity: 0; } 100% { opacity: 1; } }
+.clock-display {
+    font-family: var(--font-mono);
+    font-size: 18px;
+    letter-spacing: 2px;
+    color: var(--accent);
+    text-shadow: 0 0 8px var(--accent-glow);
+}
+.highlight { color: var(--accent); font-weight: bold; }
+
+/* MODAL STYLING */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(2, 4, 7, 0.85);
+    backdrop-filter: blur(8px);
+    z-index: 2000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+.modal-overlay.hidden { opacity: 0; pointer-events: none; }
+.modal-content {
+    width: 450px;
+    padding: 30px;
+}
+.modal-header h3 {
+    font-family: var(--font-hud);
+    font-size: 16px;
+    letter-spacing: 1px;
+    margin-bottom: 20px;
+    color: var(--accent);
+}
+.modal-body label {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+}
+#unit-name-input {
+    width: 100%;
+    background: rgba(0,0,0,0.5);
+    border: 1px solid var(--panel-border);
+    padding: 12px;
+    color: #fff;
+    font-family: var(--font-hud);
+    font-size: 14px;
+    outline: none;
+    margin-bottom: 15px;
+}
+#unit-name-input:focus { border-color: var(--accent); }
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+.error-msg {
+    color: var(--danger);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    margin-bottom: 10px;
+}
+
+/* APPLICATION DU RENDU FLUO NÉON SUR LES TRACÉS LEAFLET */
+.neon-draw {
+    filter: url(#neon-glow-filter);
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+/* CURSEURS PERSONNALISÉS */
+.cursor-grab { cursor: grab !important; }
+.cursor-crosshair { cursor: crosshair !important; }
+.cursor-cell { cursor: cell !important; }
+
+/* CONTENEUR DE NOTIFS D'OPÉRATION IN-GAME */
+#hud-notifier-container {
+    position: fixed;
+    left: 20px;
+    bottom: 20px;
+    z-index: 1500;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.hud-notification {
+    background: rgba(6, 12, 22, 0.9);
+    border-left: 4px solid var(--accent);
+    padding: 15px 20px;
+    font-family: var(--font-mono);
+    min-width: 280px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    transform: translateX(-150%);
+    animation: slideIn 0.3s forwards cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes slideIn { 100% { transform: translateX(0); } }
+</style>

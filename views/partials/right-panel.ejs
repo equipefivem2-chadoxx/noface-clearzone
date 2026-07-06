@@ -1,55 +1,31 @@
-<aside class="right-panel glass-panel">
+<aside class="sidebar glass-panel">
 
 
-    <!-- HEADER -->
+    <!-- BRAND -->
 
-    <div class="panel-header">
+    <div class="cad-brand">
 
-
-        <div class="system-label">
+        <div class="brand-top">
 
             <span class="status-dot"></span>
 
-            UNIT CONTROL SYSTEM
+            CLEARZONE CAD
 
         </div>
 
 
-
-        <h3>
-
-            DEPLOYMENT
-
-        </h3>
+        <h1>
+            COMMAND
+        </h1>
 
 
+        <div class="dept-badge <%= mapId %>">
 
+            <span></span>
 
-        <button id="btn-new-unit" class="btn-primary">
+            <%= mapId.toUpperCase() %> OPERATIONS
 
-
-            <svg 
-                viewBox="0 0 24 24"
-                width="18"
-                height="18"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-            >
-
-                <line x1="12" y1="5" x2="12" y2="19"/>
-
-                <line x1="5" y1="12" x2="19" y2="12"/>
-
-
-            </svg>
-
-
-            DEPLOY UNIT
-
-
-        </button>
-
+        </div>
 
 
     </div>
@@ -58,102 +34,66 @@
 
 
 
-    <!-- ACTIVE UNITS -->
+    <!-- LIVE STATUS -->
 
 
-    <div class="units-section">
+    <div class="live-panel">
 
 
-        <div class="section-title">
+        <div class="panel-mini-title">
 
-            ACTIVE FIELD UNITS
+            SYSTEM STATUS
 
         </div>
 
 
 
-
-        <div id="units-list" class="units-list">
-
+        <div class="status-grid">
 
 
-            <% if(units && units.length > 0){ %>
+            <div class="status-card">
 
+                <small>
+                    CONNECTION
+                </small>
 
-                <% units.forEach(unit => { %>
+                <strong class="success">
+                    ONLINE
+                </strong>
 
-
-                    <div 
-                        class="unit-card"
-                        data-id="<%= unit.id %>"
-                        data-color="<%= unit.color %>"
-                    >
-
-
-                        <div 
-                            class="unit-color"
-                            style="--u-color:<%= unit.color %>"
-                        ></div>
+            </div>
 
 
 
-                        <div class="unit-details">
+            <div class="status-card">
 
+                <small>
+                    DATABASE
+                </small>
 
-                            <span class="unit-name">
+                <strong>
+                    ACTIVE
+                </strong>
 
-                                <%= unit.name %>
-
-                            </span>
-
-
-
-                            <small>
-
-                                ● PATROL ACTIVE
-
-                            </small>
-
-
-                        </div>
+            </div>
 
 
 
-                        <button 
-                            class="btn-delete"
-                            title="Remove"
-                        >
+            <div class="status-card">
 
-                            ×
+                <small>
+                    CHANNEL
+                </small>
 
-                        </button>
+                <strong>
+                    TAC-01
+                </strong>
 
-
-
-                    </div>
-
-
-                <% }) %>
-
-
-
-            <% } else { %>
-
-
-                <div class="empty-state">
-
-                    NO ACTIVE DEPLOYMENT
-
-
-                </div>
-
-
-            <% } %>
+            </div>
 
 
 
         </div>
-
 
 
     </div>
@@ -164,200 +104,152 @@
 
 
 
-    <!-- TACTICAL PANEL -->
+    <!-- NAVIGATION -->
 
 
-    <div 
-        id="tactical-tools"
-        class="tactical-tools hidden"
-    >
+    <nav class="command-nav">
 
 
+        <div class="nav-title">
 
-        <div class="section-title">
-
-            TACTICAL EQUIPMENT
+            NAVIGATION
 
         </div>
 
 
 
 
-
-        <div class="tool-category">
-
-
-            <label>
-
-                NAVIGATION
-
-            </label>
+        <a href="/" class="command-link">
 
 
+            <div class="link-icon">
 
-            <button 
-                class="tool-btn active"
-                data-tool="nav"
-            >
-
-                MOVE MAP
-
-            </button>
-
-
-
-        </div>
-
-
-
-
-
-
-
-        <div class="tool-category">
-
-
-            <label>
-
-                DRAW SYSTEM
-
-            </label>
-
-
-
-            <div class="tools-grid">
-
-
-
-                <button 
-                    class="tool-btn"
-                    data-tool="pencil"
-                    data-size="3"
-                >
-
-                    PRECISION
-
-
-                </button>
-
-
-
-
-                <button 
-                    class="tool-btn"
-                    data-tool="pencil"
-                    data-size="7"
-                >
-
-                    STANDARD
-
-
-                </button>
-
-
+                ⌂
 
             </div>
 
 
+            Dashboard
+
+
+        </a>
+
+
+
+
+
+        <a href="#" class="command-link active">
+
+
+            <div class="link-icon">
+
+                ◫
+
+            </div>
+
+
+            Tactical Map
+
+
+        </a>
+
+
+
+
+
+
+        <a href="#" class="command-link">
+
+
+            <div class="link-icon">
+
+                ◉
+
+            </div>
+
+
+            Units
+
+
+        </a>
+
+
+
+
+
+
+        <a href="#" class="command-link disabled">
+
+
+            <div class="link-icon">
+
+                ⚙
+
+            </div>
+
+
+            Configuration
+
+
+        </a>
+
+
+
+
+    </nav>
+
+
+
+
+
+
+
+
+
+    <!-- OPERATION SUMMARY -->
+
+
+    <div class="operation-summary">
+
+
+        <div class="panel-mini-title">
+
+            OPERATION
+
         </div>
 
 
 
+        <div class="operation-box">
 
 
+            <div>
 
+                <small>
+                    REGION
+                </small>
 
-        <div class="tool-category">
-
-
-            <label>
-
-                AREA MARKING
-
-            </label>
-
-
-
-            <div class="tools-grid">
-
-
-
-                <button 
-                    class="tool-btn"
-                    data-tool="fluo"
-                    data-size="18"
-                >
-
-                    FLUO
-
-
-                </button>
-
-
-
-                <button 
-                    class="tool-btn"
-                    data-tool="fluo"
-                    data-size="30"
-                >
-
-                    LARGE
-
-
-                </button>
-
-
+                <strong>
+                    SAN ANDREAS
+                </strong>
 
             </div>
 
 
 
-        </div>
+
+            <div>
+
+                <small>
+                    STATUS
+                </small>
 
 
+                <strong class="success">
 
+                    ACTIVE
 
-
-
-
-        <div class="tool-category">
-
-
-            <label>
-
-                CLEANUP
-
-            </label>
-
-
-
-            <div class="tools-grid">
-
-
-
-                <button 
-                    class="tool-btn"
-                    data-tool="eraser"
-                >
-
-                    ERASE
-
-
-                </button>
-
-
-
-
-                <button 
-                    id="btn-clear-all"
-                    class="tool-btn danger"
-                >
-
-                    RESET MAP
-
-
-                </button>
-
+                </strong>
 
 
             </div>
@@ -365,7 +257,6 @@
 
 
         </div>
-
 
 
 
@@ -373,112 +264,38 @@
 
 
 
+
+
+
+
+    <!-- FOOTER -->
+
+
+    <div class="sidebar-footer">
+
+
+        <div class="secure-line">
+
+
+            <span></span>
+
+
+            SECURE CONNECTION
+
+
+        </div>
+
+
+
+        <small>
+
+            CLEARZONE TACTICAL NETWORK
+
+        </small>
+
+
+    </div>
 
 
 
 </aside>
-
-
-
-
-
-
-
-
-<!-- CREATE UNIT MODAL -->
-
-
-<div 
-    id="modal-unit"
-    class="modal-overlay hidden"
->
-
-
-
-    <div class="modal">
-
-
-
-        <div class="system-label">
-
-
-            NEW DEPLOYMENT
-
-
-        </div>
-
-
-
-        <h3>
-
-            UNIT IDENTIFIER
-
-        </h3>
-
-
-
-
-        <input
-
-            type="text"
-
-            id="unit-name-input"
-
-            placeholder="Example : A141 / M167"
-
-            autocomplete="off"
-
-        >
-
-
-
-
-        <div 
-            id="modal-error"
-            class="error-text"
-        ></div>
-
-
-
-
-
-        <div class="modal-actions">
-
-
-
-            <button 
-                id="btn-cancel-unit"
-                class="btn-secondary"
-            >
-
-                CANCEL
-
-
-            </button>
-
-
-
-
-
-            <button 
-                id="btn-confirm-unit"
-                class="btn-primary"
-            >
-
-                DEPLOY
-
-
-            </button>
-
-
-
-        </div>
-
-
-
-
-    </div>
-
-
-
-</div>

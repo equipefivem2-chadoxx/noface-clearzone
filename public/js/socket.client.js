@@ -1,671 +1,139 @@
-document.addEventListener("DOMContentLoaded",()=>{
-
-
+document.addEventListener("DOMContentLoaded", () => {
     const socket = io();
+    window.tacticalSocket = socket;
 
-    socket.emit(
-        "join-map",
-        MAP_ID
-    );
+    // Connexion immédiate au canal crypté du département
+    socket.emit("join-map", window.MAP_ID);
 
+    const btnNewUnit = document.getElementById("btn-new-unit");
+    const modal = document.getElementById("modal-unit");
+    const btnCancel = document.getElementById("btn-cancel-unit");
+    const btnConfirm = document.getElementById("btn-confirm-unit");
+    const input = document.getElementById("unit-name-input");
+    const error = document.getElementById("modal-error");
+    const list = document.getElementById("units-list");
 
+    window.selectedUnit = null;
 
-    const btnNewUnit =
-        document.getElementById("btn-new-unit");
-
-
-    const modal =
-        document.getElementById("modal-unit");
-
-
-    const btnCancel =
-        document.getElementById("btn-cancel-unit");
-
-
-    const btnConfirm =
-        document.getElementById("btn-confirm-unit");
-
-
-    const input =
-        document.getElementById("unit-name-input");
-
-
-    const error =
-        document.getElementById("modal-error");
-
-
-    const list =
-        document.getElementById("units-list");
-
-
-    const tools =
-        document.getElementById("tactical-tools");
-
-
-
-
-
-    window.selectedUnit=null;
-
-
-
-
-
-
-
-    /*
-        OPEN MODAL
-    */
-
-
-    btnNewUnit.onclick=()=>{
-
-
+    // MODAL ACTIONS
+    btnNewUnit.onclick = () => {
         modal.classList.remove("hidden");
-
-
-        setTimeout(()=>{
-
-            input.focus();
-
-        },100);
-
-
+        error.textContent = "";
+        setTimeout(() => input.focus(), 100);
     };
 
-
-
-
-
-
-
-    /*
-        CLOSE MODAL
-    */
-
-
-    btnCancel.onclick=()=>{
-
-
+    btnCancel.onclick = () => {
         modal.classList.add("hidden");
-
-
-        input.value="";
-
-
-        error.textContent="";
-
-
+        input.value = "";
     };
 
-
-
-
-
-
-
-
-    /*
-        CREATE UNIT
-    */
-
-
-    btnConfirm.onclick=()=>{
-
-
-        const name =
-            input.value.trim();
-
-
-
-        if(!name){
-
-
-            error.textContent=
-
-            "UNIT IDENTIFIER REQUIRED";
-
-
+    btnConfirm.onclick = () => {
+        const name = input.value.trim().toUpperCase();
+        if(!name) {
+            error.textContent = "DECREE INVALID: FIELD DESIGNATION REQUIREMENT EMPTY.";
             return;
-
         }
 
-
-
-
-        socket.emit(
-
-            "create-unit",
-
-            name,
-
-            response=>{
-
-
-                if(!response.success){
-
-
-                    error.textContent=
-
-                    response.message;
-
-
-                    return;
-
-
-                }
-
-
-
-
+        socket.emit("create-unit", name, (res) => {
+            if(res.success) {
                 modal.classList.add("hidden");
-
-
-                input.value="";
-
-
-
+                input.value = "";
+                selectUnit(res.unit);
+            } else {
+                error.textContent = `CRITICAL FAILURE: ${res.message}`;
             }
-
-
-        );
-
-
-
+        });
     };
 
+    // GESTION DE SÉLECTION D'UNE UNITÉ ACTICE
+    window.selectUnit = function(unit) {
+        window.selectedUnit = unit;
+        document.querySelectorAll('.unit-card-active').forEach(c => c.classList.remove('selected'));
+        
+        const card = document.getElementById(`unit-${unit.id}`);
+        if(card) card.classList.add('selected');
 
+        showNotification("UNIT LINK", `CONNECTED OPERATIONAL UPLINK TO ${unit.name}`);
+    };
 
+    // INJECTION DES RECEPTIONS SOCKET TIME-REAL
+    socket.on("unit-added", (unit) => {
+        removeEmptyState();
+        appendUnitCard(unit);
+        showNotification("RADAR DEPLOYMENT", `NEW UNIT DETECTED ON GRID: ${unit.name}`);
+    });
 
-
-
-
-
-
-    /*
-        ADD UNIT
-    */
-
-
-    socket.on(
-
-        "unit-added",
-
-        unit=>{
-
-
-            removeEmpty();
-
-
-
-            createUnitCard(unit);
-
-
-
-            showNotification(
-
-                "UNIT DEPLOYED",
-
-                unit.name
-
-            );
-
-
-
+    socket.on("unit-removed", (unitId) => {
+        const card = document.getElementById(`unit-${unitId}`);
+        if(card) card.remove();
+        
+        if(window.selectedUnit && window.selectedUnit.id === unitId) {
+            window.selectedUnit = null;
+            showNotification("LINK LOSS", "PREVIOUS UNIT RETIRED FROM SYSTEM OPERATIONS.", true);
         }
-
-    );
-
-
-
-
-
-
-
-    /*
-        REMOVE UNIT
-    */
-
-
-    socket.on(
-
-        "unit-removed",
-
-        id=>{
-
-
-            const card=
-
-            document.querySelector(
-
-                `[data-id="${id}"]`
-
-            );
-
-
-
-            if(card){
-
-
-                card.style.transform=
-
-                "translateX(100%)";
-
-
-                card.style.opacity=0;
-
-
-
-                setTimeout(()=>{
-
-
-                    card.remove();
-
-
-                    checkEmpty();
-
-
-                },300);
-
-
-
-            }
-
-
-
-
-            if(
-
-                window.selectedUnit &&
-
-                window.selectedUnit.id===id
-
-            ){
-
-
-                window.selectedUnit=null;
-
-
-                tools.classList.add("hidden");
-
-
-            }
-
-
-
-        }
-
-    );
-
-
-
-
-
-
-
-
-
-    /*
-        CLICK UNIT
-    */
-
-
-    list.addEventListener(
-
-        "click",
-
-        e=>{
-
-
-            const card=
-
-            e.target.closest(
-
-                ".unit-card"
-
-            );
-
-
-
-            if(!card)
-
-            return;
-
-
-
-
-
-
-            if(
-
-                e.target.closest(
-
-                    ".btn-delete"
-
-                )
-
-            ){
-
-
-
-                socket.emit(
-
-                    "delete-unit",
-
-                    card.dataset.id
-
-                );
-
-
-                return;
-
-
-            }
-
-
-
-
-
-
-
-            document
-
-            .querySelectorAll(
-
-                ".unit-card"
-
-            )
-
-            .forEach(c=>{
-
-
-                c.classList.remove(
-
-                    "active"
-
-                );
-
-
-            });
-
-
-
-
-
-            card.classList.add(
-
-                "active"
-
-            );
-
-
-
-
-
-            window.selectedUnit={
-
-
-                id:
-
-                card.dataset.id,
-
-
-                color:
-
-                card.dataset.color
-
-
-            };
-
-
-
-
-            tools.classList.remove(
-
-                "hidden"
-
-            );
-
-
-
-            showNotification(
-
-                "UNIT SELECTED",
-
-                card.querySelector(".unit-name").textContent
-
-            );
-
-
-
-
-        }
-
-
-    );
-
-
-
-
-
-
-
-
-
-    function createUnitCard(unit){
-
-
-
-        const card=
-
-        document.createElement(
-
-            "div"
-
-        );
-
-
-
-        card.className="unit-card";
-
-
-
-        card.dataset.id=
-
-        unit.id;
-
-
-
-        card.dataset.color=
-
-        unit.color;
-
-
-
-
-        card.innerHTML=`
-
-        <div 
-        class="unit-color"
-        style="--u-color:${unit.color}">
-        </div>
-
-
-        <div class="unit-details">
-
-            <span class="unit-name">
-
-            ${unit.name}
-
-            </span>
-
-
-            <small>
-
-            ● PATROL ACTIVE
-
-            </small>
-
-
-        </div>
-
-
-        <button class="btn-delete">
-
-        ×
-
-        </button>
-
+        checkEmptyState();
+    });
+
+    function appendUnitCard(unit) {
+        if(document.getElementById(`unit-${unit.id}`)) return;
+
+        const card = document.createElement("div");
+        card.id = `unit-${unit.id}`;
+        card.className = "unit-card-active";
+        card.style.setProperty('--unit-color', unit.color);
+        
+        // Bordure gauche aux couleurs fluo exclusives assignées à l'unité
+        card.style.borderLeft = `4px solid ${unit.color}`;
+
+        card.innerHTML = `
+            <div class="unit-info-block">
+                <span class="unit-name-title">${unit.name}</span>
+                <span class="unit-status-tag" style="color: ${unit.color}">● MONITORING FIELD</span>
+            </div>
+            <button class="btn-delete-unit" title="Retirer l'unité">×</button>
         `;
 
+        card.addEventListener('click', (e) => {
+            if(e.target.classList.contains('btn-delete-unit')) return;
+            selectUnit(unit);
+        });
 
+        card.querySelector('.btn-delete-unit').onclick = (e) => {
+            e.stopPropagation();
+            socket.emit("delete-unit", unit.id);
+        };
 
         list.appendChild(card);
-
-
-
     }
 
-
-
-
-
-
-
-    function removeEmpty(){
-
-
-        const empty=
-
-        document.querySelector(
-
-            ".empty-state"
-
-        );
-
-
-        if(empty)
-
-        empty.remove();
-
-
+    function removeEmptyState() {
+        const empty = document.querySelector(".empty-state");
+        if(empty) empty.remove();
     }
 
-
-
-
-
-
-    function checkEmpty(){
-
-
-        if(list.children.length===0){
-
-
-            list.innerHTML=`
-
-            <div class="empty-state">
-
-            NO ACTIVE DEPLOYMENT
-
-            </div>
-
-            `;
-
-
+    function checkEmptyState() {
+        if(list.children.length === 0) {
+            list.innerHTML = `<div class="empty-state">NO ACTIVE DEPLOYMENT IN GRID</div>`;
         }
-
-
     }
 
+    // SYSTÈME DE NOTIFICATIONS HUD EN BAS À GAUCHE
+    window.showNotification = function(title, text, isDanger = false) {
+        const container = document.getElementById("hud-notifier-container");
+        const box = document.createElement("div");
+        box.className = "hud-notification";
+        if(isDanger) box.style.borderColor = "var(--danger)";
 
-
-
-
-
-
-
-
-    function showNotification(title,text){
-
-
-        const box=
-
-        document.createElement(
-
-            "div"
-
-        );
-
-
-
-        box.className=
-
-        "hud-notification";
-
-
-
-        box.innerHTML=`
-
-            <strong>${title}</strong>
-
-            <span>${text}</span>
-
+        box.innerHTML = `
+            <div style="font-weight: 800; font-size: 11px; letter-spacing: 1px; color: #fff;">[ ${title} ]</div>
+            <div style="font-size: 13px; color: var(--text-muted); margin-top: 3px;">${text}</div>
         `;
 
-
-
-        document.body.appendChild(box);
-
-
-
-
-
-        setTimeout(()=>{
-
-
-            box.classList.add(
-
-                "show"
-
-            );
-
-
-        },50);
-
-
-
-
-
-        setTimeout(()=>{
-
-
-            box.classList.remove(
-
-                "show"
-
-            );
-
-
-            setTimeout(()=>box.remove(),300);
-
-
-
-        },3000);
-
-
-
-
-    }
-
-
-
-
-
-
-
-    window.tacticalSocket=socket;
-
-
-
+        container.appendChild(box);
+        setTimeout(() => {
+            box.style.transform = "translateX(-150%)";
+            box.style.transition = "transform 0.4s ease";
+            setTimeout(() => box.remove(), 400);
+        }, 4000);
+    };
 });
