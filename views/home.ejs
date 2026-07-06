@@ -3,127 +3,115 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CLEARZONE - Command Center</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+    <title>CLEARZONE | COMMAND CENTER</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/home.css">
 </head>
 <body>
 
-    <div id="startup-screen">
-        <div class="startup-content">
-            <div class="spinner"></div>
-            <div class="startup-text">INITIALIZING SYSTEM...</div>
+    <div id="loader" class="loader-overlay">
+        <div class="loader-core">
+            <div class="spinner-ring"></div>
+            <div class="spinner-ring inner"></div>
+            <span class="loader-text">AUTH...</span>
         </div>
     </div>
 
-    <main class="dashboard-wrapper">
-        
-        <header class="topbar">
-            <div class="topbar-left">
-                <div class="brand">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-                    <span>CLEARZONE <span class="badge">v2.0</span></span>
-                </div>
+    <div class="tactical-grid-bg"></div>
+
+    <nav class="top-nav">
+        <div class="nav-brand">
+            <div class="brand-logo">CZ</div>
+            <div class="brand-text">
+                <h1>CLEARZONE</h1>
+                <span>v3.0 // SECURE NODE</span>
             </div>
-            <div class="topbar-right">
-                <div class="status-pill">
-                    <span class="dot pulse-green"></span>
-                    <span>SECURE NETWORK ONLINE</span>
-                </div>
-                <div class="time-display" id="local-time">00:00:00</div>
-            </div>
+        </div>
+        <div class="nav-status">
+            <div class="status-item"><span class="dot blink-green"></span> UPLINK STABLE</div>
+            <div class="status-item" id="sys-time">00:00:00</div>
+        </div>
+    </nav>
+
+    <main class="dashboard-container">
+        <header class="dash-header">
+            <h2>SÉLECTION DU NŒUD TACTIQUE</h2>
+            <p>ACCÈS RESTREINT. TOUTE ACTIVITÉ EST ENREGISTRÉE SUR LE RÉSEAU CENTRAL.</p>
         </header>
 
-        <section class="hero-section">
-            <h1 class="main-title">TACTICAL OPERATIONS</h1>
-            <p class="sub-title">SELECT A COMMAND NODE TO INITIALIZE SAT-LINK</p>
-        </section>
-
-        <section class="nodes-grid">
+        <div class="nodes-wrapper">
             
-            <a href="/map/bcso" class="node-card bcso-theme">
-                <div class="card-header">
-                    <span class="node-id">NODE-01</span>
-                    <span class="status ready">READY</span>
-                </div>
+            <a href="/map/bcso" class="tactical-card theme-bcso">
+                <div class="card-deco-line"></div>
                 <div class="card-icon">
-                    <img src="/assets/bcso.png" alt="BCSO" onerror="this.src='data:image/svg+xml;utf8,<svg viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%23f59e0b\' stroke-width=\'1\'><circle cx=\'12\' cy=\'12\' r=\'10\'/></svg>'">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                 </div>
-                <div class="card-body">
-                    <h2>BCSO</h2>
-                    <p>Blaine County Sheriff's Office<br>Tactical Mapping Division</p>
+                <div class="card-content">
+                    <h3>BCSO</h3>
+                    <span class="sub-text">Blaine County Sheriff's Office</span>
                 </div>
                 <div class="card-footer">
-                    <span>CONNECT TO GRID</span>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    <span class="status-badge">READY</span>
+                    <span class="action-text">CONNECT <span class="arrow">→</span></span>
                 </div>
             </a>
 
-            <a href="/map/lspd" class="node-card lspd-theme">
-                <div class="card-header">
-                    <span class="node-id">NODE-02</span>
-                    <span class="status ready">READY</span>
-                </div>
+            <a href="/map/lspd" class="tactical-card theme-lspd">
+                <div class="card-deco-line"></div>
                 <div class="card-icon">
-                    <img src="/assets/lspd.png" alt="LSPD" onerror="this.src='data:image/svg+xml;utf8,<svg viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%233b82f6\' stroke-width=\'1\'><circle cx=\'12\' cy=\'12\' r=\'10\'/></svg>'">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
                 </div>
-                <div class="card-body">
-                    <h2>LSPD</h2>
-                    <p>Los Santos Police Department<br>Metropolitan Command</p>
+                <div class="card-content">
+                    <h3>LSPD</h3>
+                    <span class="sub-text">Los Santos Police Dept.</span>
                 </div>
                 <div class="card-footer">
-                    <span>CONNECT TO GRID</span>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    <span class="status-badge">READY</span>
+                    <span class="action-text">CONNECT <span class="arrow">→</span></span>
                 </div>
             </a>
 
-            <a href="/map/all" class="node-card global-theme">
-                <div class="card-header">
-                    <span class="node-id">NODE-SA</span>
-                    <span class="status active">ACTIVE</span>
-                </div>
+            <a href="/map/all" class="tactical-card theme-global">
+                <div class="card-deco-line"></div>
                 <div class="card-icon">
-                    <svg width="70" height="70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <line x1="2" y1="12" x2="22" y2="12"></line>
-                        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
-                    </svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><path d="M2 12h20"/></svg>
                 </div>
-                <div class="card-body">
-                    <h2>GLOBAL</h2>
-                    <p>San Andreas State<br>Joint Task Force Network</p>
+                <div class="card-content">
+                    <h3>GLOBAL MAP</h3>
+                    <span class="sub-text">San Andreas Joint Task Force</span>
                 </div>
                 <div class="card-footer">
-                    <span>CONNECT TO GRID</span>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    <span class="status-badge active">LIVE</span>
+                    <span class="action-text">CONNECT <span class="arrow">→</span></span>
                 </div>
             </a>
 
-        </section>
-        
-        <footer class="bottom-footer">
-            <p>CLEARZONE SECURE TERMINAL &copy; 2026. AUTHORIZED PERSONNEL ONLY.</p>
-        </footer>
-
+        </div>
     </main>
 
     <script>
-        // Séquence de démarrage très fluide
-        window.addEventListener('load', () => {
-            setTimeout(() => {
-                const screen = document.getElementById('startup-screen');
-                screen.style.opacity = '0';
-                setTimeout(() => screen.remove(), 600);
-            }, 800);
+        // 1. HORLOGE EN TEMPS RÉEL
+        setInterval(() => {
+            const d = new Date();
+            document.getElementById('sys-time').innerText = d.toLocaleTimeString('en-US', { hour12: false }) + ' LCL';
+        }, 1000);
+
+        // 2. GESTION DU LOADER (SÉCURITÉ ANTI-INFINI)
+        const removeLoader = () => {
+            const loader = document.getElementById('loader');
+            if (loader && !loader.classList.contains('faded')) {
+                loader.classList.add('faded'); // Déclenche la transition CSS
+                setTimeout(() => loader.remove(), 600); // Supprime du DOM après la transition
+            }
+        };
+
+        // Méthode A : Dès que la structure HTML est lue (n'attend pas les images/réseau)
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(removeLoader, 800); // Petit délai esthétique pour l'animation
         });
 
-        // Horloge temps réel
-        function updateTime() {
-            const now = new Date();
-            document.getElementById('local-time').textContent = now.toLocaleTimeString('en-US', { hour12: false });
-        }
-        setInterval(updateTime, 1000);
-        updateTime();
+        // Méthode B : FAILSAFE ABSOLU. Au bout de 2.5 secondes, on le vire de force quoi qu'il se passe.
+        setTimeout(removeLoader, 2500);
     </script>
 </body>
 </html>
