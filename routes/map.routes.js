@@ -1,18 +1,8 @@
-const MapStoreService = require('../services/mapStore.service');
+const express = require('express');
+const router = express.Router();
+const mapController = require('../controllers/map.controller');
 
-exports.renderMap = (req, res) => {
-    const mapId = req.params.id.toLowerCase();
-    const validMaps = ['bcso', 'lspd', 'all'];
+// Route GET paramétrée pour les différentes cartes tactiques
+router.get('/:id', mapController.renderMap);
 
-    if (!validMaps.includes(mapId)) {
-        return res.redirect('/');
-    }
-
-    const mapData = MapStoreService.getMapData(mapId);
-
-    res.render('map', {
-        title: `Operations - ${mapId.toUpperCase()}`,
-        mapId: mapId,
-        units: mapData.units
-    });
-};
+module.exports = router;
