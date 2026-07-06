@@ -12,7 +12,7 @@
     
     <%- include('partials/sidebar') %>
 
-    <!-- Conteneur de la carte plein écran -->
+    <!-- Conteneur de la carte (Prendra la grille CSS si pas d'image) -->
     <main id="map-container"></main>
 
     <%- include('partials/right-panel') %>
@@ -21,14 +21,6 @@
     <script>
         const MAP_ID = "<%= mapId %>";
     </script>
-
-    <!-- Dépendances -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="/socket.io/socket.io.js"></script>
-    
-    <!-- Scripts Modulaires -->
-    <script src="/js/map.core.js"></script>
-    <!-- On ajoutera map.draw.js et socket.client.js à la prochaine étape -->
 
     <!-- Dépendances -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
