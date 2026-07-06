@@ -1,455 +1,129 @@
-```html
 <!DOCTYPE html>
 <html lang="fr">
-
 <head>
-
     <meta charset="UTF-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title><%= title %></title>
-
-    <link rel="stylesheet" href="/css/style.css">
+    <title>CLEARZONE - Command Center</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/home.css">
-
 </head>
-
-
 <body>
 
-
-<div class="boot-overlay">
-
-    <div class="boot-content">
-
-        <div class="boot-logo">
-            CLEARZONE
+    <div id="startup-screen">
+        <div class="startup-content">
+            <div class="spinner"></div>
+            <div class="startup-text">INITIALIZING SYSTEM...</div>
         </div>
-
-        <div class="boot-loader">
-            <span></span>
-        </div>
-
-        <p>
-            INITIALIZING TACTICAL COMMAND SYSTEM
-        </p>
-
     </div>
 
-</div>
-
-
-
-
-<main class="home-container">
-
-
-
-<!-- TOP HUD -->
-
-<header class="top-hud">
-
-
-    <div class="hud-brand">
-
-        <span class="hud-square"></span>
-
-        CLEARZONE
-
-        <small>
-            TACTICAL OPERATIONS SYSTEM
-        </small>
-
-    </div>
-
-
-
-    <div class="hud-status">
-
-
-        <div>
-
-            SERVER
-
-            <strong class="online">
-                ONLINE
-            </strong>
-
-        </div>
-
-
-        <div>
-
-            DATABASE
-
-            <strong>
-                CONNECTED
-            </strong>
-
-        </div>
-
-
-        <div>
-
-            SECURITY
-
-            <strong>
-                ENCRYPTED
-            </strong>
-
-        </div>
-
-
-    </div>
-
-
-</header>
-
-
-
-
-
-
-
-<!-- CENTER -->
-
-<section class="hero">
-
-
-
-<div class="system-warning">
-
-    <span></span>
-
-    SECURE CHANNEL ESTABLISHED
-
-</div>
-
-
-
-<h1 class="home-title">
-
-    CLEARZONE
-
-</h1>
-
-
-
-<p class="home-subtitle">
-
-    SAN ANDREAS EMERGENCY COMMAND NETWORK
-
-</p>
-
-
-
-<div class="hero-line"></div>
-
-
-
-</section>
-
-
-
-
-
-
-
-
-
-<!-- DEPARTMENTS -->
-
-
-<section class="cards-grid">
-
-
-
-
-
-<a href="/map/bcso" class="dept-card bcso">
-
-
-    <div class="card-id">
-
-        UNIT 01 // BCSO
-
-    </div>
-
-
-    <div class="card-glow"></div>
-
-
-
-    <img 
-        src="/assets/bcso.png"
-        class="dept-logo"
-    >
-
-
-
-    <h2>
-        BCSO
-    </h2>
-
-
-    <p>
-        BLAINE COUNTY<br>
-        SHERIFF OFFICE<br>
-        TACTICAL DIVISION
-    </p>
-
-
-
-    <div class="card-data">
-
-        <span>
-            STATUS
-        </span>
-
-        <b>
-            READY
-        </b>
-
-    </div>
-
-
-
-    <div class="btn-access">
-
-        ENTER COMMAND
-
-    </div>
-
-
-</a>
-
-
-
-
-
-
-
-
-<a href="/map/lspd" class="dept-card lspd">
-
-
-
-    <div class="card-id">
-
-        UNIT 02 // LSPD
-
-    </div>
-
-
-    <div class="card-glow"></div>
-
-
-
-    <img 
-        src="/assets/lspd.png"
-        class="dept-logo"
-    >
-
-
-
-    <h2>
-        LSPD
-    </h2>
-
-
-    <p>
-        LOS SANTOS<br>
-        POLICE DEPARTMENT<br>
-        METROPOLITAN UNIT
-    </p>
-
-
-
-    <div class="card-data">
-
-        <span>
-            STATUS
-        </span>
-
-        <b>
-            READY
-        </b>
-
-    </div>
-
-
-
-    <div class="btn-access">
-
-        ENTER COMMAND
-
-    </div>
-
-
-</a>
-
-
-
-
-
-
-
-
-<a href="/map/all" class="dept-card all">
-
-
-    <div class="card-id">
-
-        NETWORK // GLOBAL
-
-    </div>
-
-
-    <div class="card-glow"></div>
-
-
-
-
-    <svg 
-        class="dept-icon"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-    >
-
-        <circle cx="12" cy="12" r="10"/>
-
-        <path d="M2 12h20"/>
-
-        <path d="M12 2a15 15 0 0 1 0 20"/>
-
-        <path d="M12 2a15 15 0 0 0 0 20"/>
-
-    </svg>
-
-
-
-
-
-    <h2>
-        GLOBAL
-    </h2>
-
-
-    <p>
-        MULTI AGENCY<br>
-        COMMAND NETWORK<br>
-        CENTRAL SYSTEM
-    </p>
-
-
-
-
-    <div class="card-data">
-
-        <span>
-            STATUS
-        </span>
-
-        <b>
-            ACTIVE
-        </b>
-
-    </div>
-
-
-
-    <div class="btn-access">
-
-        ACCESS NETWORK
-
-    </div>
-
-
-</a>
-
-
-
-
-</section>
-
-
-
-
-
-
-
-<footer class="system-footer">
-
-
-<div>
-
-    <span>
-        LOCATION
-    </span>
-
-    <strong>
-        SAN ANDREAS
-    </strong>
-
-</div>
-
-
-
-<div>
-
-    <span>
-        OPERATIONS
-    </span>
-
-    <strong>
-        ACTIVE
-    </strong>
-
-</div>
-
-
-
-<div>
-
-    <span>
-        VERSION
-    </span>
-
-    <strong>
-        CLEARZONE V1.0
-    </strong>
-
-</div>
-
-
-
-</footer>
-
-
-
-
-
-
-</main>
-
-
-
-<script>
-
-setTimeout(()=>{
-
-document.querySelector(".boot-overlay")
-?.classList.add("hide")
-
-},1800)
-
-
-</script>
-
-
+    <main class="dashboard-wrapper">
+        
+        <header class="topbar">
+            <div class="topbar-left">
+                <div class="brand">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                    <span>CLEARZONE <span class="badge">v2.0</span></span>
+                </div>
+            </div>
+            <div class="topbar-right">
+                <div class="status-pill">
+                    <span class="dot pulse-green"></span>
+                    <span>SECURE NETWORK ONLINE</span>
+                </div>
+                <div class="time-display" id="local-time">00:00:00</div>
+            </div>
+        </header>
+
+        <section class="hero-section">
+            <h1 class="main-title">TACTICAL OPERATIONS</h1>
+            <p class="sub-title">SELECT A COMMAND NODE TO INITIALIZE SAT-LINK</p>
+        </section>
+
+        <section class="nodes-grid">
+            
+            <a href="/map/bcso" class="node-card bcso-theme">
+                <div class="card-header">
+                    <span class="node-id">NODE-01</span>
+                    <span class="status ready">READY</span>
+                </div>
+                <div class="card-icon">
+                    <img src="/assets/bcso.png" alt="BCSO" onerror="this.src='data:image/svg+xml;utf8,<svg viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%23f59e0b\' stroke-width=\'1\'><circle cx=\'12\' cy=\'12\' r=\'10\'/></svg>'">
+                </div>
+                <div class="card-body">
+                    <h2>BCSO</h2>
+                    <p>Blaine County Sheriff's Office<br>Tactical Mapping Division</p>
+                </div>
+                <div class="card-footer">
+                    <span>CONNECT TO GRID</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </div>
+            </a>
+
+            <a href="/map/lspd" class="node-card lspd-theme">
+                <div class="card-header">
+                    <span class="node-id">NODE-02</span>
+                    <span class="status ready">READY</span>
+                </div>
+                <div class="card-icon">
+                    <img src="/assets/lspd.png" alt="LSPD" onerror="this.src='data:image/svg+xml;utf8,<svg viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%233b82f6\' stroke-width=\'1\'><circle cx=\'12\' cy=\'12\' r=\'10\'/></svg>'">
+                </div>
+                <div class="card-body">
+                    <h2>LSPD</h2>
+                    <p>Los Santos Police Department<br>Metropolitan Command</p>
+                </div>
+                <div class="card-footer">
+                    <span>CONNECT TO GRID</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </div>
+            </a>
+
+            <a href="/map/all" class="node-card global-theme">
+                <div class="card-header">
+                    <span class="node-id">NODE-SA</span>
+                    <span class="status active">ACTIVE</span>
+                </div>
+                <div class="card-icon">
+                    <svg width="70" height="70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="2" y1="12" x2="22" y2="12"></line>
+                        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                    </svg>
+                </div>
+                <div class="card-body">
+                    <h2>GLOBAL</h2>
+                    <p>San Andreas State<br>Joint Task Force Network</p>
+                </div>
+                <div class="card-footer">
+                    <span>CONNECT TO GRID</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </div>
+            </a>
+
+        </section>
+        
+        <footer class="bottom-footer">
+            <p>CLEARZONE SECURE TERMINAL &copy; 2026. AUTHORIZED PERSONNEL ONLY.</p>
+        </footer>
+
+    </main>
+
+    <script>
+        // Séquence de démarrage très fluide
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const screen = document.getElementById('startup-screen');
+                screen.style.opacity = '0';
+                setTimeout(() => screen.remove(), 600);
+            }, 800);
+        });
+
+        // Horloge temps réel
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('local-time').textContent = now.toLocaleTimeString('en-US', { hour12: false });
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+    </script>
 </body>
-
 </html>
-```
