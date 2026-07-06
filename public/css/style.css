@@ -262,6 +262,15 @@ body {
     margin-bottom: 1rem;
 }
 
+.tool-group-title {
+    font-size: 0.7rem;
+    color: #64748b;
+    text-transform: uppercase;
+    margin-bottom: 0.4rem;
+    margin-top: 0.8rem;
+    letter-spacing: 0.5px;
+}
+
 .tools-grid {
     display: flex;
     flex-wrap: wrap;
@@ -274,12 +283,11 @@ body {
     color: var(--text-secondary);
     padding: 0.6rem 0.8rem;
     border-radius: 6px;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
     flex: 1;
-    min-width: 30%;
     text-align: center;
 }
 
@@ -306,10 +314,11 @@ body {
     border-color: var(--danger);
 }
 
-/* Curseur Gomme */
-.cursor-eraser {
-    cursor: crosshair !important;
-}
+/* Curseurs dynamiques JS */
+.cursor-grab { cursor: grab !important; }
+.cursor-grabbing { cursor: grabbing !important; }
+.cursor-draw { cursor: crosshair !important; }
+.cursor-eraser { cursor: cell !important; }
 
 .leaflet-control-attribution { display: none !important; }
 

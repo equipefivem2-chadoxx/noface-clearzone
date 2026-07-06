@@ -8,7 +8,6 @@
     </div>
 
     <div id="units-list" class="units-list">
-        <!-- Les unités seront injectées ici via JS/Socket -->
         <% if (units && units.length > 0) { %>
             <% units.forEach(unit => { %>
                 <div class="unit-card" data-id="<%= unit.id %>" data-color="<%= unit.color %>">
@@ -25,20 +24,35 @@
         <% } %>
     </div>
 
-    <!-- Panneau d'outils tactiques caché par défaut -->
     <div id="tactical-tools" class="tactical-tools hidden">
         <h4>Équipement Tactique</h4>
+        
+        <div class="tool-group-title">Navigation</div>
         <div class="tools-grid">
-            <button class="tool-btn" data-tool="draw" data-size="4" title="Tracé Fin">Fin</button>
-            <button class="tool-btn active" data-tool="draw" data-size="8" title="Tracé Normal">Normal</button>
-            <button class="tool-btn" data-tool="draw" data-size="14" title="Tracé Épais">Épais</button>
-            <button class="tool-btn" data-tool="eraser" title="Gomme ciblée">Gomme</button>
-            <button class="tool-btn text-danger" id="btn-clear-all" title="Nettoyer la carte">Clear All</button>
+            <!-- Outil de déplacement activé par défaut -->
+            <button class="tool-btn active" data-tool="nav" title="Déplacer la carte">Main</button>
+        </div>
+
+        <div class="tool-group-title">Crayon (Opaque & Précis)</div>
+        <div class="tools-grid">
+            <button class="tool-btn" data-tool="pencil" data-size="3">Fin</button>
+            <button class="tool-btn" data-tool="pencil" data-size="6">Normal</button>
+        </div>
+
+        <div class="tool-group-title">Fluo (Large & Transparent)</div>
+        <div class="tools-grid">
+            <button class="tool-btn" data-tool="fluo" data-size="15">Normal</button>
+            <button class="tool-btn" data-tool="fluo" data-size="25">Large</button>
+        </div>
+
+        <div class="tool-group-title">Nettoyage</div>
+        <div class="tools-grid">
+            <button class="tool-btn" data-tool="eraser" title="Gomme magique (cliquez ou glissez)">Gomme</button>
+            <button class="tool-btn text-danger" id="btn-clear-all" title="Nettoyer votre carte">Clear All</button>
         </div>
     </div>
 </aside>
 
-<!-- Modal Création d'unité -->
 <div id="modal-unit" class="modal-overlay hidden">
     <div class="modal">
         <h3>Identifiant de l'unité</h3>

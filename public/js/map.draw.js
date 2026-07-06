@@ -4,21 +4,21 @@ document.addEventListener('DOMContentLoaded', () => {
         const socket = window.tacticalSocket;
         const mapContainer = document.getElementById('map-container');
         
-        // Configuration de base des outils
+        // Mode de base : Navigation
         window.tacticalState = {
-            tool: 'draw',
-            size: 8
+            tool: 'nav',
+            size: 3
         };
         
         let isDrawing = false;
+        let isEraserActive = false; // Pour la gomme "swipe"
         let currentPolyline = null;
         let currentPath = [];
         let currentLineId = null;
         
-        // Format: { unitId: { lineId: polylineObject } }
         const drawnItems = {};
 
-        // 1. Initialisation des boutons de la ToolBox
+        // 1. Initialisation des boutons
         document.querySelectorAll('.tool-btn[data-tool]').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 document.querySelectorAll('.tool-btn[data-tool]').forEach(b => b.classList.remove('active'));
@@ -29,42 +29,51 @@ document.addEventListener('DOMContentLoaded', () => {
                     window.tacticalState.size = parseInt(e.currentTarget.dataset.size);
                 }
                 
-                // Changement de curseur
-                if (window.tacticalState.tool === 'eraser') {
-                    mapContainer.classList.add('cursor-eraser');
-                } else {
-                    mapContainer.classList.remove('cursor-eraser');
-                }
+                // MAJ du curseur CSS
+                mapContainer.className = '';
+                if (window.tacticalState.tool === 'nav') mapContainer.classList.add('cursor-grab');
+                else if (window.tacticalState.tool === 'eraser') mapContainer.classList.add('cursor-eraser');
+                else mapContainer.classList.add('cursor-draw');
             });
         });
 
-        // Fonction d'effacement complet (Corbeille)
+        // Corbeille globale
         document.getElementById('btn-clear-all')?.addEventListener('click', () => {
             if (!window.selectedUnit) return;
             const uId = window.selectedUnit.id;
-            
             socket.emit('clear-drawings', uId);
-            
-            // Efface localement
             if (drawnItems[uId]) {
                 Object.values(drawnItems[uId]).forEach(line => map.removeLayer(line));
                 drawnItems[uId] = {};
             }
         });
 
-        // 2. Logique de dessin local
+        // 2. Logique Tactique
         map.on('mousedown', (e) => {
-            if (!window.selectedUnit || window.tacticalState.tool === 'eraser') return;
+            if (!window.selectedUnit) return;
 
+            if (window.tacticalState.tool === 'nav') {
+                mapContainer.classList.add('cursor-grabbing');
+                return; // On laisse Leaflet gérer le déplacement normal
+            }
+
+            if (window.tacticalState.tool === 'eraser') {
+                isEraserActive = true;
+                return;
+            }
+
+            // Mode Dessin (Pencil ou Fluo)
             map.dragging.disable();
             isDrawing = true;
             currentPath = [e.latlng];
-            currentLineId = 'L_' + Date.now() + Math.random().toString(36).substr(2, 9); // ID unique
+            currentLineId = 'L_' + Date.now() + Math.random().toString(36).substr(2, 9);
+
+            const opacity = window.tacticalState.tool === 'fluo' ? 0.4 : 1.0;
 
             currentPolyline = L.polyline(currentPath, {
                 color: window.selectedUnit.color,
                 weight: window.tacticalState.size,
-                opacity: 0.7,
+                opacity: opacity,
                 lineCap: 'round',
                 lineJoin: 'round',
                 className: 'neon-draw'
@@ -80,23 +89,32 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         map.on('mouseup', () => {
+            if (window.tacticalState.tool === 'nav') {
+                mapContainer.classList.remove('cursor-grabbing');
+                mapContainer.classList.add('cursor-grab');
+                return;
+            }
+
+            isEraserActive = false;
+
             if (!isDrawing) return;
             isDrawing = false;
             map.dragging.enable();
 
             if (currentPath.length > 1 && window.selectedUnit) {
                 const uId = window.selectedUnit.id;
+                const opacity = window.tacticalState.tool === 'fluo' ? 0.4 : 1.0;
                 
                 if (!drawnItems[uId]) drawnItems[uId] = {};
                 drawnItems[uId][currentLineId] = currentPolyline;
 
-                // Envoyer au serveur (action normale de dessin)
                 socket.emit('draw-line', {
                     action: 'draw',
                     lineId: currentLineId,
                     unitId: uId,
                     color: window.selectedUnit.color,
                     size: window.tacticalState.size,
+                    opacity: opacity,
                     latlngs: currentPath
                 });
             } else if (currentPolyline) {
@@ -105,27 +123,30 @@ document.addEventListener('DOMContentLoaded', () => {
             currentPolyline = null;
         });
 
-        // Fonction pour lier la gomme (click) sur un tracé
+        // 3. Logique de Gomme Magique
+        function eraseLine(polyline, unitId, lineId) {
+            if (window.selectedUnit && window.selectedUnit.id === unitId) {
+                map.removeLayer(polyline);
+                if (drawnItems[unitId]) delete drawnItems[unitId][lineId];
+                socket.emit('draw-line', { action: 'erase', lineId: lineId, unitId: unitId });
+            }
+        }
+
         function attachLineEvents(polyline, unitId, lineId) {
+            // Efface au clic
             polyline.on('click', () => {
-                if (window.tacticalState && window.tacticalState.tool === 'eraser') {
-                    // On vérifie que le joueur gomme bien une ligne appartenant à son unité activée
-                    if (window.selectedUnit && window.selectedUnit.id === unitId) {
-                        map.removeLayer(polyline);
-                        if (drawnItems[unitId]) delete drawnItems[unitId][lineId];
-                        
-                        // Utilisation du relais serveur "draw-line" pour envoyer un ordre d'effacement ciblé
-                        socket.emit('draw-line', { action: 'erase', lineId: lineId, unitId: unitId });
-                    }
-                }
+                if (window.tacticalState.tool === 'eraser') eraseLine(polyline, unitId, lineId);
+            });
+            // Efface au survol si la souris est pressée (Swipe Eraser)
+            polyline.on('mouseover', () => {
+                if (window.tacticalState.tool === 'eraser' && isEraserActive) eraseLine(polyline, unitId, lineId);
             });
         }
 
-        // 3. Réception des flux des autres unités
+        // 4. Réception Serveur
         socket.on('line-drawn', (data) => {
             const uId = data.unitId;
 
-            // L'autre unité demande l'effacement d'une ligne précise (Outil Gomme)
             if (data.action === 'erase') {
                 if (drawnItems[uId] && drawnItems[uId][data.lineId]) {
                     map.removeLayer(drawnItems[uId][data.lineId]);
@@ -134,11 +155,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // Réception normale d'un tracé
             const remotePolyline = L.polyline(data.latlngs, {
                 color: data.color,
-                weight: data.size || 8,
-                opacity: 0.7,
+                weight: data.size || 6,
+                opacity: data.opacity || 1.0,
                 lineCap: 'round',
                 lineJoin: 'round',
                 className: 'neon-draw'
@@ -150,7 +170,6 @@ document.addEventListener('DOMContentLoaded', () => {
             drawnItems[uId][data.lineId] = remotePolyline;
         });
 
-        // Réception du nettoyage complet d'une unité (Bouton Clear)
         socket.on('drawings-cleared', (unitId) => {
             if (drawnItems[unitId]) {
                 Object.values(drawnItems[unitId]).forEach(line => map.removeLayer(line));
@@ -158,7 +177,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Si une unité se déconnecte / est supprimée
         socket.on('unit-removed', (unitId) => {
             if (drawnItems[unitId]) {
                 Object.values(drawnItems[unitId]).forEach(line => map.removeLayer(line));
