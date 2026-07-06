@@ -1,49 +1,261 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
+
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title><%= title %></title>
-    <!-- Chargement des styles globaux et spécifiques à l'accueil -->
+
+
     <link rel="stylesheet" href="/css/style.css">
+
     <link rel="stylesheet" href="/css/home.css">
+
 </head>
+
+
 <body>
-    <main class="home-container">
-        <h1 class="home-title">Tactical Operations</h1>
-        <p class="home-subtitle">Système de Coordination • San Andreas</p>
 
-        <div class="cards-grid">
-            
-            <!-- Carte BCSO -->
-            <a href="/map/bcso" class="dept-card bcso">
-                <img src="/assets/bcso.png" alt="Blason BCSO" class="dept-logo">
-                <h2>BCSO</h2>
-                <p>Interface de commandement réservée aux unités du Blaine County Sheriff's Office.</p>
-                <div class="btn-access">Initialiser</div>
-            </a>
 
-            <!-- Carte LSPD -->
-            <a href="/map/lspd" class="dept-card lspd">
-                <img src="/assets/lspd.png" alt="Blason LSPD" class="dept-logo">
-                <h2>LSPD</h2>
-                <p>Interface de commandement réservée aux unités du Los Santos Police Department.</p>
-                <div class="btn-access">Initialiser</div>
-            </a>
+<main class="home-container">
 
-            <!-- Carte COMMUN (SVG conservé en attendant ton logo) -->
-            <a href="/map/all" class="dept-card all">
-                <svg class="dept-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path>
-                    <path d="M2 12h20"></path>
-                </svg>
-                <h2>COMMUN</h2>
-                <p>Réseau crypté partagé. Coordination globale des opérations inter-services.</p>
-                <div class="btn-access">Initialiser</div>
-            </a>
+
+    <!-- HEADER SYSTEME -->
+
+    <section class="home-header">
+
+
+        <div class="system-tag">
+
+            <span class="status-dot"></span>
+
+            SECURE CONNECTION ESTABLISHED
 
         </div>
-    </main>
+
+
+        <h1 class="home-title">
+
+            CLEARZONE
+
+        </h1>
+
+
+        <p class="home-subtitle">
+
+            SAN ANDREAS TACTICAL COMMAND NETWORK
+
+        </p>
+
+
+    </section>
+
+
+
+
+
+    <!-- CARTES -->
+
+    <div class="cards-grid">
+
+
+
+        <!-- BCSO -->
+
+        <a href="/map/bcso" class="dept-card bcso">
+
+
+            <img 
+                src="/assets/bcso.png"
+                class="dept-logo"
+                alt="BCSO"
+            >
+
+
+            <h2>
+
+                BCSO
+
+            </h2>
+
+
+            <p>
+
+                Blaine County Sheriff's Office<br>
+                Tactical Operations Network
+
+            </p>
+
+
+            <div class="btn-access">
+
+                ACCESS COMMAND
+
+            </div>
+
+
+        </a>
+
+
+
+
+
+        <!-- LSPD -->
+
+        <a href="/map/lspd" class="dept-card lspd">
+
+
+            <img 
+                src="/assets/lspd.png"
+                class="dept-logo"
+                alt="LSPD"
+            >
+
+
+            <h2>
+
+                LSPD
+
+            </h2>
+
+
+            <p>
+
+                Los Santos Police Department<br>
+                Metropolitan Command Network
+
+            </p>
+
+
+            <div class="btn-access">
+
+                ACCESS COMMAND
+
+            </div>
+
+
+        </a>
+
+
+
+
+
+        <!-- COMMUN -->
+
+        <a href="/map/all" class="dept-card all">
+
+
+            <svg 
+                class="dept-icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+            >
+
+                <circle cx="12" cy="12" r="10"></circle>
+
+                <path d="M2 12h20"></path>
+
+                <path d="M12 2a15 15 0 0 1 0 20"></path>
+
+                <path d="M12 2a15 15 0 0 0 0 20"></path>
+
+
+            </svg>
+
+
+            <h2>
+
+                GLOBAL
+
+            </h2>
+
+
+            <p>
+
+                Unified emergency network<br>
+                Multi agency coordination system
+
+            </p>
+
+
+            <div class="btn-access">
+
+                ACCESS NETWORK
+
+            </div>
+
+
+
+        </a>
+
+
+
+    </div>
+
+
+
+
+
+
+    <!-- FOOTER HUD -->
+
+    <footer class="system-footer">
+
+
+        <div>
+
+            SERVER
+
+            <strong>
+
+                ONLINE
+
+            </strong>
+
+        </div>
+
+
+
+        <div>
+
+            MAP DATABASE
+
+            <strong>
+
+                SAN ANDREAS
+
+            </strong>
+
+        </div>
+
+
+
+        <div>
+
+            NETWORK
+
+            <strong>
+
+                ENCRYPTED
+
+            </strong>
+
+        </div>
+
+
+    </footer>
+
+
+
+
+</main>
+
+
 </body>
+
 </html>

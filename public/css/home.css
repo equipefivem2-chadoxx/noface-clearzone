@@ -1,186 +1,606 @@
-/* --- public/css/home.css --- */
-
-/* Fond d'écran façon carte tactique / grille radar */
-body {
-    background-color: #090a0f;
-    background-image: 
-        radial-gradient(circle at 50% 0%, rgba(37, 99, 235, 0.1) 0%, transparent 50%),
-        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-    background-size: 100% 100%, 40px 40px, 40px 40px;
-    background-position: center top;
-}
-
 .home-container {
-    padding: 6rem 2rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    min-height: 100vh;
-    position: relative;
-    z-index: 1;
+
+    min-height:100vh;
+
+    display:flex;
+    flex-direction:column;
+
+    align-items:center;
+    justify-content:center;
+
+
+    position:relative;
+
+    padding:40px;
+
+
+    overflow:hidden;
+
 }
 
-/* Typographie Premium */
-.home-title {
-    font-size: 4rem;
-    font-weight: 800;
-    letter-spacing: -1.5px;
-    margin-bottom: 1rem;
-    text-transform: uppercase;
-    background: linear-gradient(135deg, #ffffff 0%, #71717a 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    filter: drop-shadow(0 4px 12px rgba(255,255,255,0.1));
+
+/* grille tactique */
+
+.home-container::before {
+
+    content:"";
+
+    position:absolute;
+
+    inset:0;
+
+
+    background:
+
+        linear-gradient(
+            rgba(255,255,255,.025) 1px,
+            transparent 1px
+        ),
+
+        linear-gradient(
+            90deg,
+            rgba(255,255,255,.025) 1px,
+            transparent 1px
+        );
+
+
+    background-size:50px 50px;
+
+
+    mask-image:
+        radial-gradient(
+            circle,
+            black,
+            transparent 75%
+        );
+
 }
+
+
+
+/* halo central */
+
+.home-container::after {
+
+    content:"";
+
+    position:absolute;
+
+    width:700px;
+
+    height:700px;
+
+
+    background:
+
+        radial-gradient(
+            circle,
+            rgba(22,119,255,.15),
+            transparent 70%
+        );
+
+
+    top:50%;
+
+    left:50%;
+
+    transform:
+        translate(-50%,-50%);
+
+
+    filter:blur(20px);
+
+}
+
+
+
+
+/* TITRE */
+
+
+.home-title {
+
+
+    position:relative;
+
+
+    font-family:"Rajdhani", sans-serif;
+
+
+    font-size:72px;
+
+
+    font-weight:700;
+
+
+    letter-spacing:8px;
+
+
+    text-transform:uppercase;
+
+
+    margin-bottom:5px;
+
+
+    color:white;
+
+
+    text-shadow:
+
+        0 0 30px rgba(255,255,255,.15);
+
+}
+
+
+
+.home-title::before {
+
+
+    content:"CLEARZONE";
+
+
+    position:absolute;
+
+
+    inset:0;
+
+
+    color:#1677ff;
+
+
+    opacity:.15;
+
+
+    transform:
+        translate(3px,3px);
+
+
+}
+
+
+
+
 
 .home-subtitle {
-    color: #a1a1aa;
-    font-size: 1.2rem;
-    font-weight: 300;
-    margin-bottom: 5rem;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
+
+
+    position:relative;
+
+
+    color:#8492a6;
+
+
+    letter-spacing:5px;
+
+
+    font-size:15px;
+
+
+    text-transform:uppercase;
+
+
+    margin-bottom:60px;
+
+
 }
 
-/* Grille des cartes */
+
+
+
+
+/* CARTES */
+
+
 .cards-grid {
-    display: flex;
-    gap: 2.5rem;
-    justify-content: center;
-    flex-wrap: wrap;
-    max-width: 1300px;
+
+
+    position:relative;
+
+
+    display:flex;
+
+
+    gap:25px;
+
+
+    flex-wrap:wrap;
+
+
+    justify-content:center;
+
 }
 
-/* Design des Cartes Tactiques */
+
+
+
+
 .dept-card {
-    width: 350px;
-    padding: 3rem 2rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-decoration: none;
-    position: relative;
-    border-radius: 16px;
-    background: rgba(20, 21, 27, 0.4);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    overflow: hidden;
+
+
+    width:360px;
+
+
+    min-height:400px;
+
+
+    padding:35px;
+
+
+    text-decoration:none;
+
+
+    color:white;
+
+
+    display:flex;
+
+    flex-direction:column;
+
+    align-items:center;
+
+
+    justify-content:center;
+
+
+
+    background:
+
+        linear-gradient(
+            145deg,
+            rgba(255,255,255,.06),
+            rgba(0,0,0,.5)
+        );
+
+
+    border:
+
+        1px solid rgba(255,255,255,.1);
+
+
+
+    position:relative;
+
+
+    overflow:hidden;
+
+
+
+    transition:.35s;
+
+
 }
 
-/* Effet de lueur interne (Glow) */
+
+
+
+/* ligne HUD */
+
 .dept-card::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 50%);
-    opacity: 0;
-    transition: opacity 0.5s;
-    pointer-events: none;
+
+
+    content:"";
+
+
+    position:absolute;
+
+
+    top:0;
+
+    left:0;
+
+
+    width:100%;
+
+    height:3px;
+
+
+    background:white;
+
+
+    opacity:.2;
+
 }
 
-/* --- Gestion des Médias (SVG et PNG) --- */
 
-/* Icônes SVG (Pour COMMUN) */
-.dept-icon {
-    width: 80px;
-    height: 80px;
-    margin-bottom: 1.5rem;
-    color: #52525b;
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));
-}
 
-/* Logos PNG (Pour LSPD et BCSO) */
-.dept-logo {
-    width: 110px;
-    height: 110px;
-    object-fit: contain;
-    margin-bottom: 1.5rem;
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    filter: drop-shadow(0 5px 15px rgba(0,0,0,0.6)) grayscale(40%);
-}
 
-/* Typographie interne des cartes */
-.dept-card h2 { 
-    color: #e4e4e7;
-    font-size: 1.8rem;
-    font-weight: 800;
-    letter-spacing: 2px;
-    margin-bottom: 1rem;
-    transition: color 0.3s;
-}
-
-.dept-card p { 
-    color: #71717a; 
-    font-size: 0.95rem; 
-    line-height: 1.5;
-    margin-bottom: 2.5rem; 
-    transition: color 0.3s;
-}
-
-/* Bouton Premium */
-.btn-access {
-    background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: #a1a1aa;
-    padding: 0.8rem 2.5rem;
-    border-radius: 8px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    transition: all 0.3s ease;
-    width: 100%;
-}
-
-/* --- Interactions au survol (Hover states avec animations AAA) --- */
 .dept-card:hover {
-    transform: translateY(-10px);
-    border-color: rgba(255, 255, 255, 0.2);
+
+
+    transform:
+
+        translateY(-12px);
+
+
+    background:
+
+        rgba(15,20,30,.9);
+
+
 }
 
-.dept-card:hover::before {
-    opacity: 1;
+
+
+
+/* LOGOS */
+
+
+.dept-logo {
+
+
+    width:120px;
+
+
+    height:120px;
+
+
+    object-fit:contain;
+
+
+    margin-bottom:25px;
+
+
+    filter:
+
+        grayscale(40%);
+
+
+    transition:.35s;
+
 }
+
+
+
+
+.dept-card:hover .dept-logo {
+
+
+    transform:
+
+        scale(1.15);
+
+
+    filter:
+
+        grayscale(0);
+
+}
+
+
+
+
+
+.dept-icon {
+
+
+    width:110px;
+
+    height:110px;
+
+
+    margin-bottom:25px;
+
+
+    color:#64748b;
+
+
+}
+
+
+
+
+
+/* TEXTE */
+
+
+.dept-card h2 {
+
+
+    font-family:"Rajdhani",sans-serif;
+
+
+    font-size:42px;
+
+
+    letter-spacing:5px;
+
+
+    margin-bottom:10px;
+
+
+}
+
+
+
+.dept-card p {
+
+
+    color:#94a3b8;
+
+
+    text-align:center;
+
+
+    line-height:1.6;
+
+
+    font-size:14px;
+
+
+    min-height:65px;
+
+}
+
+
+
+
+
+/* BOUTON */
+
+
+.btn-access {
+
+
+    margin-top:30px;
+
+
+    width:100%;
+
+
+    padding:14px;
+
+
+    text-align:center;
+
+
+    border:
+
+        1px solid rgba(255,255,255,.15);
+
+
+    font-size:13px;
+
+
+    font-weight:700;
+
+
+    letter-spacing:3px;
+
+
+    text-transform:uppercase;
+
+
+    transition:.25s;
+
+}
+
+
+
+
 
 .dept-card:hover .btn-access {
-    background: #ffffff;
-    color: #000000;
-    box-shadow: 0 0 20px rgba(255,255,255,0.2);
+
+
+    background:white;
+
+
+    color:black;
+
 }
 
-/* Effets spécifiques par département - BCSO */
-.dept-card.bcso:hover { border-color: var(--bcso-color); box-shadow: 0 20px 40px rgba(217, 119, 6, 0.15); }
-.dept-card.bcso:hover h2 { color: var(--bcso-color); }
-.dept-card.bcso:hover .dept-logo { 
-    transform: scale(1.15); 
-    filter: drop-shadow(0 0 25px rgba(217, 119, 6, 0.7)) grayscale(0%); 
-}
-.dept-card.bcso:hover .btn-access { background: var(--bcso-color); color: #fff; box-shadow: 0 0 20px rgba(217, 119, 6, 0.3); border-color: var(--bcso-color); }
 
-/* Effets spécifiques par département - LSPD */
-.dept-card.lspd:hover { border-color: var(--lspd-color); box-shadow: 0 20px 40px rgba(37, 99, 235, 0.15); }
-.dept-card.lspd:hover h2 { color: var(--lspd-color); }
-.dept-card.lspd:hover .dept-logo { 
-    transform: scale(1.15); 
-    filter: drop-shadow(0 0 25px rgba(37, 99, 235, 0.7)) grayscale(0%); 
-}
-.dept-card.lspd:hover .btn-access { background: var(--lspd-color); color: #fff; box-shadow: 0 0 20px rgba(37, 99, 235, 0.3); border-color: var(--lspd-color); }
 
-/* Effets spécifiques par département - COMMUN */
-.dept-card.all:hover { border-color: var(--all-color); box-shadow: 0 20px 40px rgba(16, 185, 129, 0.15); }
-.dept-card.all:hover h2 { color: var(--all-color); }
-.dept-card.all:hover .dept-icon { 
-    color: var(--all-color); 
-    transform: scale(1.15) rotate(15deg);
-    filter: drop-shadow(0 0 20px rgba(16, 185, 129, 0.6)); 
+
+
+/* BCSO */
+
+
+.bcso:hover {
+
+
+    border-color:#d97706;
+
+
+    box-shadow:
+
+        0 0 40px rgba(217,119,6,.25);
+
 }
-.dept-card.all:hover .btn-access { background: var(--all-color); color: #fff; box-shadow: 0 0 20px rgba(16, 185, 129, 0.3); border-color: var(--all-color); }
+
+
+
+.bcso:hover h2 {
+
+
+    color:#f59e0b;
+
+}
+
+
+
+.bcso:hover .btn-access {
+
+
+    background:#d97706;
+
+    color:white;
+
+}
+
+
+
+
+
+/* LSPD */
+
+
+.lspd:hover {
+
+
+    border-color:#1677ff;
+
+
+    box-shadow:
+
+        0 0 40px rgba(22,119,255,.3);
+
+}
+
+
+
+.lspd:hover h2 {
+
+
+    color:#3b82f6;
+
+}
+
+
+
+.lspd:hover .btn-access {
+
+
+    background:#1677ff;
+
+    color:white;
+
+}
+
+
+
+
+
+/* COMMUN */
+
+
+.all:hover {
+
+
+    border-color:#10b981;
+
+
+    box-shadow:
+
+        0 0 40px rgba(16,185,129,.25);
+
+}
+
+
+
+.all:hover h2 {
+
+
+    color:#10b981;
+
+}
+
+
+
+.all:hover .btn-access {
+
+
+    background:#10b981;
+
+    color:white;
+
+}

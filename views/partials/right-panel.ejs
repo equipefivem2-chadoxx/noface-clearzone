@@ -1,66 +1,430 @@
 <aside class="right-panel glass-panel">
+
+
+    <!-- HEADER -->
+
     <div class="panel-header">
-        <h3>Déploiement</h3>
+
+
+        <div class="system-label">
+
+            <span class="status-dot"></span>
+
+            UNIT CONTROL
+
+        </div>
+
+
+        <h3>
+
+            DEPLOYMENT
+
+        </h3>
+
+
+
         <button id="btn-new-unit" class="btn-primary">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-            Nouvelle Unité
+
+
+            <svg viewBox="0 0 24 24" width="16" height="16">
+
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+
+
+            </svg>
+
+
+            DEPLOY UNIT
+
+
         </button>
+
+
+
     </div>
 
-    <div id="units-list" class="units-list">
-        <% if (units && units.length > 0) { %>
-            <% units.forEach(unit => { %>
-                <div class="unit-card" data-id="<%= unit.id %>" data-color="<%= unit.color %>">
-                    <div class="unit-color" style="--u-color: <%= unit.color %>;"></div>
-                    <span class="unit-name"><%= unit.name %></span>
-                    
-                    <button class="btn-delete" title="Retirer l'unité">
-                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                    </button>
+
+
+
+
+    <!-- UNITES -->
+
+
+    <div class="units-section">
+
+
+        <div class="section-title">
+
+            ACTIVE UNITS
+
+        </div>
+
+
+
+        <div id="units-list" class="units-list">
+
+
+            <% if (units && units.length > 0) { %>
+
+
+                <% units.forEach(unit => { %>
+
+
+                    <div 
+                        class="unit-card"
+                        data-id="<%= unit.id %>"
+                        data-color="<%= unit.color %>"
+                    >
+
+
+
+                        <div 
+                            class="unit-color"
+                            style="--u-color:<%= unit.color %>"
+                        ></div>
+
+
+
+                        <div class="unit-details">
+
+
+                            <span class="unit-name">
+
+                                <%= unit.name %>
+
+                            </span>
+
+
+                            <small>
+
+                                PATROL ACTIVE
+
+                            </small>
+
+
+                        </div>
+
+
+
+                        <button 
+                            class="btn-delete"
+                            title="Remove unit"
+                        >
+
+                            ×
+
+                        </button>
+
+
+
+                    </div>
+
+
+
+                <% }); %>
+
+
+
+            <% } else { %>
+
+
+                <div class="empty-state">
+
+                    NO ACTIVE UNITS
+
                 </div>
-            <% }); %>
-        <% } else { %>
-            <div class="empty-state">Aucune unité n'est déployée sur ce secteur.</div>
-        <% } %>
+
+
+            <% } %>
+
+
+
+        </div>
+
+
     </div>
+
+
+
+
+
+
+    <!-- OUTILS -->
+
 
     <div id="tactical-tools" class="tactical-tools hidden">
-        <h4>Équipement Tactique</h4>
-        
-        <div class="tool-group-title">Navigation</div>
-        <div class="tools-grid">
-            <!-- Outil de déplacement activé par défaut -->
-            <button class="tool-btn active" data-tool="nav" title="Déplacer la carte">Main</button>
+
+
+
+        <div class="section-title">
+
+            TACTICAL EQUIPMENT
+
         </div>
 
-        <div class="tool-group-title">Crayon (Opaque & Précis)</div>
-        <div class="tools-grid">
-            <button class="tool-btn" data-tool="pencil" data-size="3">Fin</button>
-            <button class="tool-btn" data-tool="pencil" data-size="6">Normal</button>
+
+
+
+
+        <div class="tool-category">
+
+
+            <label>
+
+                NAVIGATION
+
+            </label>
+
+
+
+            <button 
+                class="tool-btn active"
+                data-tool="nav"
+            >
+
+                MOVE MAP
+
+            </button>
+
+
         </div>
 
-        <div class="tool-group-title">Fluo (Large & Transparent)</div>
-        <div class="tools-grid">
-            <button class="tool-btn" data-tool="fluo" data-size="15">Normal</button>
-            <button class="tool-btn" data-tool="fluo" data-size="25">Large</button>
+
+
+
+
+
+
+        <div class="tool-category">
+
+
+            <label>
+
+                DRAWING
+
+            </label>
+
+
+            <div class="tools-grid">
+
+
+                <button 
+                    class="tool-btn"
+                    data-tool="pencil"
+                    data-size="3"
+                >
+
+                    FINE
+
+                </button>
+
+
+
+                <button 
+                    class="tool-btn"
+                    data-tool="pencil"
+                    data-size="6"
+                >
+
+                    STANDARD
+
+                </button>
+
+
+
+            </div>
+
+
         </div>
 
-        <div class="tool-group-title">Nettoyage</div>
-        <div class="tools-grid">
-            <button class="tool-btn" data-tool="eraser" title="Gomme magique (cliquez ou glissez)">Gomme</button>
-            <button class="tool-btn text-danger" id="btn-clear-all" title="Nettoyer votre carte">Clear All</button>
+
+
+
+
+
+
+
+        <div class="tool-category">
+
+
+            <label>
+
+                MARKING
+
+            </label>
+
+
+            <div class="tools-grid">
+
+
+                <button 
+                    class="tool-btn"
+                    data-tool="fluo"
+                    data-size="15"
+                >
+
+                    FLUO
+
+                </button>
+
+
+
+                <button 
+                    class="tool-btn"
+                    data-tool="fluo"
+                    data-size="25"
+                >
+
+                    LARGE
+
+                </button>
+
+
+
+            </div>
+
+
         </div>
+
+
+
+
+
+
+
+
+        <div class="tool-category">
+
+
+            <label>
+
+                CLEANUP
+
+            </label>
+
+
+
+            <div class="tools-grid">
+
+
+                <button 
+                    class="tool-btn"
+                    data-tool="eraser"
+                >
+
+                    ERASE
+
+                </button>
+
+
+
+
+                <button 
+                    id="btn-clear-all"
+                    class="tool-btn danger"
+                >
+
+                    CLEAR MAP
+
+                </button>
+
+
+
+            </div>
+
+
+
+        </div>
+
+
+
     </div>
+
+
+
+
+
 </aside>
 
+
+
+
+
+
+<!-- MODALE CREATION UNITE -->
+
+
 <div id="modal-unit" class="modal-overlay hidden">
+
+
     <div class="modal">
-        <h3>Identifiant de l'unité</h3>
-        <input type="text" id="unit-name-input" placeholder="Ex: ALPHA-1, M-14..." autocomplete="off">
-        <div id="modal-error" class="error-text"></div>
-        <div class="modal-actions">
-            <button id="btn-cancel-unit" class="btn-secondary">Annuler</button>
-            <button id="btn-confirm-unit" class="btn-primary">Déployer</button>
+
+
+        <div class="system-label">
+
+            NEW DEPLOYMENT
+
         </div>
+
+
+
+        <h3>
+
+            UNIT IDENTIFIER
+
+        </h3>
+
+
+
+        <input
+            type="text"
+            id="unit-name-input"
+            placeholder="Ex : A141 / M167"
+            autocomplete="off"
+        >
+
+
+
+        <div 
+            id="modal-error"
+            class="error-text"
+        ></div>
+
+
+
+
+        <div class="modal-actions">
+
+
+            <button 
+                id="btn-cancel-unit"
+                class="btn-secondary"
+            >
+
+                CANCEL
+
+            </button>
+
+
+
+            <button 
+                id="btn-confirm-unit"
+                class="btn-primary"
+            >
+
+                DEPLOY
+
+            </button>
+
+
+
+        </div>
+
+
+
     </div>
+
+
 </div>

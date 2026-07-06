@@ -1,21 +1,231 @@
 <aside class="sidebar glass-panel">
+
+
+    <!-- IDENTITE SYSTEME -->
+
     <div class="sidebar-header">
-        <h2>Operations</h2>
-        <span class="badge-dept <%= mapId %>"><%= mapId.toUpperCase() %> NETWORK</span>
+
+
+        <div class="system-label">
+
+            <span class="status-dot"></span>
+
+            CLEARZONE CAD
+
+        </div>
+
+
+
+        <h2>
+
+            COMMAND
+
+        </h2>
+
+
+
+        <span class="badge-dept <%= mapId %>">
+
+            <%= mapId.toUpperCase() %> NETWORK
+
+        </span>
+
+
+
     </div>
-    
+
+
+
+
+
+    <!-- INFORMATIONS RAPIDES -->
+
+    <div class="system-info">
+
+
+        <div class="info-box">
+
+
+            <span>
+
+                CONNECTION
+
+            </span>
+
+
+            <strong class="online">
+
+                ONLINE
+
+            </strong>
+
+
+        </div>
+
+
+
+        <div class="info-box">
+
+
+            <span>
+
+                MAP
+
+            </span>
+
+
+            <strong>
+
+                SAN ANDREAS
+
+            </strong>
+
+
+        </div>
+
+
+
+        <div class="info-box">
+
+
+            <span>
+
+                CHANNEL
+
+            </span>
+
+
+            <strong>
+
+                TACTICAL-01
+
+            </strong>
+
+
+        </div>
+
+
+
+    </div>
+
+
+
+
+
+
+    <!-- NAVIGATION -->
+
     <nav class="sidebar-nav">
+
+
+
         <a href="/" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
-            Retour Dashboard
+
+
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+
+                <polyline points="9 22 9 12 15 12 15 22"/>
+
+            </svg>
+
+
+            Dashboard
+
+
         </a>
+
+
+
+
+
+
         <a href="#" class="nav-item active">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-            Carte Tactique
+
+
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+
+
+                <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/>
+
+
+                <line x1="8" y1="2" x2="8" y2="18"/>
+
+
+                <line x1="16" y1="6" x2="16" y2="22"/>
+
+
+            </svg>
+
+
+
+            Tactical Map
+
+
+
         </a>
+
+
+
+
+
+
+
         <a href="#" class="nav-item disabled">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+
+
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+
+
+                <circle cx="12" cy="12" r="3"/>
+
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+
+            </svg>
+
+
             Configuration
+
+
         </a>
+
+
+
+
     </nav>
+
+
+
+
+    <!-- BAS DE PANNEAU -->
+
+
+    <div class="sidebar-footer">
+
+
+        <div class="footer-title">
+
+            OPERATION STATUS
+
+        </div>
+
+
+        <div class="operation-state">
+
+
+            <span></span>
+
+
+            ACTIVE
+
+
+        </div>
+
+
+
+    </div>
+
+
+
 </aside>
