@@ -1,26 +1,186 @@
-document.addEventListener('DOMContentLoaded', () => {
-    // 1. Configuration de Leaflet pour une image plate (pas une vraie map monde)
-    // On utilise L.CRS.Simple pour les jeux vidéos
-    const map = L.map('map-container', {
+document.addEventListener("DOMContentLoaded", () => {
+
+
+    const map = L.map("map-container", {
+
         crs: L.CRS.Simple,
-        minZoom: -2,
-        maxZoom: 2,
-        zoomControl: false // On désactive pour avoir un rendu clean (on peut zoomer molette)
+
+        minZoom:-2,
+
+        maxZoom:2,
+
+        zoomControl:false,
+
+        attributionControl:false,
+
+        preferCanvas:true
+
     });
 
-    // 2. Définition des dimensions de l'image (À ajuster selon ton image HD)
-    // Ici on simule une map de 8192x8192 pixels
-    const bounds = [[0, 0], [8192, 8192]];
 
-    // 3. Application de l'image sur la carte Leaflet
-    L.imageOverlay('/assets/map-gta5.jpg', bounds).addTo(map);
 
-    // 4. Centrage par défaut
+
+
+    const bounds = [
+
+        [0,0],
+
+        [8192,8192]
+
+    ];
+
+
+
+
+
+    const overlay = L.imageOverlay(
+
+        "/assets/map-gta5.jpg",
+
+        bounds,
+
+        {
+
+            opacity:1,
+
+            interactive:false
+
+        }
+
+    ).addTo(map);
+
+
+
+
+
+
+
     map.fitBounds(bounds);
+
+
     map.setZoom(-1);
 
-    // On rend l'instance map globale pour pouvoir l'utiliser dans map.draw.js plus tard
+
+
+
+
+
+
+    /*
+        Effet caméra tactique
+    */
+
+
+    setTimeout(()=>{
+
+
+        map.flyTo(
+
+            [4096,4096],
+
+            -1,
+
+            {
+
+                duration:1.2,
+
+                easeLinearity:.25
+
+            }
+
+        );
+
+
+    },300);
+
+
+
+
+
+
+
+    /*
+        Curseur initial
+    */
+
+
+    document
+
+    .getElementById("map-container")
+
+    .classList
+
+    .add("cursor-grab");
+
+
+
+
+
+
+
+    /*
+        Overlay scan système
+    */
+
+
+    const hud = document.createElement("div");
+
+
+    hud.className="map-hud-overlay";
+
+
+    hud.innerHTML=`
+
+
+        <div class="hud-top-left">
+
+
+            <span class="pulse"></span>
+
+            SATELLITE LINK ACTIVE
+
+
+        </div>
+
+
+
+        <div class="hud-bottom-right">
+
+
+            SAN ANDREAS
+
+            <br>
+
+            TACTICAL GRID ONLINE
+
+
+        </div>
+
+
+    `;
+
+
+    document.body.appendChild(hud);
+
+
+
+
+
+
+
+
     window.tacticalMap = map;
 
-    console.log(`[MAP CORE] Carte initialisée pour la zone : ${MAP_ID}`);
+
+
+    console.log(
+
+        "[CLEARZONE] Tactical map loaded:",
+
+        MAP_ID
+
+    );
+
+
+
 });

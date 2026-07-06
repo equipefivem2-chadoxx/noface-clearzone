@@ -1,109 +1,671 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener("DOMContentLoaded",()=>{
+
+
     const socket = io();
 
-    // 1. Rejoindre la room
-    socket.emit('join-map', MAP_ID);
+    socket.emit(
+        "join-map",
+        MAP_ID
+    );
 
-    // 2. Gestion de l'UI
-    const btnNewUnit = document.getElementById('btn-new-unit');
-    const modalUnit = document.getElementById('modal-unit');
-    const btnCancelUnit = document.getElementById('btn-cancel-unit');
-    const btnConfirmUnit = document.getElementById('btn-confirm-unit');
-    const inputUnitName = document.getElementById('unit-name-input');
-    const modalError = document.getElementById('modal-error');
-    const unitsList = document.getElementById('units-list');
-    const tacticalTools = document.getElementById('tactical-tools');
 
-    window.selectedUnit = null;
 
-    btnNewUnit.addEventListener('click', () => {
-        modalUnit.classList.remove('hidden');
-        inputUnitName.focus();
-    });
+    const btnNewUnit =
+        document.getElementById("btn-new-unit");
 
-    btnCancelUnit.addEventListener('click', () => {
-        modalUnit.classList.add('hidden');
-        inputUnitName.value = '';
-        modalError.textContent = '';
-    });
 
-    btnConfirmUnit.addEventListener('click', () => {
-        const name = inputUnitName.value.trim();
-        if (!name) return;
+    const modal =
+        document.getElementById("modal-unit");
 
-        socket.emit('create-unit', name, (response) => {
-            if (!response.success) {
-                modalError.textContent = response.message;
-            } else {
-                modalUnit.classList.add('hidden');
-                inputUnitName.value = '';
-                modalError.textContent = '';
-            }
-        });
-    });
 
-    // 3. Réception Serveur -> Client
-    socket.on('unit-added', (unit) => {
-        const emptyState = document.querySelector('.empty-state');
-        if (emptyState) emptyState.remove();
+    const btnCancel =
+        document.getElementById("btn-cancel-unit");
 
-        const card = document.createElement('div');
-        card.className = 'unit-card';
-        card.dataset.id = unit.id;
-        card.dataset.color = unit.color;
-        
-        card.innerHTML = `
-            <div class="unit-color" style="--u-color: ${unit.color};"></div>
-            <span class="unit-name">${unit.name}</span>
-            <button class="btn-delete" title="Retirer l'unité">
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-            </button>
-        `;
-        unitsList.appendChild(card);
-    });
 
-    socket.on('unit-removed', (unitId) => {
-        const card = document.querySelector(`.unit-card[data-id="${unitId}"]`);
-        if (card) card.remove();
-        
-        if (window.selectedUnit && window.selectedUnit.id === unitId) {
-            window.selectedUnit = null;
-            tacticalTools.classList.add('hidden'); // Cache les outils si l'unité disparaît
-        }
+    const btnConfirm =
+        document.getElementById("btn-confirm-unit");
 
-        if (unitsList.children.length === 0) {
-            unitsList.innerHTML = '<div class="empty-state">Aucune unité n\'est déployée sur ce secteur.</div>';
-        }
-    });
 
-    // 4. Délégation d'événements pour Sélectionner (carte entière) / Supprimer
-    unitsList.addEventListener('click', (e) => {
-        const card = e.target.closest('.unit-card');
-        if (!card) return;
+    const input =
+        document.getElementById("unit-name-input");
 
-        const unitId = card.dataset.id;
-        const unitColor = card.dataset.color;
 
-        // Clic sur Corbeille
-        if (e.target.closest('.btn-delete')) {
-            socket.emit('delete-unit', unitId);
+    const error =
+        document.getElementById("modal-error");
+
+
+    const list =
+        document.getElementById("units-list");
+
+
+    const tools =
+        document.getElementById("tactical-tools");
+
+
+
+
+
+    window.selectedUnit=null;
+
+
+
+
+
+
+
+    /*
+        OPEN MODAL
+    */
+
+
+    btnNewUnit.onclick=()=>{
+
+
+        modal.classList.remove("hidden");
+
+
+        setTimeout(()=>{
+
+            input.focus();
+
+        },100);
+
+
+    };
+
+
+
+
+
+
+
+    /*
+        CLOSE MODAL
+    */
+
+
+    btnCancel.onclick=()=>{
+
+
+        modal.classList.add("hidden");
+
+
+        input.value="";
+
+
+        error.textContent="";
+
+
+    };
+
+
+
+
+
+
+
+
+    /*
+        CREATE UNIT
+    */
+
+
+    btnConfirm.onclick=()=>{
+
+
+        const name =
+            input.value.trim();
+
+
+
+        if(!name){
+
+
+            error.textContent=
+
+            "UNIT IDENTIFIER REQUIRED";
+
+
             return;
+
         }
 
-        // Clic sur le reste de la carte = Sélection
-        document.querySelectorAll('.unit-card').forEach(c => {
-            c.classList.remove('active');
-            c.style.borderColor = 'var(--border-light)';
-        });
-        
-        card.classList.add('active');
-        card.style.borderColor = unitColor;
-        
-        window.selectedUnit = { id: unitId, color: unitColor };
-        
-        // Affiche l'équipement tactique !
-        tacticalTools.classList.remove('hidden');
-    });
 
-    window.tacticalSocket = socket;
+
+
+        socket.emit(
+
+            "create-unit",
+
+            name,
+
+            response=>{
+
+
+                if(!response.success){
+
+
+                    error.textContent=
+
+                    response.message;
+
+
+                    return;
+
+
+                }
+
+
+
+
+                modal.classList.add("hidden");
+
+
+                input.value="";
+
+
+
+            }
+
+
+        );
+
+
+
+    };
+
+
+
+
+
+
+
+
+
+    /*
+        ADD UNIT
+    */
+
+
+    socket.on(
+
+        "unit-added",
+
+        unit=>{
+
+
+            removeEmpty();
+
+
+
+            createUnitCard(unit);
+
+
+
+            showNotification(
+
+                "UNIT DEPLOYED",
+
+                unit.name
+
+            );
+
+
+
+        }
+
+    );
+
+
+
+
+
+
+
+    /*
+        REMOVE UNIT
+    */
+
+
+    socket.on(
+
+        "unit-removed",
+
+        id=>{
+
+
+            const card=
+
+            document.querySelector(
+
+                `[data-id="${id}"]`
+
+            );
+
+
+
+            if(card){
+
+
+                card.style.transform=
+
+                "translateX(100%)";
+
+
+                card.style.opacity=0;
+
+
+
+                setTimeout(()=>{
+
+
+                    card.remove();
+
+
+                    checkEmpty();
+
+
+                },300);
+
+
+
+            }
+
+
+
+
+            if(
+
+                window.selectedUnit &&
+
+                window.selectedUnit.id===id
+
+            ){
+
+
+                window.selectedUnit=null;
+
+
+                tools.classList.add("hidden");
+
+
+            }
+
+
+
+        }
+
+    );
+
+
+
+
+
+
+
+
+
+    /*
+        CLICK UNIT
+    */
+
+
+    list.addEventListener(
+
+        "click",
+
+        e=>{
+
+
+            const card=
+
+            e.target.closest(
+
+                ".unit-card"
+
+            );
+
+
+
+            if(!card)
+
+            return;
+
+
+
+
+
+
+            if(
+
+                e.target.closest(
+
+                    ".btn-delete"
+
+                )
+
+            ){
+
+
+
+                socket.emit(
+
+                    "delete-unit",
+
+                    card.dataset.id
+
+                );
+
+
+                return;
+
+
+            }
+
+
+
+
+
+
+
+            document
+
+            .querySelectorAll(
+
+                ".unit-card"
+
+            )
+
+            .forEach(c=>{
+
+
+                c.classList.remove(
+
+                    "active"
+
+                );
+
+
+            });
+
+
+
+
+
+            card.classList.add(
+
+                "active"
+
+            );
+
+
+
+
+
+            window.selectedUnit={
+
+
+                id:
+
+                card.dataset.id,
+
+
+                color:
+
+                card.dataset.color
+
+
+            };
+
+
+
+
+            tools.classList.remove(
+
+                "hidden"
+
+            );
+
+
+
+            showNotification(
+
+                "UNIT SELECTED",
+
+                card.querySelector(".unit-name").textContent
+
+            );
+
+
+
+
+        }
+
+
+    );
+
+
+
+
+
+
+
+
+
+    function createUnitCard(unit){
+
+
+
+        const card=
+
+        document.createElement(
+
+            "div"
+
+        );
+
+
+
+        card.className="unit-card";
+
+
+
+        card.dataset.id=
+
+        unit.id;
+
+
+
+        card.dataset.color=
+
+        unit.color;
+
+
+
+
+        card.innerHTML=`
+
+        <div 
+        class="unit-color"
+        style="--u-color:${unit.color}">
+        </div>
+
+
+        <div class="unit-details">
+
+            <span class="unit-name">
+
+            ${unit.name}
+
+            </span>
+
+
+            <small>
+
+            ● PATROL ACTIVE
+
+            </small>
+
+
+        </div>
+
+
+        <button class="btn-delete">
+
+        ×
+
+        </button>
+
+        `;
+
+
+
+        list.appendChild(card);
+
+
+
+    }
+
+
+
+
+
+
+
+    function removeEmpty(){
+
+
+        const empty=
+
+        document.querySelector(
+
+            ".empty-state"
+
+        );
+
+
+        if(empty)
+
+        empty.remove();
+
+
+    }
+
+
+
+
+
+
+    function checkEmpty(){
+
+
+        if(list.children.length===0){
+
+
+            list.innerHTML=`
+
+            <div class="empty-state">
+
+            NO ACTIVE DEPLOYMENT
+
+            </div>
+
+            `;
+
+
+        }
+
+
+    }
+
+
+
+
+
+
+
+
+
+    function showNotification(title,text){
+
+
+        const box=
+
+        document.createElement(
+
+            "div"
+
+        );
+
+
+
+        box.className=
+
+        "hud-notification";
+
+
+
+        box.innerHTML=`
+
+            <strong>${title}</strong>
+
+            <span>${text}</span>
+
+        `;
+
+
+
+        document.body.appendChild(box);
+
+
+
+
+
+        setTimeout(()=>{
+
+
+            box.classList.add(
+
+                "show"
+
+            );
+
+
+        },50);
+
+
+
+
+
+        setTimeout(()=>{
+
+
+            box.classList.remove(
+
+                "show"
+
+            );
+
+
+            setTimeout(()=>box.remove(),300);
+
+
+
+        },3000);
+
+
+
+
+    }
+
+
+
+
+
+
+
+    window.tacticalSocket=socket;
+
+
+
 });

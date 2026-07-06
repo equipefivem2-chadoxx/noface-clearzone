@@ -10,9 +10,10 @@
 
             <span class="status-dot"></span>
 
-            UNIT CONTROL
+            UNIT CONTROL SYSTEM
 
         </div>
+
 
 
         <h3>
@@ -23,14 +24,22 @@
 
 
 
+
         <button id="btn-new-unit" class="btn-primary">
 
 
-            <svg viewBox="0 0 24 24" width="16" height="16">
+            <svg 
+                viewBox="0 0 24 24"
+                width="18"
+                height="18"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+            >
 
-                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="12" y1="5" x2="12" y2="19"/>
 
-                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <line x1="5" y1="12" x2="19" y2="12"/>
 
 
             </svg>
@@ -49,7 +58,7 @@
 
 
 
-    <!-- UNITES -->
+    <!-- ACTIVE UNITS -->
 
 
     <div class="units-section">
@@ -57,16 +66,18 @@
 
         <div class="section-title">
 
-            ACTIVE UNITS
+            ACTIVE FIELD UNITS
 
         </div>
+
 
 
 
         <div id="units-list" class="units-list">
 
 
-            <% if (units && units.length > 0) { %>
+
+            <% if(units && units.length > 0){ %>
 
 
                 <% units.forEach(unit => { %>
@@ -77,7 +88,6 @@
                         data-id="<%= unit.id %>"
                         data-color="<%= unit.color %>"
                     >
-
 
 
                         <div 
@@ -97,9 +107,10 @@
                             </span>
 
 
+
                             <small>
 
-                                PATROL ACTIVE
+                                ● PATROL ACTIVE
 
                             </small>
 
@@ -110,7 +121,7 @@
 
                         <button 
                             class="btn-delete"
-                            title="Remove unit"
+                            title="Remove"
                         >
 
                             ×
@@ -122,8 +133,7 @@
                     </div>
 
 
-
-                <% }); %>
+                <% }) %>
 
 
 
@@ -132,7 +142,8 @@
 
                 <div class="empty-state">
 
-                    NO ACTIVE UNITS
+                    NO ACTIVE DEPLOYMENT
+
 
                 </div>
 
@@ -144,6 +155,7 @@
         </div>
 
 
+
     </div>
 
 
@@ -151,10 +163,14 @@
 
 
 
-    <!-- OUTILS -->
+
+    <!-- TACTICAL PANEL -->
 
 
-    <div id="tactical-tools" class="tactical-tools hidden">
+    <div 
+        id="tactical-tools"
+        class="tactical-tools hidden"
+    >
 
 
 
@@ -189,6 +205,7 @@
             </button>
 
 
+
         </div>
 
 
@@ -202,12 +219,14 @@
 
             <label>
 
-                DRAWING
+                DRAW SYSTEM
 
             </label>
 
 
+
             <div class="tools-grid">
+
 
 
                 <button 
@@ -216,19 +235,22 @@
                     data-size="3"
                 >
 
-                    FINE
+                    PRECISION
+
 
                 </button>
+
 
 
 
                 <button 
                     class="tool-btn"
                     data-tool="pencil"
-                    data-size="6"
+                    data-size="7"
                 >
 
                     STANDARD
+
 
                 </button>
 
@@ -238,7 +260,6 @@
 
 
         </div>
-
 
 
 
@@ -251,21 +272,24 @@
 
             <label>
 
-                MARKING
+                AREA MARKING
 
             </label>
+
 
 
             <div class="tools-grid">
 
 
+
                 <button 
                     class="tool-btn"
                     data-tool="fluo"
-                    data-size="15"
+                    data-size="18"
                 >
 
                     FLUO
+
 
                 </button>
 
@@ -274,10 +298,11 @@
                 <button 
                     class="tool-btn"
                     data-tool="fluo"
-                    data-size="25"
+                    data-size="30"
                 >
 
                     LARGE
+
 
                 </button>
 
@@ -286,8 +311,8 @@
             </div>
 
 
-        </div>
 
+        </div>
 
 
 
@@ -309,12 +334,14 @@
             <div class="tools-grid">
 
 
+
                 <button 
                     class="tool-btn"
                     data-tool="eraser"
                 >
 
                     ERASE
+
 
                 </button>
 
@@ -326,7 +353,8 @@
                     class="tool-btn danger"
                 >
 
-                    CLEAR MAP
+                    RESET MAP
+
 
                 </button>
 
@@ -340,7 +368,9 @@
 
 
 
+
     </div>
+
 
 
 
@@ -353,18 +383,27 @@
 
 
 
-<!-- MODALE CREATION UNITE -->
 
 
-<div id="modal-unit" class="modal-overlay hidden">
+<!-- CREATE UNIT MODAL -->
+
+
+<div 
+    id="modal-unit"
+    class="modal-overlay hidden"
+>
+
 
 
     <div class="modal">
 
 
+
         <div class="system-label">
 
+
             NEW DEPLOYMENT
+
 
         </div>
 
@@ -378,12 +417,19 @@
 
 
 
+
         <input
+
             type="text"
+
             id="unit-name-input"
-            placeholder="Ex : A141 / M167"
+
+            placeholder="Example : A141 / M167"
+
             autocomplete="off"
+
         >
+
 
 
 
@@ -395,7 +441,9 @@
 
 
 
+
         <div class="modal-actions">
+
 
 
             <button 
@@ -405,7 +453,10 @@
 
                 CANCEL
 
+
             </button>
+
+
 
 
 
@@ -416,6 +467,7 @@
 
                 DEPLOY
 
+
             </button>
 
 
@@ -424,7 +476,9 @@
 
 
 
+
     </div>
+
 
 
 </div>

@@ -1,35 +1,294 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
+
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title><%= title %></title>
+
+
     <link rel="stylesheet" href="/css/style.css">
-    <!-- Leaflet CSS -->
+
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+
 </head>
+
+
 <body class="map-layout">
-    
+
+
+
+    <!-- OVERLAY HUD GLOBAL -->
+
+    <div class="hud-overlay">
+
+
+        <div class="scan-line"></div>
+
+
+        <div class="hud-grid"></div>
+
+
+    </div>
+
+
+
+
+
+    <!-- TOP BAR COMMAND CENTER -->
+
+    <header class="command-header">
+
+
+        <div class="command-brand">
+
+
+            <div class="brand-icon">
+
+                C
+
+            </div>
+
+
+
+            <div>
+
+
+                <h1>
+
+                    CLEARZONE
+
+                </h1>
+
+
+                <span>
+
+                    TACTICAL COMMAND SYSTEM
+
+                </span>
+
+
+            </div>
+
+
+
+        </div>
+
+
+
+
+
+        <div class="command-status">
+
+
+            <div class="status-item">
+
+
+                <span class="status-light"></span>
+
+
+                SERVER ONLINE
+
+
+            </div>
+
+
+
+            <div class="status-item">
+
+
+                SECURE CHANNEL
+
+
+                <strong>
+
+                    ENCRYPTED
+
+                </strong>
+
+
+            </div>
+
+
+
+
+            <div class="status-item">
+
+
+                SECTOR
+
+
+                <strong>
+
+                    <%= mapId.toUpperCase() %>
+
+                </strong>
+
+
+            </div>
+
+
+
+        </div>
+
+
+
+    </header>
+
+
+
+
+
+
+
+
+    <!-- CARTE -->
+
+    <main id="map-container"></main>
+
+
+
+
+
+
+
+
+    <!-- COORDINATES HUD -->
+
+
+    <div class="map-hud-left">
+
+
+        <div class="hud-box">
+
+
+            <span>
+
+                SYSTEM
+
+            </span>
+
+
+            <strong>
+
+                ACTIVE
+
+            </strong>
+
+
+        </div>
+
+
+
+        <div class="hud-box">
+
+
+            <span>
+
+                DATABASE
+
+            </span>
+
+
+            <strong>
+
+                SAN ANDREAS
+
+            </strong>
+
+
+        </div>
+
+
+    </div>
+
+
+
+
+
+
+    <div class="map-hud-right">
+
+
+        <div class="radar-circle">
+
+
+            <div class="radar-line"></div>
+
+
+        </div>
+
+
+
+    </div>
+
+
+
+
+
+
+
+
+    <!-- PANNEAUX -->
+
+
     <%- include('partials/sidebar') %>
 
-    <!-- Conteneur de la carte (Prendra la grille CSS si pas d'image) -->
-    <main id="map-container"></main>
 
     <%- include('partials/right-panel') %>
 
-    <!-- Configuration injectée pour le JS client -->
+
+
+
+
+
+
+
+    <!-- CONFIG -->
+
+
     <script>
+
         const MAP_ID = "<%= mapId %>";
+
     </script>
 
-    <!-- Dépendances -->
+
+
+
+
+    <!-- LIBS -->
+
+
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+
     <script src="/socket.io/socket.io.js"></script>
-    
-    <!-- Scripts Modulaires Front -->
+
+
+
+
+
+    <!-- CLIENT -->
+
+
     <script src="/js/map.core.js"></script>
+
+
     <script src="/js/socket.client.js"></script>
+
+
     <script src="/js/map.draw.js"></script>
-    
+
+
+
+
+
 </body>
+
+
 </html>
