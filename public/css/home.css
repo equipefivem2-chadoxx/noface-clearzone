@@ -1,0 +1,161 @@
+/* --- public/css/home.css --- */
+
+/* Fond d'écran façon carte tactique / grille radar */
+body {
+    background-color: #090a0f;
+    background-image: 
+        radial-gradient(circle at 50% 0%, rgba(37, 99, 235, 0.1) 0%, transparent 50%),
+        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 100% 100%, 40px 40px, 40px 40px;
+    background-position: center top;
+}
+
+.home-container {
+    padding: 6rem 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    min-height: 100vh;
+    position: relative;
+    z-index: 1;
+}
+
+/* Typographie Premium */
+.home-title {
+    font-size: 4rem;
+    font-weight: 800;
+    letter-spacing: -1.5px;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+    background: linear-gradient(135deg, #ffffff 0%, #71717a 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 4px 12px rgba(255,255,255,0.1));
+}
+
+.home-subtitle {
+    color: #a1a1aa;
+    font-size: 1.2rem;
+    font-weight: 300;
+    margin-bottom: 5rem;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+/* Grille des cartes */
+.cards-grid {
+    display: flex;
+    gap: 2.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    max-width: 1300px;
+}
+
+/* Design des Cartes Tactiques */
+.dept-card {
+    width: 350px;
+    padding: 3rem 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    position: relative;
+    border-radius: 16px;
+    background: rgba(20, 21, 27, 0.4);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    overflow: hidden;
+}
+
+/* Effet de lueur interne (Glow) */
+.dept-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 50%);
+    opacity: 0;
+    transition: opacity 0.5s;
+    pointer-events: none;
+}
+
+/* Icônes SVG */
+.dept-icon {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 1.5rem;
+    color: #52525b;
+    transition: all 0.4s ease;
+    filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));
+}
+
+.dept-card h2 { 
+    color: #e4e4e7;
+    font-size: 1.8rem;
+    font-weight: 800;
+    letter-spacing: 2px;
+    margin-bottom: 1rem;
+    transition: color 0.3s;
+}
+
+.dept-card p { 
+    color: #71717a; 
+    font-size: 0.95rem; 
+    line-height: 1.5;
+    margin-bottom: 2.5rem; 
+    transition: color 0.3s;
+}
+
+/* Bouton Premium */
+.btn-access {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #a1a1aa;
+    padding: 0.8rem 2.5rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    width: 100%;
+}
+
+/* Interactions au survol (Hover states) */
+.dept-card:hover {
+    transform: translateY(-10px);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.dept-card:hover::before {
+    opacity: 1;
+}
+
+.dept-card:hover .btn-access {
+    background: #ffffff;
+    color: #000000;
+    box-shadow: 0 0 20px rgba(255,255,255,0.2);
+}
+
+/* Couleurs spécifiques par département */
+.dept-card.bcso:hover { border-color: var(--bcso-color); box-shadow: 0 20px 40px rgba(217, 119, 6, 0.15); }
+.dept-card.bcso:hover h2 { color: var(--bcso-color); }
+.dept-card.bcso:hover .dept-icon { color: var(--bcso-color); filter: drop-shadow(0 0 15px rgba(217, 119, 6, 0.4)); }
+.dept-card.bcso:hover .btn-access { background: var(--bcso-color); color: #fff; box-shadow: 0 0 20px rgba(217, 119, 6, 0.3); border-color: var(--bcso-color); }
+
+.dept-card.lspd:hover { border-color: var(--lspd-color); box-shadow: 0 20px 40px rgba(37, 99, 235, 0.15); }
+.dept-card.lspd:hover h2 { color: var(--lspd-color); }
+.dept-card.lspd:hover .dept-icon { color: var(--lspd-color); filter: drop-shadow(0 0 15px rgba(37, 99, 235, 0.4)); }
+.dept-card.lspd:hover .btn-access { background: var(--lspd-color); color: #fff; box-shadow: 0 0 20px rgba(37, 99, 235, 0.3); border-color: var(--lspd-color); }
+
+.dept-card.all:hover { border-color: var(--all-color); box-shadow: 0 20px 40px rgba(16, 185, 129, 0.15); }
+.dept-card.all:hover h2 { color: var(--all-color); }
+.dept-card.all:hover .dept-icon { color: var(--all-color); filter: drop-shadow(0 0 15px rgba(16, 185, 129, 0.4)); }
+.dept-card.all:hover .btn-access { background: var(--all-color); color: #fff; box-shadow: 0 0 20px rgba(16, 185, 129, 0.3); border-color: var(--all-color); }

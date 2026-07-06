@@ -5,30 +5,53 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= title %></title>
     <link rel="stylesheet" href="/css/style.css">
+    <!-- Fichier CSS modulaire spécifique à l'accueil -->
+    <link rel="stylesheet" href="/css/home.css">
 </head>
 <body>
     <main class="home-container">
-        <h1 class="home-title">Tactical Operations Map</h1>
-        <p class="home-subtitle">Coordination en temps réel des unités de San Andreas.</p>
+        <h1 class="home-title">Tactical Operations</h1>
+        <p class="home-subtitle">Système de Coordination • San Andreas</p>
 
         <div class="cards-grid">
-            <a href="/map/bcso" class="dept-card glass-panel bcso">
+            
+            <!-- Carte BCSO -->
+            <a href="/map/bcso" class="dept-card bcso">
+                <!-- Icône Étoile Shérif -->
+                <svg class="dept-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                </svg>
                 <h2>BCSO</h2>
-                <p>Carte réservée au Blaine County Sheriff's Office.</p>
-                <div class="btn-access">Accéder</div>
+                <p>Interface de commandement réservée aux unités du Blaine County Sheriff's Office.</p>
+                <div class="btn-access">Initialiser</div>
             </a>
 
-            <a href="/map/lspd" class="dept-card glass-panel lspd">
+            <!-- Carte LSPD -->
+            <a href="/map/lspd" class="dept-card lspd">
+                <!-- Icône Bouclier Police -->
+                <svg class="dept-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                    <path d="M12 8v4"></path>
+                    <path d="M12 16h.01"></path>
+                </svg>
                 <h2>LSPD</h2>
-                <p>Carte réservée au Los Santos Police Department.</p>
-                <div class="btn-access">Accéder</div>
+                <p>Interface de commandement réservée aux unités du Los Santos Police Department.</p>
+                <div class="btn-access">Initialiser</div>
             </a>
 
-            <a href="/map/all" class="dept-card glass-panel all">
+            <!-- Carte COMMUN -->
+            <a href="/map/all" class="dept-card all">
+                <!-- Icône Radar/Réseau -->
+                <svg class="dept-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path>
+                    <path d="M2 12h20"></path>
+                </svg>
                 <h2>COMMUN</h2>
-                <p>Carte regroupant le BCSO et le LSPD.</p>
-                <div class="btn-access">Accéder</div>
+                <p>Réseau crypté partagé. Coordination globale des opérations inter-services.</p>
+                <div class="btn-access">Initialiser</div>
             </a>
+
         </div>
     </main>
 </body>
