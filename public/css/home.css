@@ -86,16 +86,29 @@ body {
     pointer-events: none;
 }
 
-/* Icônes SVG */
+/* --- Gestion des Médias (SVG et PNG) --- */
+
+/* Icônes SVG (Pour COMMUN) */
 .dept-icon {
     width: 80px;
     height: 80px;
     margin-bottom: 1.5rem;
     color: #52525b;
-    transition: all 0.4s ease;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));
 }
 
+/* Logos PNG (Pour LSPD et BCSO) */
+.dept-logo {
+    width: 110px;
+    height: 110px;
+    object-fit: contain;
+    margin-bottom: 1.5rem;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    filter: drop-shadow(0 5px 15px rgba(0,0,0,0.6)) grayscale(40%);
+}
+
+/* Typographie interne des cartes */
 .dept-card h2 { 
     color: #e4e4e7;
     font-size: 1.8rem;
@@ -128,7 +141,7 @@ body {
     width: 100%;
 }
 
-/* Interactions au survol (Hover states) */
+/* --- Interactions au survol (Hover states avec animations AAA) --- */
 .dept-card:hover {
     transform: translateY(-10px);
     border-color: rgba(255, 255, 255, 0.2);
@@ -144,18 +157,30 @@ body {
     box-shadow: 0 0 20px rgba(255,255,255,0.2);
 }
 
-/* Couleurs spécifiques par département */
+/* Effets spécifiques par département - BCSO */
 .dept-card.bcso:hover { border-color: var(--bcso-color); box-shadow: 0 20px 40px rgba(217, 119, 6, 0.15); }
 .dept-card.bcso:hover h2 { color: var(--bcso-color); }
-.dept-card.bcso:hover .dept-icon { color: var(--bcso-color); filter: drop-shadow(0 0 15px rgba(217, 119, 6, 0.4)); }
+.dept-card.bcso:hover .dept-logo { 
+    transform: scale(1.15); 
+    filter: drop-shadow(0 0 25px rgba(217, 119, 6, 0.7)) grayscale(0%); 
+}
 .dept-card.bcso:hover .btn-access { background: var(--bcso-color); color: #fff; box-shadow: 0 0 20px rgba(217, 119, 6, 0.3); border-color: var(--bcso-color); }
 
+/* Effets spécifiques par département - LSPD */
 .dept-card.lspd:hover { border-color: var(--lspd-color); box-shadow: 0 20px 40px rgba(37, 99, 235, 0.15); }
 .dept-card.lspd:hover h2 { color: var(--lspd-color); }
-.dept-card.lspd:hover .dept-icon { color: var(--lspd-color); filter: drop-shadow(0 0 15px rgba(37, 99, 235, 0.4)); }
+.dept-card.lspd:hover .dept-logo { 
+    transform: scale(1.15); 
+    filter: drop-shadow(0 0 25px rgba(37, 99, 235, 0.7)) grayscale(0%); 
+}
 .dept-card.lspd:hover .btn-access { background: var(--lspd-color); color: #fff; box-shadow: 0 0 20px rgba(37, 99, 235, 0.3); border-color: var(--lspd-color); }
 
+/* Effets spécifiques par département - COMMUN */
 .dept-card.all:hover { border-color: var(--all-color); box-shadow: 0 20px 40px rgba(16, 185, 129, 0.15); }
 .dept-card.all:hover h2 { color: var(--all-color); }
-.dept-card.all:hover .dept-icon { color: var(--all-color); filter: drop-shadow(0 0 15px rgba(16, 185, 129, 0.4)); }
+.dept-card.all:hover .dept-icon { 
+    color: var(--all-color); 
+    transform: scale(1.15) rotate(15deg);
+    filter: drop-shadow(0 0 20px rgba(16, 185, 129, 0.6)); 
+}
 .dept-card.all:hover .btn-access { background: var(--all-color); color: #fff; box-shadow: 0 0 20px rgba(16, 185, 129, 0.3); border-color: var(--all-color); }
