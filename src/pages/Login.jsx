@@ -1,22 +1,41 @@
-import React, { useState } from 'react';
-import { Lock, Fingerprint, ShieldCheck, Terminal } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Lock, Fingerprint, ShieldCheck, Terminal, AlertTriangle } from 'lucide-react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 function Login() {
   const [isScanning, setIsScanning] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+  
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  // Ce useEffect vérifie l'URL quand on revient de Discord
+  useEffect(() => {
+    const token = searchParams.get('token');
+    const error = searchParams.get('error');
+
+    if (token) {
+      // Succès ! On sauvegarde le pass et on entre
+      localStorage.setItem('auth_token', token);
+      navigate('/'); 
+    } else if (error === 'unauthorized') {
+      // Refusé par le Backend (Pas le bon rôle)
+      setErrorMsg("ACCÈS REFUSÉ : Accréditation insuffisante.");
+      setIsScanning(false);
+    } else if (error) {
+      // Autre erreur
+      setErrorMsg("ERREUR DE COMMUNICATION SYSTÈME.");
+      setIsScanning(false);
+    }
+  }, [searchParams, navigate]);
 
   const handleDiscordLogin = () => {
     setIsScanning(true);
+    setErrorMsg('');
     
-    // ⚠️ ICI TU METTRAS L'URL OAUTH2 DE TON BOT DISCORD :
-    // const discordOAuthUrl = "https://discord.com/oauth2/authorize?client_id=TON_ID&redirect_uri=TON_LIEN&response_type=code&scope=identify%20guilds";
-    // window.location.href = discordOAuthUrl;
-
-    // SIMULATION POUR TESTER LE DESIGN (À supprimer quand tu mettras ton vrai lien) :
-    setTimeout(() => {
-      localStorage.setItem('auth_token', 'temp_valid_token');
-      window.location.href = '/';
-    }, 1500);
-  };
+    // ⚠️ METS ICI L'URL DE TON BACKEND SUR RAILWAY + /auth/discord
+    // Exemple : https://ton-backend-railway.up.railway.app/auth/discord
+window.location.href = 'https://bcso-noface.up.railway.app/auth/discord';  };
 
   return (
     <div className="min-h-screen bg-black text-slate-200 flex items-center justify-center p-4 relative overflow-hidden select-none font-sans">
@@ -46,9 +65,17 @@ function Login() {
         <h1 className="text-3xl font-black text-white tracking-[0.2em] mb-2 uppercase">
           Accès <span className="font-light text-neutral-500">Restreint</span>
         </h1>
-        <p className="text-neutral-500 text-xs mb-10 font-mono tracking-widest uppercase">
+        <p className="text-neutral-500 text-xs mb-8 font-mono tracking-widest uppercase">
           Identification requise pour continuer
         </p>
+
+        {/* 🚨 Affichage des erreurs d'authentification */}
+        {errorMsg && (
+          <div className="w-full mb-6 py-3 px-4 bg-red-950/50 border border-red-900 rounded flex items-center justify-center gap-3">
+            <AlertTriangle className="w-4 h-4 text-red-500 animate-pulse" />
+            <span className="text-red-500 text-[10px] font-mono tracking-widest uppercase font-bold">{errorMsg}</span>
+          </div>
+        )}
 
         {/* Bouton de connexion Discord */}
         <button 
