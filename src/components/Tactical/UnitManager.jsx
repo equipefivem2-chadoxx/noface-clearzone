@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { X, Crosshair, Users, Activity, Fingerprint, Plus, LogIn, Radio } from 'lucide-react';
+import { X, Crosshair, Users, Activity, Fingerprint, Plus, LogIn, Radio, Trash2 } from 'lucide-react';
 
-const UnitManager = ({ isOpen, onClose, unitData, setUnitData, isDeployed, onDeploy, activeUnitsList = [] }) => {
+const UnitManager = ({ isOpen, onClose, unitData, setUnitData, isDeployed, onDeploy, activeUnitsList = [], onDeleteGlobalUnit }) => {
   const [activeTab, setActiveTab] = useState('create');
 
   useEffect(() => {
@@ -85,7 +85,21 @@ const UnitManager = ({ isOpen, onClose, unitData, setUnitData, isDeployed, onDep
                         <div className="text-neutral-500 font-mono text-[9px] tracking-widest">{unit.agents || "Aucun agent listé"}</div>
                       </div>
                     </div>
-                    <LogIn className="w-4 h-4 text-neutral-600 group-hover:text-white transition-colors" />
+                    
+                    {/* NOUVEAU : Actions (Supprimer et Rejoindre) */}
+                    <div className="flex items-center gap-2">
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation(); // Empêche de déclencher handleJoinUnit
+                          if (onDeleteGlobalUnit) onDeleteGlobalUnit(unit.callsign);
+                        }}
+                        className="p-2 text-neutral-600 hover:text-red-500 hover:bg-red-950/30 rounded transition-colors"
+                        title="Supprimer l'unité pour tout le monde"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                      <LogIn className="w-4 h-4 text-neutral-600 group-hover:text-white transition-colors" title="Rejoindre" />
+                    </div>
                   </div>
                 ))}
               </div>
