@@ -51,6 +51,12 @@ io.on('connection', (socket) => {
     io.emit('sync_zones', activeZones);
   });
 
+  // Un agent efface une zone (LA NOUVELLE FONCTION GOMME)
+  socket.on('delete_zone', (zoneId) => {
+    activeZones = activeZones.filter(z => z.id !== zoneId);
+    io.emit('sync_zones', activeZones);
+  });
+
   // Déconnexion d'un agent (on retire son unité)
   socket.on('disconnect', () => {
     activeUnits = activeUnits.filter(u => u.id !== socket.id);
