@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Radio, Target, Activity, Menu } from 'lucide-react';
 import SanAndreasMap from '../components/Map/SanAndreasMap';
-import UnitManager from '../components/Tactical/UnitManager'; // L'import magique
+import UnitManager from '../components/Tactical/UnitManager';
+import DrawToolbar from '../components/Tactical/DrawToolbar';
 
 const MapInterface = () => {
   const { faction } = useParams();
@@ -74,7 +75,7 @@ const MapInterface = () => {
         </div>
       </header>
 
-      {/* PANNEAU LATÉRAL MODULAIRE (Importé depuis Tactical/UnitManager.jsx) */}
+      {/* PANNEAU LATÉRAL MODULAIRE */}
       <UnitManager 
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}
@@ -83,6 +84,9 @@ const MapInterface = () => {
         isDeployed={isDeployed}
         onDeploy={handleDeploy}
       />
+
+      {/* BARRE D'OUTILS DE DESSIN (Apparaît au déploiement) */}
+      <DrawToolbar activeColor={unitData.color} isDeployed={isDeployed} />
 
       {/* COMPOSANT CARTE (Reçoit la couleur active pour dessiner) */}
       <SanAndreasMap activeColor={unitData.color} isDeployed={isDeployed} />
