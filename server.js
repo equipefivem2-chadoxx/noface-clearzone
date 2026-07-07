@@ -3,8 +3,14 @@ import cors from 'cors';
 import axios from 'axios';
 import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 dotenv.config();
+
+// Configuration pour lire les fichiers locaux
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 app.use(cors());
@@ -34,7 +40,6 @@ app.get('/auth/discord/callback', async (req, res) => {
   if (!code) return res.status(400).send('Code manquant');
 
   try {
-    // A. Échanger le code contre un token d'accès Discord
     const tokenResponse = await axios.post('https://discord.com/api/oauth2/token', new URLSearchParams({
       client_id: DISCORD_CLIENT_ID,
       client_secret: DISCORD_CLIENT_SECRET,
@@ -47,39 +52,43 @@ app.get('/auth/discord/callback', async (req, res) => {
 
     const accessToken = tokenResponse.data.access_token;
 
-    // B. Récupérer l'ID de l'utilisateur
     const userResponse = await axios.get('https://discord.com/api/users/@me', {
       headers: { Authorization: `Bearer ${accessToken}` }
     });
     const userId = userResponse.data.id;
     const username = userResponse.data.username;
 
-    // C. Utiliser le Bot pour voir les rôles du joueur sur TON serveur
     const memberResponse = await axios.get(`https://discord.com/api/guilds/${DISCORD_GUILD_ID}/members/${userId}`, {
       headers: { Authorization: `Bot ${DISCORD_BOT_TOKEN}` }
     });
     
     const userRoles = memberResponse.data.roles;
-
-    // D. Vérifier s'il a au moins un des rôles autorisés
     const hasAccess = userRoles.some(role => ALLOWED_ROLES.includes(role));
 
     if (hasAccess) {
-      // Succès ! On crée un pass d'accès (JWT)
       const token = jwt.sign({ id: userId, username }, JWT_SECRET, { expiresIn: '12h' });
-      // On le renvoie sur ton site React avec le pass
-      res.redirect(`http://localhost:5173/login?token=${token}`);
+      // Redirection dynamique (fonctionne sur Railway et en local)
+      res.redirect(`/login?token=${token}`);
     } else {
-      // Refusé ! Pas le bon rôle.
-      res.redirect(`http://localhost:5173/login?error=unauthorized`);
+      res.redirect(`/login?error=unauthorized`);
     }
 
   } catch (error) {
     console.error('Erreur Auth:', error.response?.data || error.message);
-    res.redirect(`http://localhost:5173/login?error=server_error`);
+    res.redirect(`/login?error=server_error`);
   }
 });
 
+// --- FUSION : LE BACKEND HÉBERGE LE FRONTEND ---
+// On sert les fichiers statiques (le site React généré dans le dossier dist)
+app.use(express.static(path.join(__dirname, 'dist')));
+
+// Pour n'importe quelle autre route, on renvoie l'interface React
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+});
+// -----------------------------------------------
+
 app.listen(PORT || 3001, () => {
-  console.log(`[SYS] Serveur d'authentification en ligne sur le port ${PORT || 3001}`);
+  console.log(`[SYS] Serveur central en ligne sur le port ${PORT || 3001}`);
 });
