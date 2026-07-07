@@ -51,6 +51,11 @@ io.on('connection', (socket) => {
   console.log(`[SYS] Nouvel agent connecté : ${socket.id}`);
   socket.emit('sync_data', { units: activeUnits, zones: activeZones });
 
+  // NOUVEAU : Répond à la demande explicite de synchro d'un client
+  socket.on('request_sync', () => {
+    socket.emit('sync_data', { units: activeUnits, zones: activeZones });
+  });
+
   // --- UNITÉS ---
   socket.on('deploy_unit', (unitData) => {
     const existingIndex = activeUnits.findIndex(u => u.callsign === unitData.callsign);

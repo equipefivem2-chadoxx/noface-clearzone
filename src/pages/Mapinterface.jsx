@@ -12,10 +12,15 @@ const MapInterface = () => {
   const { faction } = useParams();
   const navigate = useNavigate();
 
-  // ÉTATS DE BASE
+  // ÉTATS DE BASE : Utilisation du LocalStorage pour ne pas perdre son unité si on fait F5
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [unitData, setUnitData] = useState({ callsign: '', agents: '', color: '#ffffff' });
-  const [isDeployed, setIsDeployed] = useState(false);
+  const [unitData, setUnitData] = useState(() => {
+    const savedData = localStorage.getItem(`unitData_${faction}`);
+    return savedData ? JSON.parse(savedData) : { callsign: '', agents: '', color: '#ffffff' };
+  });
+  const [isDeployed, setIsDeployed] = useState(() => {
+    return localStorage.getItem(`isDeployed_${faction}`) === 'true';
+  });
 
   // ÉTATS TEMPS RÉEL (HUD & DESSIN)
   const [activeTool, setActiveTool] = useState('hand'); // 'hand' par défaut pour bouger
@@ -26,6 +31,14 @@ const MapInterface = () => {
   const factionLabel = faction ? faction.toUpperCase() : 'UNKNOWN';
 
   useEffect(() => {
+    // 1. Dès que le composant est monté, on demande au serveur l'état actuel de la carte
+    socket.emit('request_sync');
+
+    // 2. Si on était déjà déployé avant le F5, on renvoie notre unité au serveur au cas où
+    if (isDeployed && unitData.callsign) {
+      socket.emit('deploy_unit', unitData);
+    }
+
     socket.on('sync_data', (data) => {
       setActiveUnitsList(data.units || []);
       setZones(data.zones || []);
@@ -47,7 +60,15 @@ const MapInterface = () => {
       socket.off('sync_zones');
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, []);
+  }, []); // Exécuté une seule fois au montage
+
+  // NOUVEAU : On sauvegarde la session dans le LocalStorage à chaque changement
+  useEffect(() => {
+    if (isDeployed) {
+      localStorage.setItem(`unitData_${faction}`, JSON.stringify(unitData));
+      localStorage.setItem(`isDeployed_${faction}`, 'true');
+    }
+  }, [unitData, isDeployed, faction]);
 
   const handleDeploy = () => {
     if (unitData.callsign.trim() === '') return;
@@ -56,13 +77,15 @@ const MapInterface = () => {
     socket.emit('deploy_unit', unitData);
   };
 
-  // NOUVEAU : Fonction pour quitter / supprimer son unité
+  // NOUVEAU : Fonction pour quitter / supprimer son unité et nettoyer la session locale
   const handleLeaveUnit = () => {
     if (unitData.callsign) {
       socket.emit('delete_global_unit', unitData.callsign);
     }
     setIsDeployed(false);
     setUnitData({ callsign: '', agents: '', color: '#ffffff' });
+    localStorage.removeItem(`unitData_${faction}`);
+    localStorage.removeItem(`isDeployed_${faction}`);
   };
 
   const handleUndo = () => socket.emit('undo_last_zone');
@@ -87,7 +110,7 @@ const MapInterface = () => {
           </div>
         </div>
 
-        {/* NOUVEAU : BARRE DES UNITÉS ACTIVES AU CENTRE */}
+        {/* BARRE DES UNITÉS ACTIVES AU CENTRE */}
         <div className="flex-1 flex justify-center items-center gap-3 px-4 overflow-x-auto no-scrollbar">
           {activeUnitsList.map((u, i) => (
             <div key={i} className="flex items-center gap-2 px-3 py-1 rounded-full border border-neutral-700 bg-neutral-900/50" style={{ borderColor: `${u.color}40` }}>
@@ -132,8 +155,8 @@ const MapInterface = () => {
         isDeployed={isDeployed} 
         activeTool={activeTool}
         setActiveTool={setActiveTool}
-        strokeWidth={strokeWidth}
-        setStrokeWidth={setStrokeWidth}
+        penWeight={strokeWidth} 
+        setPenWeight={setStrokeWidth} 
         onUndo={handleUndo}
         onClearAll={handleClearAll}
       />
