@@ -1,8 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Lock, Fingerprint, ShieldCheck, Terminal } from 'lucide-react';
 
 function Login() {
   const [isScanning, setIsScanning] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    // On regarde ce que le backend (Discord) nous a renvoyé dans l'URL
+    const params = new URLSearchParams(location.search);
+    const token = params.get('token');
+    const error = params.get('error');
+
+    if (token) {
+      // 1. On sauvegarde le token pour que App.jsx le voie
+      localStorage.setItem('auth_token', token);
+      
+      // 2. On redirige vers l'accueil
+      navigate('/');
+    }
+
+    if (error) {
+      if (error === 'unauthorized') setErrorMsg("Accès refusé. Vous n'avez pas le grade requis (LSPD/BCSO).");
+      else setErrorMsg("Erreur lors de l'authentification avec Discord.");
+    }
+  }, [location, navigate]);
 
   const handleDiscordLogin = () => {
     setIsScanning(true);
@@ -41,6 +65,13 @@ function Login() {
         <p className="text-neutral-500 text-xs mb-10 font-mono tracking-widest uppercase">
           Identification requise pour continuer
         </p>
+
+        {/* AFFICHAGE DES ERREURS DISCORD */}
+        {errorMsg && (
+          <div className="w-full mb-6 py-3 px-4 bg-red-950/50 border border-red-500/50 rounded text-red-400 text-xs font-mono">
+            {errorMsg}
+          </div>
+        )}
 
         {/* Bouton de connexion Discord */}
         <button 
