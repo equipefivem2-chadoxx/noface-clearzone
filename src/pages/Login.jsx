@@ -35,7 +35,7 @@ function Login() {
     
     // ⚠️ METS ICI L'URL DE TON BACKEND SUR RAILWAY + /auth/discord
     // Exemple : https://ton-backend-railway.up.railway.app/auth/discord
-window.location.href = '[https://clearzone-noface.up.railway.app/auth/discord](https://clearzone-noface.up.railway.app/auth/discord)';  };
+window.location.href = 'https://clearzone-noface.up.railway.app/auth/discord';  };
 
   return (
     <div className="min-h-screen bg-black text-slate-200 flex items-center justify-center p-4 relative overflow-hidden select-none font-sans">
