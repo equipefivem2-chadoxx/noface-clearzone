@@ -24,7 +24,7 @@ const SanAndreasMap = () => {
         maxBounds={bounds} // Verrouille la caméra dans les limites réelles de l'image
         maxBoundsViscosity={1.0} // Force à 100% le fait que l'utilisateur ne puisse pas sortir des bordures
         
-        style={{ height: '100%', width: '100%', backgroundColor: '#000000' }}
+        style={{ height: '100%', width: '100%', backgroundColor: '#143d6b' }}
       >
         {/* Chargement de l'image locale */}
         <ImageOverlay
