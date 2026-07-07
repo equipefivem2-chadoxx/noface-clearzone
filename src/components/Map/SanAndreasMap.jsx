@@ -12,7 +12,7 @@ const SanAndreasMap = () => {
         style={{ height: '100vh', width: '100vw' }}
       >
         <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          url="https://maps.plebmasters.de/gta5/realmap/M3/mapC_{z}_{x}.png"
         />
       </MapContainer>
     </div>
