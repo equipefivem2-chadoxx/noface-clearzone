@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Radio, Target, Activity, Menu, X, Crosshair, Users } from 'lucide-react';
+import { ArrowLeft, Radio, Target, Activity, Menu } from 'lucide-react';
 import SanAndreasMap from '../components/Map/SanAndreasMap';
+import UnitManager from '../components/Tactical/UnitManager'; // L'import magique
 
 const MapInterface = () => {
   const { faction } = useParams();
@@ -18,19 +19,10 @@ const MapInterface = () => {
 
   const factionLabel = faction ? faction.toUpperCase() : 'UNKNOWN';
 
-  // Couleurs tactiques disponibles
-  const tacticalColors = [
-    { name: 'Blanc Standard', hex: '#ffffff' },
-    { name: 'Bleu LSPD', hex: '#3b82f6' },
-    { name: 'Ambre BCSO', hex: '#f59e0b' },
-    { name: 'Vert IR', hex: '#22c55e' },
-    { name: 'Rouge Assaut', hex: '#ef4444' }
-  ];
-
   const handleDeploy = () => {
     if (unitData.callsign.trim() === '') return;
     setIsDeployed(true);
-    setIsSidebarOpen(false);
+    setIsSidebarOpen(false); // Ferme le panneau au déploiement pour voir la carte
   };
 
   return (
@@ -82,83 +74,17 @@ const MapInterface = () => {
         </div>
       </header>
 
-      {/* PANNEAU LATÉRAL DE CONFIGURATION (SIDEBAR) */}
-      <div className={`absolute top-0 right-0 h-full w-96 bg-[#050505]/95 backdrop-blur-2xl border-l border-neutral-800 z-[1050] p-6 shadow-[-20px_0_50px_rgba(0,0,0,0.8)] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'}`}>
-        
-        {/* En-tête Sidebar */}
-        <div className="flex items-center justify-between mb-10 pb-4 border-b border-neutral-800">
-          <h2 className="text-xl font-black tracking-[0.2em] text-white uppercase">
-            Création d'Unité
-          </h2>
-          <button onClick={() => setIsSidebarOpen(false)} className="p-2 hover:bg-white hover:text-black rounded border border-transparent hover:border-white transition-all">
-            <X className="w-5 h-5" />
-          </button>
-        </div>
+      {/* PANNEAU LATÉRAL MODULAIRE (Importé depuis Tactical/UnitManager.jsx) */}
+      <UnitManager 
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
+        unitData={unitData}
+        setUnitData={setUnitData}
+        isDeployed={isDeployed}
+        onDeploy={handleDeploy}
+      />
 
-        {/* Formulaire */}
-        <div className="space-y-8">
-          
-          {/* Indicatif */}
-          <div className="space-y-2">
-            <label className="text-[10px] font-mono tracking-[0.3em] text-neutral-500 uppercase flex items-center gap-2">
-              <Crosshair className="w-3 h-3" /> Indicatif Unité
-            </label>
-            <input 
-              type="text" 
-              placeholder="Ex: LINCOLN-4" 
-              value={unitData.callsign}
-              onChange={(e) => setUnitData({...unitData, callsign: e.target.value.toUpperCase()})}
-              className="w-full bg-black border border-neutral-800 focus:border-white rounded-lg px-4 py-3 text-white font-mono tracking-wider outline-none transition-all placeholder:text-neutral-700"
-            />
-          </div>
-
-          {/* Agents */}
-          <div className="space-y-2">
-            <label className="text-[10px] font-mono tracking-[0.3em] text-neutral-500 uppercase flex items-center gap-2">
-              <Users className="w-3 h-3" /> Agents Déployés
-            </label>
-            <input 
-              type="text" 
-              placeholder="Ex: J. Doe, R. Smith" 
-              value={unitData.agents}
-              onChange={(e) => setUnitData({...unitData, agents: e.target.value})}
-              className="w-full bg-black border border-neutral-800 focus:border-white rounded-lg px-4 py-3 text-white font-mono tracking-wider outline-none transition-all placeholder:text-neutral-700"
-            />
-          </div>
-
-          {/* Signature Tactique (Couleurs) */}
-          <div className="space-y-3">
-            <label className="text-[10px] font-mono tracking-[0.3em] text-neutral-500 uppercase">
-              Signature Tactique
-            </label>
-            <div className="flex flex-wrap gap-3">
-              {tacticalColors.map((color) => (
-                <button
-                  key={color.hex}
-                  onClick={() => setUnitData({...unitData, color: color.hex})}
-                  className={`w-10 h-10 rounded-lg border-2 transition-all cursor-pointer flex items-center justify-center ${unitData.color === color.hex ? 'border-white scale-110 shadow-[0_0_15px_rgba(255,255,255,0.3)]' : 'border-transparent hover:border-neutral-600'}`}
-                  style={{ backgroundColor: color.hex }}
-                  title={color.name}
-                >
-                  {unitData.color === color.hex && <div className="w-3 h-3 bg-black rounded-full"></div>}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Bouton Déploiement */}
-          <button 
-            onClick={handleDeploy}
-            disabled={!unitData.callsign}
-            className={`w-full mt-8 py-4 rounded font-mono text-sm tracking-[0.2em] uppercase font-bold transition-all duration-300 border ${unitData.callsign ? 'bg-white text-black border-white hover:shadow-[0_0_20px_rgba(255,255,255,0.4)]' : 'bg-black text-neutral-600 border-neutral-800 cursor-not-allowed'}`}
-          >
-            {isDeployed ? 'Mettre à jour' : 'Déployer Unité'}
-          </button>
-
-        </div>
-      </div>
-
-      {/* COMPOSANT CARTE (On lui passe la couleur active pour dessiner plus tard) */}
+      {/* COMPOSANT CARTE (Reçoit la couleur active pour dessiner) */}
       <SanAndreasMap activeColor={unitData.color} isDeployed={isDeployed} />
 
       {/* FILTRES D'ÉCRAN */}
