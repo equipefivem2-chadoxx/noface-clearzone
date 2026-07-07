@@ -20,6 +20,7 @@ const io = new Server(server, { cors: { origin: '*' } });
 
 app.use(cors());
 
+// Récupération de toutes tes variables d'environnement
 const {
   DISCORD_CLIENT_ID, DISCORD_CLIENT_SECRET, DISCORD_BOT_TOKEN,
   DISCORD_GUILD_ID, DISCORD_REDIRECT_URI, JWT_SECRET, PORT
@@ -47,11 +48,11 @@ const saveData = () => {
 
 loadData(); // Chargement au démarrage
 
+// --- WEBSOCKET (SOCKET.IO) : GESTION DE LA CARTE ---
 io.on('connection', (socket) => {
   console.log(`[SYS] Nouvel agent connecté : ${socket.id}`);
   socket.emit('sync_data', { units: activeUnits, zones: activeZones });
 
-  // NOUVEAU : Répond à la demande explicite de synchro d'un client
   socket.on('request_sync', () => {
     socket.emit('sync_data', { units: activeUnits, zones: activeZones });
   });
@@ -68,7 +69,6 @@ io.on('connection', (socket) => {
     io.emit('sync_units', activeUnits);
   });
 
-  // Supprime l'unité pour tout le monde (efface du serveur)
   socket.on('delete_global_unit', (callsign) => {
     activeUnits = activeUnits.filter(u => u.callsign !== callsign);
     saveData();
@@ -106,27 +106,74 @@ io.on('connection', (socket) => {
 
 // --- ROUTES D'AUTHENTIFICATION DISCORD ---
 
+// 1. Redirige l'utilisateur vers la page de connexion Discord
 app.get('/auth/discord', (req, res) => {
   if (!DISCORD_CLIENT_ID || !DISCORD_REDIRECT_URI) {
     console.error("[SYS] Variables d'environnement Discord manquantes !");
     return res.status(500).send("Configuration serveur incomplète.");
   }
-  // Construction de l'URL d'autorisation Discord
-  const authUrl = `https://discord.com/api/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${encodeURIComponent(DISCORD_REDIRECT_URI)}&response_type=code&scope=identify`;
   
-  // Redirection vers Discord
+  const authUrl = `https://discord.com/api/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${encodeURIComponent(DISCORD_REDIRECT_URI)}&response_type=code&scope=identify`;
   res.redirect(authUrl);
 });
 
+// 2. Gère le retour de Discord avec le code d'autorisation
 app.get('/auth/discord/callback', async (req, res) => {
-  // Ici viendra plus tard ta logique d'échange de code contre un token Discord.
-  // Pour le moment, on simule une redirection vers la page de login avec une erreur temporaire 
-  // pour éviter que ça ne tourne dans le vide.
-  res.redirect('/login?error=non_implemente');
+  const { code } = req.query;
+  
+  if (!code) {
+    return res.redirect('/login?error=no_code');
+  }
+
+  try {
+    // A. Échange le code contre un token d'accès Discord
+    const tokenResponse = await axios.post('https://discord.com/api/oauth2/token', new URLSearchParams({
+      client_id: DISCORD_CLIENT_ID,
+      client_secret: DISCORD_CLIENT_SECRET,
+      grant_type: 'authorization_code',
+      code: code,
+      redirect_uri: DISCORD_REDIRECT_URI,
+    }).toString(), {
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+    });
+
+    const accessToken = tokenResponse.data.access_token;
+
+    // B. Récupère l'ID de l'utilisateur
+    const userResponse = await axios.get('https://discord.com/api/users/@me', {
+      headers: { Authorization: `Bearer ${accessToken}` }
+    });
+    const userId = userResponse.data.id;
+
+    // C. Vérifie les rôles sur le serveur Discord de la faction
+    const memberResponse = await axios.get(`https://discord.com/api/guilds/${DISCORD_GUILD_ID}/members/${userId}`, {
+      headers: { Authorization: `Bot ${DISCORD_BOT_TOKEN}` }
+    });
+    
+    const userRoles = memberResponse.data.roles;
+    const hasRole = userRoles.some(role => ALLOWED_ROLES.includes(role));
+
+    if (!hasRole) {
+      return res.redirect('/login?error=unauthorized');
+    }
+
+    // D. Crée le token du site pour maintenir la session ouverte
+    const siteToken = jwt.sign({ id: userId }, JWT_SECRET || 'fallback_secret', { expiresIn: '24h' });
+
+    // E. Redirige vers le front avec le token validé
+    res.redirect(`/login?token=${siteToken}`);
+
+  } catch (error) {
+    console.error("[SYS] Erreur OAuth Discord:", error.response?.data || error.message);
+    res.redirect('/login?error=auth_failed');
+  }
 });
 
-// --- SERVEUR STATIQUE ---
+// --- SERVEUR STATIQUE POUR LE FRONTEND (REACT) ---
 app.use(express.static(path.join(__dirname, 'dist')));
 app.get(/.*/, (req, res) => res.sendFile(path.join(__dirname, 'dist', 'index.html')));
 
-server.listen(PORT || 3001, () => console.log(`[SYS] Serveur tactique en ligne sur le port ${PORT || 3001}`));
+// --- DÉMARRAGE DU SERVEUR ---
+server.listen(PORT || 3001, () => {
+  console.log(`[SYS] Serveur tactique en ligne sur le port ${PORT || 3001}`);
+});
