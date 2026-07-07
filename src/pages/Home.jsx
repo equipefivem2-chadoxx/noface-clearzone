@@ -55,9 +55,9 @@ function App() {
             <div className="absolute inset-0 bg-gradient-to-b from-slate-400/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             <Globe className="w-20 h-20 text-slate-300 mb-6 group-hover:scale-110 transition-transform duration-500 drop-shadow-[0_0_15px_rgba(203,213,225,0.3)]" />
             <h2 className="text-3xl font-bold text-slate-100 tracking-wider mb-2">GLOBAL</h2>
-            <p className="text-slate-400 text-sm mb-8 font-medium">Supervision Inter-Services</p>
+            <p className="text-slate-400 text-sm mb-8 font-medium">Inter-Services</p>
             <div className="mt-auto px-6 py-2 border border-slate-500/30 bg-slate-500/10 text-slate-300 text-xs rounded-full uppercase tracking-widest font-bold group-hover:bg-slate-200 group-hover:text-slate-900 transition-colors duration-300">
-              Vue Commandement
+              Connexion Inter-Services
             </div>
           </button>
 
