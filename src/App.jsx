@@ -46,6 +46,9 @@ function App() {
             </ProtectedRoute>
           } 
         /> 
+
+        {/* Route pour attraper toutes les erreurs 404 (Évite la page blanche) */}
+        <Route path="*" element={<div className="text-white text-center mt-20 font-mono">Page introuvable (Erreur 404)</div>} />
       </Routes>
     </BrowserRouter>
   );

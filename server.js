@@ -102,14 +102,30 @@ io.on('connection', (socket) => {
     saveData();
     io.emit('sync_zones', activeZones);
   });
-
-  // Note : On ne supprime plus l'unité lors du 'disconnect' pour garder la persistance.
 });
 
-// Routes Discord Omises pour la lisibilité, garde les tiennes :
-// app.get('/auth/discord', ...)
-// app.get('/auth/discord/callback', ...)
+// --- ROUTES D'AUTHENTIFICATION DISCORD ---
 
+app.get('/auth/discord', (req, res) => {
+  if (!DISCORD_CLIENT_ID || !DISCORD_REDIRECT_URI) {
+    console.error("[SYS] Variables d'environnement Discord manquantes !");
+    return res.status(500).send("Configuration serveur incomplète.");
+  }
+  // Construction de l'URL d'autorisation Discord
+  const authUrl = `https://discord.com/api/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${encodeURIComponent(DISCORD_REDIRECT_URI)}&response_type=code&scope=identify`;
+  
+  // Redirection vers Discord
+  res.redirect(authUrl);
+});
+
+app.get('/auth/discord/callback', async (req, res) => {
+  // Ici viendra plus tard ta logique d'échange de code contre un token Discord.
+  // Pour le moment, on simule une redirection vers la page de login avec une erreur temporaire 
+  // pour éviter que ça ne tourne dans le vide.
+  res.redirect('/login?error=non_implemente');
+});
+
+// --- SERVEUR STATIQUE ---
 app.use(express.static(path.join(__dirname, 'dist')));
 app.get(/.*/, (req, res) => res.sendFile(path.join(__dirname, 'dist', 'index.html')));
 
