@@ -3,7 +3,7 @@ import { MapContainer, TileLayer } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
-// On dit à Leaflet que c'est une carte de jeu vidéo (monde plat)
+// Configuration du monde plat de GTA V
 const gtaCrs = L.CRS.Simple;
 const bounds = [[-4000, -4000], [4000, 4000]];
 
@@ -13,6 +13,8 @@ const SanAndreasMap = () => {
       <MapContainer 
         crs={gtaCrs} 
         bounds={bounds} 
+        center={[0, 0]} /* POINT DE DÉPART DE LA CAMÉRA (Centre de la map) */
+        zoom={2}        /* NIVEAU DE ZOOM INITIAL */
         minZoom={1} 
         maxZoom={5} 
         zoomControl={false}
