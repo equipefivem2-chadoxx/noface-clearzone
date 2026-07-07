@@ -15,7 +15,7 @@ const SanAndreasMap = () => {
         bounds={bounds} 
         center={[4096, 4096]} 
         zoom={-1} 
-        minZoom={-2} 
+        minZoom={-5} 
         maxZoom={2} 
         zoomControl={false}
         style={{ height: '100%', width: '100%', backgroundColor: '#020617' }}
