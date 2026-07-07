@@ -6,6 +6,7 @@ import axios from 'axios';
 import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 
 dotenv.config();
@@ -26,8 +27,25 @@ const {
 
 const ALLOWED_ROLES = ['1427651124231405610', '1427651123606589446'];
 
+// --- SYSTÈME DE SAUVEGARDE PERSISTANTE ---
+const DATA_FILE = path.join(__dirname, 'data.json');
 let activeUnits = [];
 let activeZones = [];
+
+const loadData = () => {
+  if (fs.existsSync(DATA_FILE)) {
+    try {
+      const data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf-8'));
+      activeUnits = data.units || [];
+      activeZones = data.zones || [];
+    } catch (e) { console.error("[SYS] Erreur lecture data.json", e); }
+  }
+};
+const saveData = () => {
+  fs.writeFileSync(DATA_FILE, JSON.stringify({ units: activeUnits, zones: activeZones }, null, 2));
+};
+
+loadData(); // Chargement au démarrage
 
 io.on('connection', (socket) => {
   console.log(`[SYS] Nouvel agent connecté : ${socket.id}`);
@@ -35,71 +53,57 @@ io.on('connection', (socket) => {
 
   // --- UNITÉS ---
   socket.on('deploy_unit', (unitData) => {
-    // Vérifie si l'unité existe déjà (pour la rejoindre plutôt que la dupliquer)
     const existingIndex = activeUnits.findIndex(u => u.callsign === unitData.callsign);
     if (existingIndex !== -1) {
       activeUnits[existingIndex] = { ...activeUnits[existingIndex], ...unitData };
     } else {
       activeUnits.push({ id: socket.id, ...unitData });
     }
+    saveData();
     io.emit('sync_units', activeUnits);
   });
 
-  socket.on('delete_unit', () => {
-    activeUnits = activeUnits.filter(u => u.id !== socket.id);
+  // Supprime l'unité pour tout le monde (efface du serveur)
+  socket.on('delete_global_unit', (callsign) => {
+    activeUnits = activeUnits.filter(u => u.callsign !== callsign);
+    saveData();
     io.emit('sync_units', activeUnits);
   });
 
   // --- ZONES ---
   socket.on('add_zone', (zone) => {
     activeZones.push({ id: Math.random().toString(36).substr(2, 9), socketId: socket.id, ...zone });
+    saveData();
     io.emit('sync_zones', activeZones);
   });
 
   socket.on('delete_zone', (zoneId) => {
     activeZones = activeZones.filter(z => z.id !== zoneId);
+    saveData();
     io.emit('sync_zones', activeZones);
   });
 
-  // Annuler SON dernier tracé
   socket.on('undo_last_zone', () => {
     const index = activeZones.map(z => z.socketId).lastIndexOf(socket.id);
     if (index !== -1) {
       activeZones.splice(index, 1);
+      saveData();
       io.emit('sync_zones', activeZones);
     }
   });
 
-  // Supprimer TOUTES SES zones
   socket.on('clear_all_zones', () => {
     activeZones = activeZones.filter(z => z.socketId !== socket.id);
+    saveData();
     io.emit('sync_zones', activeZones);
   });
 
-  // --- DÉCONNEXION ---
-  socket.on('disconnect', () => {
-    activeUnits = activeUnits.filter(u => u.id !== socket.id);
-    io.emit('sync_units', activeUnits);
-  });
+  // Note : On ne supprime plus l'unité lors du 'disconnect' pour garder la persistance.
 });
 
-app.get('/auth/discord', (req, res) => {
-  res.redirect(`https://discord.com/api/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${encodeURIComponent(DISCORD_REDIRECT_URI)}&response_type=code&scope=identify`);
-});
-
-app.get('/auth/discord/callback', async (req, res) => {
-  const code = req.query.code;
-  if (!code) return res.status(400).send('Code manquant');
-  try {
-    const tokenRes = await axios.post('https://discord.com/api/oauth2/token', new URLSearchParams({ client_id: DISCORD_CLIENT_ID, client_secret: DISCORD_CLIENT_SECRET, grant_type: 'authorization_code', code, redirect_uri: DISCORD_REDIRECT_URI }).toString(), { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
-    const userRes = await axios.get('https://discord.com/api/users/@me', { headers: { Authorization: `Bearer ${tokenRes.data.access_token}` } });
-    const memberRes = await axios.get(`https://discord.com/api/guilds/${DISCORD_GUILD_ID}/members/${userRes.data.id}`, { headers: { Authorization: `Bot ${DISCORD_BOT_TOKEN}` } });
-    
-    if (memberRes.data.roles.some(role => ALLOWED_ROLES.includes(role))) {
-      res.redirect(`/login?token=${jwt.sign({ id: userRes.data.id, username: userRes.data.username }, JWT_SECRET, { expiresIn: '12h' })}`);
-    } else res.redirect(`/login?error=unauthorized`);
-  } catch (error) { res.redirect(`/login?error=server_error`); }
-});
+// Routes Discord Omises pour la lisibilité, garde les tiennes :
+// app.get('/auth/discord', ...)
+// app.get('/auth/discord/callback', ...)
 
 app.use(express.static(path.join(__dirname, 'dist')));
 app.get(/.*/, (req, res) => res.sendFile(path.join(__dirname, 'dist', 'index.html')));

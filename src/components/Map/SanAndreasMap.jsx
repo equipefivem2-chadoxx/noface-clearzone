@@ -9,7 +9,7 @@ const gtaCrs = L.CRS.Simple;
 const bounds = [[0, 0], [8192, 8192]];
 
 // Contrôleur de dessin optimisé
-const DrawingController = ({ activeTool, setActiveTool, activeColor, socket }) => {
+const DrawingController = ({ activeTool, activeColor, socket, strokeWidth }) => {
   const map = useMap();
   const drawControlRef = useRef(null);
   const currentLineRef = useRef(null);
@@ -19,41 +19,41 @@ const DrawingController = ({ activeTool, setActiveTool, activeColor, socket }) =
     // 1. Nettoyage des outils précédents
     if (drawControlRef.current) drawControlRef.current.disable();
     map.off('mousedown mousemove mouseup');
-    map.dragging.enable(); // Réactive le mouvement de carte par défaut
+    map.dragging.enable(); // Réactive le mouvement de carte par défaut (la "Main")
 
-    if (!activeTool || activeTool === 'eraser') return;
+    if (!activeTool || activeTool === 'hand' || activeTool === 'eraser') return;
 
-    // 2. CRAYON FLUO (Dessin libre 100% fluide, sans React State)
+    // 2. CRAYON FLUO (Dessin libre 100% fluide)
     if (activeTool === 'pen') {
       map.dragging.disable(); // Bloque le déplacement de la carte pendant le dessin
       
       const onMouseDown = (e) => {
         isDrawingRef.current = true;
-        // Style "Fluo" : épais, bout rond, légèrement transparent
+        // Utilisation de strokeWidth ici
         currentLineRef.current = L.polyline([e.latlng], { 
-          color: activeColor, weight: 8, opacity: 0.6, lineCap: 'round', lineJoin: 'round' 
+          color: activeColor, weight: strokeWidth, opacity: 0.6, lineCap: 'round', lineJoin: 'round' 
         }).addTo(map);
       };
 
       const onMouseMove = (e) => {
         if (!isDrawingRef.current || !currentLineRef.current) return;
-        currentLineRef.current.addLatLng(e.latlng); // Ajout ultra-rapide sans re-render
+        currentLineRef.current.addLatLng(e.latlng);
       };
 
       const onMouseUp = () => {
         if (!isDrawingRef.current) return;
         isDrawingRef.current = false;
-        map.dragging.enable();
-
+        
+        // On NE réactive PAS map.dragging.enable() ici pour garder le mode "dessin" actif
         const latlngs = currentLineRef.current.getLatLngs();
         if (latlngs.length > 1) {
-          socket.emit('add_zone', { type: 'polyline', color: activeColor, latlngs });
+          // On envoie le weight au serveur pour que les autres voient la même épaisseur
+          socket.emit('add_zone', { type: 'polyline', color: activeColor, latlngs, weight: strokeWidth });
         }
         
-        // On supprime le trait temporaire, le serveur va renvoyer la zone définitive
         currentLineRef.current.remove(); 
         currentLineRef.current = null;
-        setActiveTool(null);
+        // On NE met PLUS setActiveTool(null) ici pour garder l'outil actif !
       };
 
       map.on('mousedown', onMouseDown);
@@ -63,8 +63,8 @@ const DrawingController = ({ activeTool, setActiveTool, activeColor, socket }) =
       return () => { map.off('mousedown mousemove mouseup'); map.dragging.enable(); };
     }
 
-    // 3. OUTILS LEAFLET-DRAW (Pour les formes parfaites comme Cercle/Polygone)
-    const options = { shapeOptions: { color: activeColor, weight: 3, fillOpacity: 0.2 } };
+    // 3. OUTILS LEAFLET-DRAW (Cercle/Polygone)
+    const options = { shapeOptions: { color: activeColor, weight: strokeWidth, fillOpacity: 0.2 } };
     
     if (activeTool === 'circle') drawControlRef.current = new L.Draw.Circle(map, options);
     else if (activeTool === 'polygon') drawControlRef.current = new L.Draw.Polygon(map, options);
@@ -73,7 +73,7 @@ const DrawingController = ({ activeTool, setActiveTool, activeColor, socket }) =
 
     const handleDrawCreated = (e) => {
       const { layerType, layer } = e;
-      let zoneData = { type: layerType, color: activeColor };
+      let zoneData = { type: layerType, color: activeColor, weight: strokeWidth };
 
       if (layerType === 'circle') {
         zoneData.center = layer.getLatLng();
@@ -83,18 +83,21 @@ const DrawingController = ({ activeTool, setActiveTool, activeColor, socket }) =
       }
 
       socket.emit('add_zone', zoneData);
-      setActiveTool(null);
+      // On NE met PLUS setActiveTool(null) ici non plus.
+      
+      // Réactivation manuelle de l'outil Leaflet-Draw pour qu'on puisse enchaîner les ronds/polygones sans recliquer sur la barre
+      if (drawControlRef.current) drawControlRef.current.enable();
     };
 
     map.on(L.Draw.Event.CREATED, handleDrawCreated);
     return () => { map.off(L.Draw.Event.CREATED, handleDrawCreated); };
 
-  }, [activeTool, map, activeColor, socket, setActiveTool]);
+  }, [activeTool, map, activeColor, socket, strokeWidth]);
 
   return null;
 };
 
-const SanAndreasMap = ({ activeColor, isDeployed, activeTool, setActiveTool, zones, socket }) => {
+const SanAndreasMap = ({ activeColor, isDeployed, activeTool, setActiveTool, strokeWidth, zones, socket }) => {
   
   const handleZoneClick = (zoneId) => {
     if (activeTool === 'eraser') {
@@ -109,21 +112,21 @@ const SanAndreasMap = ({ activeColor, isDeployed, activeTool, setActiveTool, zon
         zoom={-2} minZoom={-3} maxZoom={2} zoomControl={false}
         maxBounds={bounds} maxBoundsViscosity={1.0}
         style={{ height: '100%', width: '100%', backgroundColor: '#000000' }}
-        preferCanvas={true} // Extrêmement important pour les perfs de dessin !
+        preferCanvas={true}
       >
         <ImageOverlay url="/map.jpg" bounds={bounds} />
         
         {isDeployed && (
-          <DrawingController activeTool={activeTool} setActiveTool={setActiveTool} activeColor={activeColor} socket={socket} />
+          <DrawingController activeTool={activeTool} activeColor={activeColor} socket={socket} strokeWidth={strokeWidth} />
         )}
 
         <FeatureGroup>
           {zones.map((zone) => {
             const isEraser = activeTool === 'eraser';
-            // Rendu de la polyline (Crayon) vs Rendu classique
+            // On récupère le zone.weight pour avoir l'épaisseur correcte stockée sur le serveur (ou on met un par défaut)
             const pathOptions = zone.type === 'polyline' 
-              ? { color: isEraser ? '#ef4444' : zone.color, weight: 8, opacity: isEraser ? 0.5 : 0.6, lineCap: 'round', lineJoin: 'round', dashArray: isEraser ? '5, 15' : '' }
-              : { color: isEraser ? '#ef4444' : zone.color, weight: isEraser ? 4 : 3, fillOpacity: isEraser ? 0.5 : 0.2, dashArray: isEraser ? '5, 10' : '' };
+              ? { color: isEraser ? '#ef4444' : zone.color, weight: zone.weight || 8, opacity: isEraser ? 0.5 : 0.6, lineCap: 'round', lineJoin: 'round', dashArray: isEraser ? '5, 15' : '' }
+              : { color: isEraser ? '#ef4444' : zone.color, weight: zone.weight || 3, fillOpacity: isEraser ? 0.5 : 0.2, dashArray: isEraser ? '5, 10' : '' };
 
             if (zone.type === 'circle') return <Circle key={zone.id} center={zone.center} radius={zone.radius} pathOptions={pathOptions} eventHandlers={{ click: () => handleZoneClick(zone.id) }} />;
             if (zone.type === 'polygon') return <Polygon key={zone.id} positions={zone.latlngs} pathOptions={pathOptions} eventHandlers={{ click: () => handleZoneClick(zone.id) }} />;
