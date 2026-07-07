@@ -123,7 +123,8 @@ const MapInterface = () => {
         setUnitData={setUnitData}
         isDeployed={isDeployed}
         onDeploy={handleDeploy}
-        activeUnitsList={activeUnitsList} 
+        activeUnitsList={activeUnitsList}
+        onDeleteGlobalUnit={(callsign) => socket.emit('delete_global_unit', callsign)}
       />
 
       <DrawToolbar 
