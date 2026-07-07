@@ -84,7 +84,8 @@ app.get('/auth/discord/callback', async (req, res) => {
 app.use(express.static(path.join(__dirname, 'dist')));
 
 // Pour n'importe quelle autre route, on renvoie l'interface React
-app.get('/(.*)', (req, res) => {
+// Utilisation de la Regex pure pour éviter le crash d'Express 5
+app.get(/.*/, (req, res) => {
   res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 // -----------------------------------------------
