@@ -1,0 +1,43 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-slate-950 text-slate-200 overflow-hidden select-none;
+  }
+}
+
+@layer utilities {
+  /* Effet Glassmorphism AAA */
+  .glass-panel {
+    @apply bg-slate-900/60 backdrop-blur-md border border-slate-700/50 shadow-2xl;
+  }
+  
+  /* Scrollbar personnalisée style logiciel tactique */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: rgba(15, 23, 42, 0.5);
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(51, 65, 85, 0.8);
+    border-radius: 10px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(71, 85, 105, 1);
+  }
+}
+
+/* Surcharge de Leaflet pour s'intégrer au thème sombre */
+.leaflet-container {
+    background-color: #020617 !important; /* slate-950 */
+    font-family: inherit;
+}
+.leaflet-control-container .leaflet-routing-container, 
+.leaflet-control-zoom a {
+    background-color: #1e293b !important;
+    color: #cbd5e1 !important;
+    border-color: #334155 !important;
+}
