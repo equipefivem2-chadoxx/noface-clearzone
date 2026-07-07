@@ -11,6 +11,12 @@ const UnitManager = ({ isOpen, onClose, unitData, setUnitData, isDeployed, onDep
     }
   }, []);
 
+  const handleJoinUnit = (unit) => {
+    // Fusionne directement l'unité et la déploie
+    setUnitData({ callsign: unit.callsign, agents: unit.agents, color: unit.color });
+    setTimeout(() => onDeploy(), 100); 
+  };
+
   return (
     <div className={`absolute top-0 right-0 h-full w-[400px] bg-[#030303]/95 backdrop-blur-3xl border-l border-neutral-800/50 z-[1050] flex flex-col shadow-[-30px_0_50px_rgba(0,0,0,0.9)] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
       
@@ -71,7 +77,7 @@ const UnitManager = ({ isOpen, onClose, unitData, setUnitData, isDeployed, onDep
             ) : (
               <div className="space-y-2">
                 {activeUnitsList.map((unit, index) => (
-                  <div key={index} className="p-4 bg-[#0a0a0a] border border-neutral-800 rounded flex items-center justify-between group hover:border-neutral-500 transition-colors cursor-pointer" onClick={() => { setUnitData({ callsign: unit.callsign, agents: unit.agents, color: unit.color }); setActiveTab('create'); }}>
+                  <div key={index} className="p-4 bg-[#0a0a0a] border border-neutral-800 rounded flex items-center justify-between group hover:border-neutral-500 transition-colors cursor-pointer" onClick={() => handleJoinUnit(unit)}>
                     <div className="flex items-center gap-3">
                       <div className="w-2 h-2 rounded-full shadow-[0_0_10px_currentColor]" style={{ backgroundColor: unit.color, color: unit.color }}></div>
                       <div>
@@ -88,7 +94,8 @@ const UnitManager = ({ isOpen, onClose, unitData, setUnitData, isDeployed, onDep
         )}
       </div>
 
-      {activeTab === 'create' && (
+      {/* Bouton d'action (visible uniquement dans "Créer" ou si déjà déployé) */}
+      {(activeTab === 'create' || isDeployed) && (
         <div className="p-6 border-t border-neutral-900 bg-[#020202]">
           <button onClick={onDeploy} disabled={!unitData.callsign} className="relative w-full py-4 rounded overflow-hidden group disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-500" style={{ backgroundColor: unitData.callsign ? `${unitData.color}15` : '#111', border: `1px solid ${unitData.callsign ? unitData.color : '#333'}`, color: unitData.callsign ? unitData.color : '#666' }}>
             {unitData.callsign && <div className="absolute inset-0 opacity-20 pointer-events-none transition-transform duration-700 group-hover:scale-150" style={{ background: `radial-gradient(circle at center, ${unitData.color} 0%, transparent 70%)` }}></div>}

@@ -6,7 +6,7 @@ import SanAndreasMap from '../components/Map/SanAndreasMap';
 import UnitManager from '../components/Tactical/UnitManager';
 import DrawToolbar from '../components/Tactical/DrawToolbar';
 
-// Connexion automatique au serveur (Local ou Railway)
+// Connexion automatique au serveur
 const socket = io(window.location.origin.includes('localhost') ? 'http://localhost:3001' : window.location.origin);
 
 const MapInterface = () => {
@@ -35,10 +35,19 @@ const MapInterface = () => {
     socket.on('sync_units', (units) => setActiveUnitsList(units));
     socket.on('sync_zones', (updatedZones) => setZones(updatedZones));
 
+    // Gestion du raccourci clavier (Ctrl + Z) pour annuler le dernier tracé
+    const handleKeyDown = (e) => {
+      if (e.ctrlKey && e.key === 'z') {
+        socket.emit('undo_last_zone');
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+
     return () => {
       socket.off('sync_data');
       socket.off('sync_units');
       socket.off('sync_zones');
+      window.removeEventListener('keydown', handleKeyDown);
     };
   }, []);
 
@@ -46,9 +55,12 @@ const MapInterface = () => {
     if (unitData.callsign.trim() === '') return;
     setIsDeployed(true);
     setIsSidebarOpen(false);
-    // Déploiement sur le réseau
     socket.emit('deploy_unit', unitData);
   };
+
+  // Fonctions pour les boutons de la barre d'outils
+  const handleUndo = () => socket.emit('undo_last_zone');
+  const handleClearAll = () => socket.emit('clear_all_zones');
 
   return (
     <div translate="no" className="w-screen h-screen flex flex-col bg-black text-slate-200 overflow-hidden select-none relative font-sans">
@@ -95,14 +107,17 @@ const MapInterface = () => {
         setUnitData={setUnitData}
         isDeployed={isDeployed}
         onDeploy={handleDeploy}
-        activeUnitsList={activeUnitsList} // Synchronisation de la liste
+        activeUnitsList={activeUnitsList} 
       />
 
+      {/* On passe handleUndo et handleClearAll en props à la toolbar */}
       <DrawToolbar 
         activeColor={unitData.color} 
         isDeployed={isDeployed} 
         activeTool={activeTool}
-        setActiveTool={setActiveTool} // Gestion de l'outil cliqué
+        setActiveTool={setActiveTool}
+        onUndo={handleUndo}
+        onClearAll={handleClearAll}
       />
 
       {/* COMPOSANT CARTE AVANCÉ */}

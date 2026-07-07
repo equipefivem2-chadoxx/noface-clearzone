@@ -1,7 +1,7 @@
 import React from 'react';
-import { Circle, Hexagon, Eraser, PenTool } from 'lucide-react';
+import { Circle, Hexagon, Eraser, PenTool, Undo2, Trash2 } from 'lucide-react';
 
-const DrawToolbar = ({ activeColor, isDeployed, activeTool, setActiveTool }) => {
+const DrawToolbar = ({ activeColor, isDeployed, activeTool, setActiveTool, onUndo, onClearAll }) => {
   if (!isDeployed) return null;
 
   return (
@@ -12,11 +12,11 @@ const DrawToolbar = ({ activeColor, isDeployed, activeTool, setActiveTool }) => 
         <div className="w-3 h-3 rounded-full animate-pulse shadow-[0_0_15px_currentColor]" style={{ backgroundColor: activeColor, color: activeColor }}></div>
       </div>
       
-      {/* Outils de dessin (avec état actif) */}
+      {/* Outils de création */}
       <button 
-        onClick={() => setActiveTool('draw')}
-        className={`p-3 rounded-lg transition-colors ${activeTool === 'draw' ? 'bg-white text-black' : 'text-neutral-500 hover:text-white hover:bg-neutral-900'}`} 
-        title="Tracé Libre"
+        onClick={() => setActiveTool('pen')}
+        className={`p-3 rounded-lg transition-colors ${activeTool === 'pen' ? 'bg-white text-black' : 'text-neutral-500 hover:text-white hover:bg-neutral-900'}`} 
+        title="Tracé Libre (Fluo)"
       >
         <PenTool className="w-4 h-4" />
       </button>
@@ -37,12 +37,27 @@ const DrawToolbar = ({ activeColor, isDeployed, activeTool, setActiveTool }) => 
       
       <div className="h-[1px] w-6 bg-neutral-800 my-1"></div>
       
+      {/* Outils d'édition / suppression */}
+      <button 
+        onClick={onUndo}
+        className="p-3 rounded-lg transition-colors text-neutral-500 hover:text-white hover:bg-neutral-900" 
+        title="Annuler le dernier tracé (Ctrl+Z)"
+      >
+        <Undo2 className="w-4 h-4" />
+      </button>
       <button 
         onClick={() => setActiveTool('eraser')}
         className={`p-3 rounded-lg transition-colors ${activeTool === 'eraser' ? 'bg-red-500 text-black' : 'text-neutral-500 hover:bg-red-950/50 hover:text-red-500'}`} 
-        title="Gomme (Effacer zone)"
+        title="Gomme (Effacer une zone au clic)"
       >
         <Eraser className="w-4 h-4" />
+      </button>
+      <button 
+        onClick={onClearAll}
+        className="p-3 mt-1 rounded-lg transition-colors text-neutral-500 hover:bg-red-900/80 hover:text-white" 
+        title="Tout effacer (Vos zones)"
+      >
+        <Trash2 className="w-4 h-4" />
       </button>
     </div>
   );

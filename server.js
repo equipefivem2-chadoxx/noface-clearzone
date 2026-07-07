@@ -15,7 +15,6 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 const server = http.createServer(app);
-// Configuration du moteur temps réel (WebSockets)
 const io = new Server(server, { cors: { origin: '*' } });
 
 app.use(cors());
@@ -27,82 +26,82 @@ const {
 
 const ALLOWED_ROLES = ['1427651124231405610', '1427651123606589446'];
 
-// --- BASE DE DONNÉES EN MÉMOIRE (TEMPS RÉEL) ---
 let activeUnits = [];
 let activeZones = [];
 
-// --- GESTION DES CONNEXIONS EN DIRECT ---
 io.on('connection', (socket) => {
   console.log(`[SYS] Nouvel agent connecté : ${socket.id}`);
-  
-  // Envoi de la situation actuelle au nouvel arrivant
   socket.emit('sync_data', { units: activeUnits, zones: activeZones });
 
-  // Un agent déploie une unité
+  // --- UNITÉS ---
   socket.on('deploy_unit', (unitData) => {
-    const newUnit = { id: socket.id, ...unitData };
-    activeUnits.push(newUnit);
-    io.emit('sync_units', activeUnits); // On prévient tout le monde
+    // Vérifie si l'unité existe déjà (pour la rejoindre plutôt que la dupliquer)
+    const existingIndex = activeUnits.findIndex(u => u.callsign === unitData.callsign);
+    if (existingIndex !== -1) {
+      activeUnits[existingIndex] = { ...activeUnits[existingIndex], ...unitData };
+    } else {
+      activeUnits.push({ id: socket.id, ...unitData });
+    }
+    io.emit('sync_units', activeUnits);
   });
 
-  // Un agent trace une zone
+  socket.on('delete_unit', () => {
+    activeUnits = activeUnits.filter(u => u.id !== socket.id);
+    io.emit('sync_units', activeUnits);
+  });
+
+  // --- ZONES ---
   socket.on('add_zone', (zone) => {
     activeZones.push({ id: Math.random().toString(36).substr(2, 9), socketId: socket.id, ...zone });
     io.emit('sync_zones', activeZones);
   });
 
-  // Un agent efface une zone (LA NOUVELLE FONCTION GOMME)
   socket.on('delete_zone', (zoneId) => {
     activeZones = activeZones.filter(z => z.id !== zoneId);
     io.emit('sync_zones', activeZones);
   });
 
-  // Déconnexion d'un agent (on retire son unité)
+  // Annuler SON dernier tracé
+  socket.on('undo_last_zone', () => {
+    const index = activeZones.map(z => z.socketId).lastIndexOf(socket.id);
+    if (index !== -1) {
+      activeZones.splice(index, 1);
+      io.emit('sync_zones', activeZones);
+    }
+  });
+
+  // Supprimer TOUTES SES zones
+  socket.on('clear_all_zones', () => {
+    activeZones = activeZones.filter(z => z.socketId !== socket.id);
+    io.emit('sync_zones', activeZones);
+  });
+
+  // --- DÉCONNEXION ---
   socket.on('disconnect', () => {
     activeUnits = activeUnits.filter(u => u.id !== socket.id);
     io.emit('sync_units', activeUnits);
-    console.log(`[SYS] Agent déconnecté : ${socket.id}`);
   });
 });
 
-// --- AUTHENTIFICATION DISCORD ---
 app.get('/auth/discord', (req, res) => {
-  const url = `https://discord.com/api/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${encodeURIComponent(DISCORD_REDIRECT_URI)}&response_type=code&scope=identify`;
-  res.redirect(url);
+  res.redirect(`https://discord.com/api/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${encodeURIComponent(DISCORD_REDIRECT_URI)}&response_type=code&scope=identify`);
 });
 
 app.get('/auth/discord/callback', async (req, res) => {
   const code = req.query.code;
   if (!code) return res.status(400).send('Code manquant');
-
   try {
-    const tokenResponse = await axios.post('https://discord.com/api/oauth2/token', new URLSearchParams({
-      client_id: DISCORD_CLIENT_ID, client_secret: DISCORD_CLIENT_SECRET,
-      grant_type: 'authorization_code', code: code, redirect_uri: DISCORD_REDIRECT_URI,
-    }).toString(), { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
-
-    const accessToken = tokenResponse.data.access_token;
-    const userResponse = await axios.get('https://discord.com/api/users/@me', { headers: { Authorization: `Bearer ${accessToken}` } });
-    const { id: userId, username } = userResponse.data;
-
-    const memberResponse = await axios.get(`https://discord.com/api/guilds/${DISCORD_GUILD_ID}/members/${userId}`, { headers: { Authorization: `Bot ${DISCORD_BOT_TOKEN}` } });
-    const hasAccess = memberResponse.data.roles.some(role => ALLOWED_ROLES.includes(role));
-
-    if (hasAccess) {
-      const token = jwt.sign({ id: userId, username }, JWT_SECRET, { expiresIn: '12h' });
-      res.redirect(`/login?token=${token}`);
-    } else {
-      res.redirect(`/login?error=unauthorized`);
-    }
-  } catch (error) {
-    res.redirect(`/login?error=server_error`);
-  }
+    const tokenRes = await axios.post('https://discord.com/api/oauth2/token', new URLSearchParams({ client_id: DISCORD_CLIENT_ID, client_secret: DISCORD_CLIENT_SECRET, grant_type: 'authorization_code', code, redirect_uri: DISCORD_REDIRECT_URI }).toString(), { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
+    const userRes = await axios.get('https://discord.com/api/users/@me', { headers: { Authorization: `Bearer ${tokenRes.data.access_token}` } });
+    const memberRes = await axios.get(`https://discord.com/api/guilds/${DISCORD_GUILD_ID}/members/${userRes.data.id}`, { headers: { Authorization: `Bot ${DISCORD_BOT_TOKEN}` } });
+    
+    if (memberRes.data.roles.some(role => ALLOWED_ROLES.includes(role))) {
+      res.redirect(`/login?token=${jwt.sign({ id: userRes.data.id, username: userRes.data.username }, JWT_SECRET, { expiresIn: '12h' })}`);
+    } else res.redirect(`/login?error=unauthorized`);
+  } catch (error) { res.redirect(`/login?error=server_error`); }
 });
 
 app.use(express.static(path.join(__dirname, 'dist')));
 app.get(/.*/, (req, res) => res.sendFile(path.join(__dirname, 'dist', 'index.html')));
 
-// IMPORTANT: On utilise server.listen pour que Socket.io fonctionne avec Express
-server.listen(PORT || 3001, () => {
-  console.log(`[SYS] Serveur tactique en ligne sur le port ${PORT || 3001}`);
-});
+server.listen(PORT || 3001, () => console.log(`[SYS] Serveur tactique en ligne sur le port ${PORT || 3001}`));
