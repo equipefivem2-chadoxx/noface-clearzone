@@ -1,7 +1,10 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Shield, ShieldAlert, Globe, Crosshair } from 'lucide-react';
 
-function App() {
+function Home() {
+  const navigate = useNavigate();
+
   return (
     <div className="min-h-screen bg-[#020617] text-slate-200 flex items-center justify-center p-4 relative overflow-hidden select-none">
       
@@ -29,7 +32,7 @@ function App() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full px-4">
           
           {/* LSPD */}
-          <button className="group relative p-10 bg-slate-900/40 backdrop-blur-md border border-slate-800 hover:border-blue-500/50 rounded-2xl transition-all duration-500 hover:shadow-[0_0_40px_rgba(59,130,246,0.15)] hover:-translate-y-2 flex flex-col items-center text-center overflow-hidden cursor-pointer">
+          <button onClick={() => navigate('/map/LSPD')} className="group relative p-10 bg-slate-900/40 backdrop-blur-md border border-slate-800 hover:border-blue-500/50 rounded-2xl transition-all duration-500 hover:shadow-[0_0_40px_rgba(59,130,246,0.15)] hover:-translate-y-2 flex flex-col items-center text-center overflow-hidden cursor-pointer">
             <div className="absolute inset-0 bg-gradient-to-b from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             <Shield className="w-20 h-20 text-blue-500 mb-6 group-hover:scale-110 transition-transform duration-500 drop-shadow-[0_0_15px_rgba(59,130,246,0.5)]" />
             <h2 className="text-3xl font-bold text-slate-100 tracking-wider mb-2">LSPD</h2>
@@ -40,7 +43,7 @@ function App() {
           </button>
 
           {/* BCSO */}
-          <button className="group relative p-10 bg-slate-900/40 backdrop-blur-md border border-slate-800 hover:border-amber-500/50 rounded-2xl transition-all duration-500 hover:shadow-[0_0_40px_rgba(245,158,11,0.15)] hover:-translate-y-2 flex flex-col items-center text-center overflow-hidden cursor-pointer">
+          <button onClick={() => navigate('/map/BCSO')} className="group relative p-10 bg-slate-900/40 backdrop-blur-md border border-slate-800 hover:border-amber-500/50 rounded-2xl transition-all duration-500 hover:shadow-[0_0_40px_rgba(245,158,11,0.15)] hover:-translate-y-2 flex flex-col items-center text-center overflow-hidden cursor-pointer">
             <div className="absolute inset-0 bg-gradient-to-b from-amber-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             <ShieldAlert className="w-20 h-20 text-amber-500 mb-6 group-hover:scale-110 transition-transform duration-500 drop-shadow-[0_0_15px_rgba(245,158,11,0.5)]" />
             <h2 className="text-3xl font-bold text-slate-100 tracking-wider mb-2">BCSO</h2>
@@ -51,7 +54,7 @@ function App() {
           </button>
 
           {/* GLOBAL */}
-          <button className="group relative p-10 bg-slate-900/40 backdrop-blur-md border border-slate-800 hover:border-slate-300/50 rounded-2xl transition-all duration-500 hover:shadow-[0_0_40px_rgba(203,213,225,0.1)] hover:-translate-y-2 flex flex-col items-center text-center overflow-hidden cursor-pointer">
+          <button onClick={() => navigate('/map/GLOBAL')} className="group relative p-10 bg-slate-900/40 backdrop-blur-md border border-slate-800 hover:border-slate-300/50 rounded-2xl transition-all duration-500 hover:shadow-[0_0_40px_rgba(203,213,225,0.1)] hover:-translate-y-2 flex flex-col items-center text-center overflow-hidden cursor-pointer">
             <div className="absolute inset-0 bg-gradient-to-b from-slate-400/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             <Globe className="w-20 h-20 text-slate-300 mb-6 group-hover:scale-110 transition-transform duration-500 drop-shadow-[0_0_15px_rgba(203,213,225,0.3)]" />
             <h2 className="text-3xl font-bold text-slate-100 tracking-wider mb-2">GLOBAL</h2>
@@ -67,4 +70,4 @@ function App() {
   );
 }
 
-export default App;
+export default Home;
