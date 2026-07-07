@@ -3,8 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 // Importation sécurisée avec l'extension .jsx pour les serveurs Linux
 import Home from './pages/Home.jsx';
-import MapInterface from './pages/MapInterface.jsx';
-
+import MapInterface from './pages/Mapinterface.jsx';
 function App() {
   return (
     <BrowserRouter>
