@@ -1,6 +1,5 @@
 import React from 'react';
-import { X, Crosshair, Users, ShieldAlert, Terminal, Activity } from 'lucide-react';
-
+import { X, Crosshair, Users, ShieldAlert, Terminal, Activity, Fingerprint } from 'lucide-react';
 const UnitManager = ({ isOpen, onClose, unitData, setUnitData, isDeployed, onDeploy }) => {
   const tacticalColors = [
     { name: 'GHOST (Blanc)', hex: '#ffffff' },
