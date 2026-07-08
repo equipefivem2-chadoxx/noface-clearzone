@@ -11,7 +11,6 @@ const DrawToolbar = ({ activeColor, isDeployed, activeTool, setActiveTool, strok
         <div className="w-3 h-3 rounded-full animate-pulse shadow-[0_0_15px_currentColor]" style={{ backgroundColor: activeColor, color: activeColor }}></div>
       </div>
       
-      {/* Outils de Navigation & Création */}
       <button 
         onClick={() => setActiveTool('hand')}
         className={`p-3 rounded-lg transition-colors ${activeTool === 'hand' ? 'bg-white text-black' : 'text-neutral-500 hover:text-white hover:bg-neutral-900'}`} 
@@ -24,16 +23,10 @@ const DrawToolbar = ({ activeColor, isDeployed, activeTool, setActiveTool, strok
         <button 
           onClick={() => setActiveTool('pen')}
           className={`p-3 w-full flex justify-center rounded-lg transition-colors ${activeTool === 'pen' ? 'bg-white text-black' : 'text-neutral-500 hover:text-white hover:bg-neutral-900'}`} 
-          title="Tracé Libre (Fluo)"
+          title="Crayon Tactique"
         >
           <PenTool className="w-4 h-4" />
         </button>
-        {/* Slider affiché uniquement quand le Pen est actif */}
-        {activeTool === 'pen' && (
-          <div className="w-full pt-2 pb-1 px-1">
-             <input type="range" min="2" max="25" value={strokeWidth} onChange={(e) => setStrokeWidth(Number(e.target.value))} className="w-full h-1 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-white" title={`Épaisseur: ${strokeWidth}`} />
-          </div>
-        )}
       </div>
 
       <button 
@@ -54,10 +47,30 @@ const DrawToolbar = ({ activeColor, isDeployed, activeTool, setActiveTool, strok
       
       <div className="h-[1px] w-6 bg-neutral-800 my-1"></div>
       
-      {/* Outils d'édition / suppression */}
-      <button onClick={onUndo} className="p-3 rounded-lg transition-colors text-neutral-500 hover:text-white hover:bg-neutral-900" title="Annuler (Ctrl+Z)"><Undo2 className="w-4 h-4" /></button>
-      <button onClick={() => setActiveTool('eraser')} className={`p-3 rounded-lg transition-colors ${activeTool === 'eraser' ? 'bg-red-500 text-black' : 'text-neutral-500 hover:bg-red-950/50 hover:text-red-500'}`} title="Gomme (Effacer au clic)"><Eraser className="w-4 h-4" /></button>
-      <button onClick={onClearAll} className="p-3 mt-1 rounded-lg transition-colors text-neutral-500 hover:bg-red-900/80 hover:text-white" title="Tout effacer"><Trash2 className="w-4 h-4" /></button>
+      <button onClick={onUndo} className="p-3 rounded-lg transition-colors text-neutral-500 hover:text-white hover:bg-neutral-900" title="Annuler (Ctrl+Z)">
+        <Undo2 className="w-4 h-4" />
+      </button>
+      
+      <button 
+        onClick={() => setActiveTool('eraser')} 
+        className={`p-3 rounded-lg transition-colors ${activeTool === 'eraser' ? 'bg-red-500 text-black' : 'text-neutral-500 hover:bg-red-900/20 hover:text-red-500'}`} 
+        title="Gomme de zone"
+      >
+        <Eraser className="w-4 h-4" />
+      </button>
+
+      {/* BOUTON RAJOUTÉ : EFFACER TOUT D'UN COUP AVEC DEMANDE DE SÉCURITÉ */}
+      <button 
+        onClick={() => {
+          if (window.confirm("🔴 ATTENTION : Voulez-vous effacer TOUS les tracés tactiques de cette carte ?")) {
+            onClearAll();
+          }
+        }} 
+        className="p-3 rounded-lg transition-colors text-neutral-500 hover:bg-red-600 hover:text-white" 
+        title="TOUT EFFACER (WIPE MAP)"
+      >
+        <Trash2 className="w-4 h-4" />
+      </button>
     </div>
   );
 };

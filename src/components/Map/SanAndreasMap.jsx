@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { MapContainer, ImageOverlay, Circle, Polygon, Polyline, FeatureGroup, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Circle, Polygon, Polyline, FeatureGroup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw/dist/leaflet.draw.css';
@@ -8,7 +8,7 @@ import 'leaflet-draw';
 const gtaCrs = L.CRS.Simple;
 const bounds = [[0, 0], [8192, 8192]];
 
-const DrawingController = ({ activeTool, activeColor, socket, strokeWidth }) => {
+const DrawingController = ({ activeTool, activeColor, socket, strokeWidth, factionLabel }) => {
   const map = useMap();
   const drawControlRef = useRef(null);
   const currentLineRef = useRef(null);
@@ -39,7 +39,13 @@ const DrawingController = ({ activeTool, activeColor, socket, strokeWidth }) => 
         const latlngs = currentLineRef.current.getLatLngs();
         
         if (latlngs.length > 1 && socket) {
-          socket.emit('add_zone', { type: 'polyline', color: activeColor, latlngs, weight: strokeWidth });
+          socket.emit('add_zone', { 
+            type: 'polyline', 
+            color: activeColor, 
+            latlngs, 
+            weight: strokeWidth, 
+            faction: factionLabel 
+          });
         }
         currentLineRef.current.remove(); 
         currentLineRef.current = null;
@@ -50,29 +56,27 @@ const DrawingController = ({ activeTool, activeColor, socket, strokeWidth }) => 
       return () => { map.off('mousedown mousemove mouseup'); map.dragging.enable(); };
     }
 
-    const options = { shapeOptions: { color: activeColor, weight: 3, fillOpacity: 0.2 } };
+    const options = { shapeOptions: { color: activeColor, weight: strokeWidth, fillOpacity: 0.2 } };
     if (activeTool === 'circle') drawControlRef.current = new L.Draw.Circle(map, options);
     else if (activeTool === 'polygon') drawControlRef.current = new L.Draw.Polygon(map, options);
     if (drawControlRef.current) drawControlRef.current.enable();
 
     const handleDrawCreated = (e) => {
       const { layerType, layer } = e;
-      let zoneData = { type: layerType, color: activeColor, weight: 3 };
-      
+      let zoneData = { type: layerType, color: activeColor, weight: strokeWidth, faction: factionLabel };
       if (layerType === 'circle') {
         zoneData.center = layer.getLatLng();
         zoneData.radius = layer.getRadius();
       } else {
         zoneData.latlngs = layer.getLatLngs();
       }
-      
       if (socket) socket.emit('add_zone', zoneData);
       if (drawControlRef.current) drawControlRef.current.enable();
     };
 
     map.on(L.Draw.Event.CREATED, handleDrawCreated);
     return () => { map.off(L.Draw.Event.CREATED, handleDrawCreated); };
-  }, [activeTool, map, activeColor, socket, strokeWidth]);
+  }, [activeTool, map, activeColor, socket, strokeWidth, factionLabel]);
 
   return null;
 };
@@ -84,38 +88,41 @@ const SanAndreasMap = ({
   setActiveTool, 
   strokeWidth = 3, 
   zones = [], 
-  socket = null 
+  socket = null,
+  factionLabel = 'GLOBAL'
 }) => {
   const handleZoneClick = (zoneId) => {
-    if (activeTool === 'eraser' && socket) socket.emit('delete_zone', zoneId);
+    if (activeTool === 'eraser' && socket) {
+      socket.emit('delete_zone', { id: zoneId, faction: factionLabel });
+    }
   };
 
   return (
-    <div className={`absolute inset-0 z-0 bg-[#143d6b] ${activeTool === 'eraser' ? 'cursor-crosshair' : activeTool === 'pen' ? 'cursor-default' : 'cursor-grab'}`}>
-      
-      {/* CSS MAGIQUE POUR Tuer LE LAG : Force l'accélération matérielle sur l'image */}
-      <style>{`.gpu-accelerated-image { will-change: transform; backface-visibility: hidden; transform: translateZ(0); }`}</style>
-      
+    <div className={`absolute inset-0 z-0 bg-black ${activeTool === 'eraser' ? 'cursor-crosshair' : activeTool === 'pen' ? 'cursor-default' : 'cursor-grab'}`}>
       <MapContainer 
         crs={gtaCrs} 
         bounds={bounds} 
         center={[4096, 4096]} 
-        zoom={-2} 
-        minZoom={-3} 
-        maxZoom={2} 
+        zoom={0} 
+        minZoom={0} 
+        maxZoom={4} 
         zoomControl={false}
         maxBounds={bounds} 
         maxBoundsViscosity={1.0}
-        zoomSnap={0.1} 
-        zoomDelta={0.5} 
-        wheelPxPerZoomLevel={120} 
-        style={{ height: '100%', width: '100%', backgroundColor: '#143d6b' }}
-        preferCanvas={true} 
+        style={{ height: '100%', width: '100%', backgroundColor: '#000000' }}
+        preferCanvas={true} // OPTIMISATION 1 : Moteur graphique HTML5 hyper fluide
       >
-        <ImageOverlay url="/map.webp" bounds={bounds} className="gpu-accelerated-image" />
+        <TileLayer
+          url="/tuiles/{z}/{x}/{-y}.jpg"
+          noWrap={true}
+          bounds={bounds}
+          tileSize={256}
+          updateWhenIdle={true}  // OPTIMISATION 2 : Attend l'arrêt du drag pour charger les tuiles lourdes
+          keepBuffer={12}         // OPTIMISATION 3 : Pré-charge 12 tuiles autour de la vision pour un déplacement parfait
+        />
         
         {isDeployed && (
-          <DrawingController activeTool={activeTool} activeColor={activeColor} socket={socket} strokeWidth={strokeWidth} />
+          <DrawingController activeTool={activeTool} activeColor={activeColor} socket={socket} strokeWidth={strokeWidth} factionLabel={factionLabel} />
         )}
 
         <FeatureGroup>
