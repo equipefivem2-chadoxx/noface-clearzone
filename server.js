@@ -189,8 +189,11 @@ app.get('/auth/discord/callback', async (req, res) => {
   }
 });
 
+// --- LA CORRECTION EST ICI ---
 app.use(express.static(path.join(__dirname, 'dist')));
-app.get('*', (req, res) => {
+
+// On utilise l'expression régulière /.*/ au lieu du * pour ne pas faire crasher Express 5 !
+app.get(/.*/, (req, res) => {
   res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 
