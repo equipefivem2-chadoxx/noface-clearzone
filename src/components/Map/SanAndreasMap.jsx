@@ -110,15 +110,17 @@ const SanAndreasMap = ({
         maxBounds={bounds} 
         maxBoundsViscosity={1.0}
         style={{ height: '100%', width: '100%', backgroundColor: '#000000' }}
-        preferCanvas={true} // OPTIMISATION 1 : Moteur graphique HTML5 hyper fluide
+        preferCanvas={true} 
       >
         <TileLayer
-          url="/tuiles/{z}/{x}/{-y}.jpg"
+          // CORRECTION : On remet {y} normal mais on utilise tms={true} pour inverser l'axe de manière sécurisée
+          url="/tuiles/{z}/{x}/{y}.jpg"
+          tms={true}
           noWrap={true}
           bounds={bounds}
           tileSize={256}
-          updateWhenIdle={true}  // OPTIMISATION 2 : Attend l'arrêt du drag pour charger les tuiles lourdes
-          keepBuffer={12}         // OPTIMISATION 3 : Pré-charge 12 tuiles autour de la vision pour un déplacement parfait
+          updateWhenIdle={true}  
+          keepBuffer={12}         
         />
         
         {isDeployed && (
