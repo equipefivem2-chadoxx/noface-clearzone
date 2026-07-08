@@ -12,9 +12,14 @@ const UnitManager = ({ isOpen, onClose, unitData, setUnitData, isDeployed, onDep
   }, []);
 
   const handleJoinUnit = (unit) => {
-    // Te connecte à l'unité en direct (vous partagez désormais le même callsign)
-    onDeploy(unit);
-    setActiveTab('create'); // Ramène sur l'onglet Création pour que tu puisses t'ajouter aux agents
+    // CORRECTION : On importe les paramètres de l'unité ciblée directement dans le formulaire
+    setUnitData({
+      callsign: unit.callsign,
+      agents: unit.agents,
+      color: unit.color
+    });
+    // On rebascule l'utilisateur sur l'onglet de création pour qu'il ajoute son matricule
+    setActiveTab('create');
   };
 
   return (
@@ -59,7 +64,6 @@ const UnitManager = ({ isOpen, onClose, unitData, setUnitData, isDeployed, onDep
               <label className="text-[10px] font-mono uppercase tracking-widest text-neutral-500">Agents Matricules (Modifiable)</label>
               <div className="flex items-center bg-black border border-neutral-800 focus-within:border-white rounded px-3 transition-colors">
                 <Users className="w-4 h-4 text-neutral-600 mr-3" />
-                {/* Le champ Agent n'est PLUS désactivé quand déployé */}
                 <input type="text" value={unitData.agents} onChange={e => setUnitData(p => ({ ...p, agents: e.target.value }))} className="w-full bg-transparent py-3 text-sm text-white font-mono uppercase focus:outline-none placeholder-neutral-700" placeholder="Ex: 01 | 43 | 12" />
               </div>
             </div>
@@ -67,7 +71,6 @@ const UnitManager = ({ isOpen, onClose, unitData, setUnitData, isDeployed, onDep
             <div className="space-y-2">
               <label className="text-[10px] font-mono uppercase tracking-widest text-neutral-500">Couleur d'identification</label>
               <div className="flex items-center gap-4 bg-black border border-neutral-800 p-3 rounded">
-                {/* Couleur modifiable en direct aussi */}
                 <input type="color" value={unitData.color} onChange={e => setUnitData(p => ({ ...p, color: e.target.value }))} className="w-8 h-8 rounded border-0 bg-transparent cursor-pointer" />
                 <span className="text-xs font-mono text-neutral-400">{unitData.color.toUpperCase()}</span>
               </div>
