@@ -108,13 +108,12 @@ const SanAndreasMap = ({
         style={{ height: '100%', width: '100%', backgroundColor: '#000000' }}
         preferCanvas={true}
       >
-        {/* CORRECTION : On retire le -y pour tester l'axe normal de ton dossier */}
+        {/* CORRECTION : L'attribut errorTileUrl a été supprimé ici pour ne plus spammer la map sur les bords ! */}
         <TileLayer
           url="/tuiles/{z}/{x}/{y}.jpg"
           noWrap={true}
           bounds={bounds}
           tileSize={256}
-          errorTileUrl="/map.jpg" // Sécurité : si une tuile manque, il mettra ton ancienne map à la place pour éviter le blanc
         />
         
         {isDeployed && (
