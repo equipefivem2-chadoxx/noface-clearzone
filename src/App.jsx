@@ -58,7 +58,9 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<Login />} />
-        <Route path="/maintenance" element={<Maintenance />} />
+        
+        {/* On passe le socket à la page Maintenance pour le retour automatique */}
+        <Route path="/maintenance" element={<Maintenance socket={socket} />} />
 
         {/* 🔒 Les routes protégées */}
         <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
