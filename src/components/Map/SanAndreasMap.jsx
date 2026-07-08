@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { MapContainer, TileLayer, Circle, Polygon, Polyline, FeatureGroup, useMap } from 'react-leaflet';
+import { MapContainer, ImageOverlay, Circle, Polygon, Polyline, FeatureGroup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw/dist/leaflet.draw.css';
@@ -99,22 +99,21 @@ const SanAndreasMap = ({
         crs={gtaCrs} 
         bounds={bounds} 
         center={[4096, 4096]} 
-        zoom={0} 
-        minZoom={0} 
-        maxZoom={4} 
+        zoom={-2} 
+        minZoom={-3} 
+        maxZoom={2} 
         zoomControl={false}
         maxBounds={bounds} 
         maxBoundsViscosity={1.0}
+        zoomSnap={0.1} // Permet un zoom fluide fractionné
+        zoomDelta={0.5} // Adoucit les crans de la molette
+        wheelPxPerZoomLevel={120} // Vitesse de la molette optimisée
         style={{ height: '100%', width: '100%', backgroundColor: '#000000' }}
-        preferCanvas={true}
+        preferCanvas={true} // Ultime optimisation pour le dessin
       >
-        {/* CORRECTION : L'attribut errorTileUrl a été supprimé ici pour ne plus spammer la map sur les bords ! */}
-        <TileLayer
-          url="/tuiles/{z}/{x}/{y}.jpg"
-          noWrap={true}
-          bounds={bounds}
-          tileSize={256}
-        />
+        
+        {/* On repasse sur l'image ultra-légère en WebP */}
+        <ImageOverlay url="/map.webp" bounds={bounds} />
         
         {isDeployed && (
           <DrawingController activeTool={activeTool} activeColor={activeColor} socket={socket} strokeWidth={strokeWidth} />
@@ -123,7 +122,6 @@ const SanAndreasMap = ({
         <FeatureGroup>
           {zones.map((zone) => {
             const isEraser = activeTool === 'eraser';
-            // Le weight s'applique correctement : soit celui du tracé, soit 3 par défaut pour les cercles
             const pathOptions = zone.type === 'polyline' 
               ? { color: isEraser ? '#ef4444' : zone.color, weight: zone.weight || 8, opacity: isEraser ? 0.5 : 0.6, lineCap: 'round', lineJoin: 'round', dashArray: isEraser ? '5, 15' : '' }
               : { color: isEraser ? '#ef4444' : zone.color, weight: zone.weight || 3, fillOpacity: isEraser ? 0.5 : 0.2, dashArray: isEraser ? '5, 10' : '' };
