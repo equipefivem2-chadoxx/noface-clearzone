@@ -1,88 +1,56 @@
 import React from 'react';
-import { Circle, Hexagon, Eraser, PenTool, Undo2, Trash2, Hand } from 'lucide-react';
+import { Circle, Hexagon, Eraser, PenTool, Undo2, Hand } from 'lucide-react';
 
-const DrawToolbar = ({ activeColor, isDeployed, activeTool, setActiveTool, strokeWidth, setStrokeWidth, onUndo, onClearAll }) => {
+const DrawToolbar = ({ activeColor, isDeployed, activeTool, setActiveTool, strokeWidth, setStrokeWidth, onUndo }) => {
   if (!isDeployed) return null;
 
+  const btnBase = "p-3 rounded-full transition-all duration-300 flex items-center justify-center relative group";
+  const btnActive = "bg-white text-black shadow-[0_0_20px_rgba(255,255,255,0.4)] scale-110";
+  const btnInactive = "text-white/60 hover:text-white hover:bg-white/10 hover:scale-105";
+
   return (
-    <div className="absolute top-24 left-6 z-[1000] flex flex-col items-center gap-2 bg-[#050505]/95 backdrop-blur-2xl border border-neutral-800 p-2 rounded-xl shadow-[0_0_30px_rgba(0,0,0,0.8)]">
+    <div className="absolute top-1/2 -translate-y-1/2 left-6 z-[1000] flex flex-col items-center gap-3 bg-black/40 backdrop-blur-xl border border-white/10 p-3 rounded-full shadow-[0_0_40px_rgba(0,0,0,0.5)]">
       
-      <div className="pb-4 border-b border-neutral-800 flex flex-col items-center gap-2 w-full">
-        <div className="w-3 h-3 rounded-full animate-pulse shadow-[0_0_15px_currentColor]" style={{ backgroundColor: activeColor, color: activeColor }}></div>
+      {/* Indicateur de couleur */}
+      <div className="mb-2 p-1">
+        <div 
+          className="w-4 h-4 rounded-full animate-pulse ring-2 ring-white/20" 
+          style={{ backgroundColor: activeColor, boxShadow: `0 0 15px ${activeColor}` }}
+        ></div>
       </div>
       
-      <button 
-        onClick={() => setActiveTool('hand')}
-        className={`p-3 rounded-lg transition-colors ${activeTool === 'hand' ? 'bg-white text-black' : 'text-neutral-500 hover:text-white hover:bg-neutral-900'}`} 
-        title="Main (Navigation libre)"
-      >
-        <Hand className="w-4 h-4" />
+      <button onClick={() => setActiveTool('hand')} className={`${btnBase} ${activeTool === 'hand' ? btnActive : btnInactive}`} title="Main (Navigation libre)">
+        <Hand className="w-5 h-5" />
       </button>
 
-      <div className="relative w-full flex flex-col items-center">
-        <button 
-          onClick={() => setActiveTool('pen')}
-          className={`p-3 w-full flex justify-center rounded-lg transition-colors ${activeTool === 'pen' ? 'bg-white text-black' : 'text-neutral-500 hover:text-white hover:bg-neutral-900'}`} 
-          title="Crayon Tactique"
-        >
-          <PenTool className="w-4 h-4" />
+      <div className="relative flex flex-col items-center">
+        <button onClick={() => setActiveTool('pen')} className={`${btnBase} ${activeTool === 'pen' ? btnActive : btnInactive}`} title="Crayon Tactique">
+          <PenTool className="w-5 h-5" />
         </button>
-        {/* CURSEUR D'ÉPAISSEUR APPARAÎT QUAND LE CRAYON EST ACTIF */}
         {activeTool === 'pen' && (
-          <div className="w-full flex flex-col items-center mt-2 px-1">
-            <input 
-              type="range" 
-              min="1" 
-              max="15" 
-              value={strokeWidth} 
-              onChange={(e) => setStrokeWidth(Number(e.target.value))} 
-              className="w-full h-1 bg-neutral-700 rounded-lg appearance-none cursor-pointer accent-white" 
-              title="Épaisseur du trait"
-            />
+          <div className="absolute left-full ml-4 top-1/2 -translate-y-1/2 bg-black/60 backdrop-blur-md border border-white/10 px-4 py-2 rounded-full flex items-center gap-3">
+            <span className="text-[10px] text-white/50 font-mono">Taille</span>
+            <input type="range" min="1" max="15" value={strokeWidth} onChange={(e) => setStrokeWidth(Number(e.target.value))} className="w-24 h-1 bg-white/20 rounded-lg appearance-none cursor-pointer accent-white" />
           </div>
         )}
       </div>
 
-      <button 
-        onClick={() => setActiveTool('circle')}
-        className={`p-3 rounded-lg transition-colors ${activeTool === 'circle' ? 'bg-white text-black' : 'text-neutral-500 hover:text-white hover:bg-neutral-900'}`} 
-        title="Zone Circulaire"
-      >
-        <Circle className="w-4 h-4" />
+      <button onClick={() => setActiveTool('circle')} className={`${btnBase} ${activeTool === 'circle' ? btnActive : btnInactive}`} title="Zone Circulaire">
+        <Circle className="w-5 h-5" />
       </button>
       
-      <button 
-        onClick={() => setActiveTool('polygon')}
-        className={`p-3 rounded-lg transition-colors ${activeTool === 'polygon' ? 'bg-white text-black' : 'text-neutral-500 hover:text-white hover:bg-neutral-900'}`} 
-        title="Périmètre (Polygone)"
-      >
-        <Hexagon className="w-4 h-4" />
+      <button onClick={() => setActiveTool('polygon')} className={`${btnBase} ${activeTool === 'polygon' ? btnActive : btnInactive}`} title="Périmètre (Polygone)">
+        <Hexagon className="w-5 h-5" />
       </button>
       
-      <div className="h-[1px] w-6 bg-neutral-800 my-1"></div>
+      <div className="h-[1px] w-8 bg-white/10 my-2"></div>
       
-      <button onClick={onUndo} className="p-3 rounded-lg transition-colors text-neutral-500 hover:text-white hover:bg-neutral-900" title="Annuler (Ctrl+Z)">
-        <Undo2 className="w-4 h-4" />
+      <button onClick={onUndo} className={`${btnBase} ${btnInactive}`} title="Annuler (Ctrl+Z)">
+        <Undo2 className="w-5 h-5" />
       </button>
       
-      <button 
-        onClick={() => setActiveTool('eraser')} 
-        className={`p-3 rounded-lg transition-colors ${activeTool === 'eraser' ? 'bg-red-500 text-black' : 'text-neutral-500 hover:bg-red-900/20 hover:text-red-500'}`} 
-        title="Gomme (Clic sur élément) ou Clic Droit"
-      >
-        <Eraser className="w-4 h-4" />
-      </button>
-
-      <button 
-        onClick={() => {
-          if (window.confirm("🔴 ATTENTION : Voulez-vous effacer TOUS les tracés tactiques de cette carte ?")) {
-            onClearAll();
-          }
-        }} 
-        className="p-3 rounded-lg transition-colors text-neutral-500 hover:bg-red-600 hover:text-white" 
-        title="TOUT EFFACER (WIPE MAP)"
-      >
-        <Trash2 className="w-4 h-4" />
+      <button onClick={() => setActiveTool('eraser')} className={`${btnBase} ${activeTool === 'eraser' ? 'bg-red-500 text-white shadow-[0_0_20px_rgba(239,68,68,0.5)] scale-110' : 'text-white/60 hover:text-red-400 hover:bg-red-500/20 hover:scale-105'}`} title="Gomme / Supprimer">
+        <Eraser className="w-5 h-5" />
       </button>
     </div>
   );

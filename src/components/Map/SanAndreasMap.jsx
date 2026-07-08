@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { MapContainer, ImageOverlay, Circle, Polygon, Polyline, FeatureGroup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -39,13 +39,7 @@ const DrawingController = ({ activeTool, activeColor, socket, strokeWidth, facti
         const latlngs = currentLineRef.current.getLatLngs();
         
         if (latlngs.length > 1 && socket) {
-          socket.emit('add_zone', { 
-            type: 'polyline', 
-            color: activeColor, 
-            latlngs, 
-            weight: strokeWidth, 
-            faction: factionLabel 
-          });
+          socket.emit('add_zone', { type: 'polyline', color: activeColor, latlngs, weight: strokeWidth, faction: factionLabel });
         }
         if (currentLineRef.current) {
           currentLineRef.current.remove(); 
@@ -94,39 +88,42 @@ const SanAndreasMap = ({
   factionLabel = 'GLOBAL'
 }) => {
   
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    // Animation d'apparition au chargement
+    const timer = setTimeout(() => setIsVisible(true), 150);
+    return () => clearTimeout(timer);
+  }, []);
+
   const handleDeleteZone = (zoneId, e) => {
     if (e) {
       e.originalEvent?.preventDefault();
       e.originalEvent?.stopPropagation();
     }
-    if (socket) {
-      socket.emit('delete_zone', { id: zoneId, faction: factionLabel });
-    }
+    if (socket) socket.emit('delete_zone', { id: zoneId, faction: factionLabel });
   };
 
   return (
     <div 
       onContextMenu={(e) => e.preventDefault()} 
-      className={`absolute inset-0 z-0 bg-black ${activeTool === 'eraser' ? 'cursor-crosshair' : activeTool === 'pen' ? 'cursor-crosshair' : 'cursor-grab'}`}
+      className={`absolute inset-0 z-0 transition-opacity duration-1000 ease-in-out ${isVisible ? 'opacity-100' : 'opacity-0'} ${activeTool === 'eraser' ? 'cursor-crosshair' : activeTool === 'pen' ? 'cursor-crosshair' : 'cursor-grab'}`}
+      style={{ backgroundColor: '#143d6b' }}
     >
       <MapContainer 
         crs={gtaCrs} 
         bounds={bounds} 
         center={[4096, 4096]} 
-        zoom={0} 
-        minZoom={-1} 
+        zoom={-1} 
+        minZoom={-2} 
         maxZoom={4} 
         zoomControl={false}
         maxBounds={bounds} 
         maxBoundsViscosity={1.0}
-        style={{ height: '100%', width: '100%', backgroundColor: '#000000' }}
+        style={{ height: '100%', width: '100%', backgroundColor: '#143d6b' }}
         preferCanvas={true} 
       >
-        <ImageOverlay
-          url="/map.webp"
-          bounds={bounds}
-          zIndex={1}
-        />
+        <ImageOverlay url="/map.webp" bounds={bounds} zIndex={1} />
         
         {isDeployed && (
           <DrawingController activeTool={activeTool} activeColor={activeColor} socket={socket} strokeWidth={strokeWidth} factionLabel={factionLabel} />
@@ -140,9 +137,7 @@ const SanAndreasMap = ({
               : { color: isEraser ? '#ef4444' : zone.color, weight: zone.weight || 3, fillOpacity: isEraser ? 0.5 : 0.2, dashArray: isEraser ? '5, 10' : '' };
 
             const eventHandlers = {
-              click: (e) => {
-                if (activeTool === 'eraser') handleDeleteZone(zone.id, e);
-              },
+              click: (e) => { if (activeTool === 'eraser') handleDeleteZone(zone.id, e); },
               contextmenu: (e) => handleDeleteZone(zone.id, e)
             };
 

@@ -74,21 +74,15 @@ io.on('connection', (socket) => {
   socket.on('toggle_maintenance', (state) => {
     isMaintenance = state;
     io.emit('maintenance_state', isMaintenance);
-    console.log(`[SYS] Maintenance: ${isMaintenance ? 'ACTIVE' : 'INACTIVE'}`);
   });
 
   socket.on('deploy_unit', (unitData) => {
-    // CORRECTION : On cherche si l'unité existe déjà.
     const existingIndex = activeUnits.findIndex(u => u.callsign === unitData.callsign && u.faction === unitData.faction);
-    
     if (existingIndex !== -1) {
-      // Si elle existe, on la met à jour sans la supprimer
       activeUnits[existingIndex] = { ...activeUnits[existingIndex], ...unitData };
     } else {
-      // Sinon on l'ajoute
       activeUnits.push({ id: socket.id, ...unitData });
     }
-    
     saveData();
     io.to(unitData.faction).emit('sync_units', activeUnits.filter(u => u.faction === unitData.faction));
   });
@@ -102,12 +96,7 @@ io.on('connection', (socket) => {
   socket.on('add_zone', (zoneData) => {
     const faction = zoneData.faction || socket.currentFaction;
     if (!faction) return;
-
-    const newZone = { 
-      id: Date.now().toString() + Math.random().toString(36).substr(2, 5), 
-      ...zoneData, 
-      faction 
-    };
+    const newZone = { id: Date.now().toString() + Math.random().toString(36).substr(2, 5), ...zoneData, faction };
     activeZones.push(newZone);
     saveData();
     io.to(faction).emit('sync_zones', activeZones.filter(z => z.faction === faction));
@@ -129,10 +118,15 @@ io.on('connection', (socket) => {
     }
   });
 
-  socket.on('clear_all_zones', ({ faction }) => {
+  // NOUVEAU : Réinitialise tout (Unités, Tracés, Titre) pour la faction
+  socket.on('clear_operation', ({ faction }) => {
+    activeUnits = activeUnits.filter(u => u.faction !== faction);
     activeZones = activeZones.filter(z => z.faction !== faction);
+    operationTitles[faction] = 'OPÉRATION STANDARD';
     saveData();
+    io.to(faction).emit('sync_units', []);
     io.to(faction).emit('sync_zones', []);
+    io.to(faction).emit('sync_operation_title', 'OPÉRATION STANDARD');
   });
 
   socket.on('update_operation_title', ({ faction, title }) => {
@@ -146,6 +140,7 @@ io.on('connection', (socket) => {
   });
 });
 
+// Auth Routes...
 app.get('/auth/discord', (req, res) => {
   const url = `https://discord.com/api/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${encodeURIComponent(DISCORD_REDIRECT_URI)}&response_type=code&scope=identify`;
   res.redirect(url);
@@ -156,45 +151,23 @@ app.get('/auth/discord/callback', async (req, res) => {
   if (!code) return res.redirect('/login?error=no_code');
   try {
     const tokenResponse = await axios.post('https://discord.com/api/oauth2/token', new URLSearchParams({
-      client_id: DISCORD_CLIENT_ID,
-      client_secret: DISCORD_CLIENT_SECRET,
-      grant_type: 'authorization_code',
-      code: code,
-      redirect_uri: DISCORD_REDIRECT_URI,
-    }).toString(), {
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-    });
-
+      client_id: DISCORD_CLIENT_ID, client_secret: DISCORD_CLIENT_SECRET, grant_type: 'authorization_code', code: code, redirect_uri: DISCORD_REDIRECT_URI,
+    }).toString(), { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
     const accessToken = tokenResponse.data.access_token;
-    const userResponse = await axios.get('https://discord.com/api/users/@me', {
-      headers: { Authorization: `Bearer ${accessToken}` }
-    });
+    const userResponse = await axios.get('https://discord.com/api/users/@me', { headers: { Authorization: `Bearer ${accessToken}` } });
     const userId = userResponse.data.id;
     const username = userResponse.data.username; 
-
-    const memberResponse = await axios.get(`https://discord.com/api/guilds/${DISCORD_GUILD_ID}/members/${userId}`, {
-      headers: { Authorization: `Bot ${DISCORD_BOT_TOKEN}` }
-    });
-    
+    const memberResponse = await axios.get(`https://discord.com/api/guilds/${DISCORD_GUILD_ID}/members/${userId}`, { headers: { Authorization: `Bot ${DISCORD_BOT_TOKEN}` } });
     const userRoles = memberResponse.data.roles;
     const hasRole = userRoles.some(role => ALLOWED_ROLES.includes(role));
-
     if (!hasRole) return res.redirect('/login?error=unauthorized');
-
     const siteToken = jwt.sign({ id: userId, username }, JWT_SECRET || 'fallback_secret', { expiresIn: '24h' });
     res.redirect(`/login?token=${siteToken}`);
   } catch (error) {
-    console.error("[SYS] Erreur OAuth Discord:", error.response?.data || error.message);
     res.redirect('/login?error=auth_error');
   }
 });
 
 app.use(express.static(path.join(__dirname, 'dist')));
-
-app.get(/.*/, (req, res) => {
-  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
-});
-
-server.listen(PORT || 3001, () => {
-  console.log(`[SYS] Serveur ClearZone sur le port ${PORT || 3001}`);
-});
+app.get(/.*/, (req, res) => { res.sendFile(path.join(__dirname, 'dist', 'index.html')); });
+server.listen(PORT || 3001, () => { console.log(`[SYS] Serveur ClearZone sur le port ${PORT || 3001}`); });

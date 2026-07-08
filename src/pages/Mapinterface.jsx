@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Radio, Target, Activity, Menu, X } from 'lucide-react';
+import { ArrowLeft, Radio, Target, Activity, Menu, X, Trash2 } from 'lucide-react';
 import { io } from 'socket.io-client';
 import SanAndreasMap from '../components/Map/SanAndreasMap';
 import UnitManager from '../components/Tactical/UnitManager';
@@ -65,7 +65,7 @@ const MapInterface = () => {
       socket.off('sync_operation_title');
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [factionLabel, isDeployed, unitData.callsign]); // Correction de dépendances
+  }, [factionLabel, isDeployed, unitData.callsign]); 
 
   useEffect(() => {
     if (isDeployed) {
@@ -74,15 +74,19 @@ const MapInterface = () => {
     }
   }, [unitData, isDeployed, faction]);
 
-  const handleDeploy = () => {
-    if (unitData.callsign.trim() === '') return;
+  // Modifié pour accepter une unité injectée directement depuis "Rejoindre"
+  const handleDeploy = (overrideUnit = null) => {
+    const targetUnit = (overrideUnit && overrideUnit.callsign) ? overrideUnit : unitData;
+    if (targetUnit.callsign.trim() === '') return;
+    
     setIsDeployed(true);
     setIsSidebarOpen(false);
-    socket.emit('deploy_unit', { ...unitData, faction: factionLabel });
+    if (overrideUnit && overrideUnit.callsign) setUnitData(targetUnit);
+    
+    socket.emit('deploy_unit', { ...targetUnit, faction: factionLabel });
   };
 
   const handleLeaveUnit = () => {
-    // On se déconnecte LOCALEMENT, on ne supprime PAS l'unité pour les autres.
     setIsDeployed(false);
     setUnitData({ callsign: '', agents: '', color: '#ffffff' });
     localStorage.removeItem(`unitData_${faction}`);
@@ -90,7 +94,14 @@ const MapInterface = () => {
   };
 
   const handleUndo = () => socket.emit('undo_last_zone', { faction: factionLabel });
-  const handleClearAll = () => socket.emit('clear_all_zones', { faction: factionLabel });
+  
+  // Fonction globale pour tout raser
+  const handleClearOperation = () => {
+    if (window.confirm("🔴 DANGER : Confirmer la réinitialisation TOTALE de l'opération ? (Unités, Tracés et Titre effacés pour tout le monde)")) {
+      socket.emit('clear_operation', { faction: factionLabel });
+      if (isDeployed) handleLeaveUnit();
+    }
+  };
 
   const handleTitleBlurOrEnter = () => {
     if (localTitle !== operationTitle) {
@@ -100,7 +111,7 @@ const MapInterface = () => {
   };
 
   return (
-    <div translate="no" className="w-screen h-screen flex flex-col bg-black text-slate-200 overflow-hidden select-none relative font-sans">
+    <div translate="no" className="w-screen h-screen flex flex-col bg-[#143d6b] text-slate-200 overflow-hidden select-none relative font-sans">
       
       <header className="absolute top-4 left-4 right-4 h-16 bg-[#050505]/90 backdrop-blur-xl z-[1000] flex items-center justify-between px-6 border border-neutral-800 rounded-xl shadow-[0_0_30px_rgba(0,0,0,0.9)]">
         
@@ -131,22 +142,22 @@ const MapInterface = () => {
         <div className="hidden lg:flex items-center gap-2 max-w-[40%]" style={{ contentVisibility: 'auto' }}>
           <div className="flex items-center gap-2 overflow-x-auto py-1 px-2 no-scrollbar">
             {activeUnitsList.map((unit) => (
-              <div 
-                key={unit.callsign} 
-                className="flex items-center gap-2 bg-neutral-950 px-3 py-1 border border-neutral-900 rounded-md text-xs font-mono"
-                style={{ borderLeft: `3px solid ${unit.color}` }}
-              >
+              <div key={unit.callsign} className="flex items-center gap-2 bg-neutral-950 px-3 py-1 border border-neutral-900 rounded-md text-xs font-mono" style={{ borderLeft: `3px solid ${unit.color}` }}>
                 <span className="text-white font-bold">{unit.callsign}</span>
                 <span className="text-[10px] text-neutral-500 font-medium">({unit.agents})</span>
               </div>
             ))}
-            {activeUnitsList.length === 0 && (
-              <span className="text-[10px] font-mono text-neutral-600 tracking-widest italic">[AUCUN MODULE ACTIF]</span>
-            )}
+            {activeUnitsList.length === 0 && <span className="text-[10px] font-mono text-neutral-600 tracking-widest italic">[AUCUN MODULE ACTIF]</span>}
           </div>
         </div>
 
         <div className="flex items-center gap-4">
+          
+          {/* NOUVEAU BOUTON : CLEAR OPÉRATION */}
+          <button onClick={handleClearOperation} className="hidden md:flex items-center gap-2 px-3 py-1.5 border border-red-900/40 bg-red-950/20 hover:bg-red-900 hover:border-red-500 text-red-500 hover:text-white rounded-lg text-[10px] font-mono font-bold tracking-wider uppercase transition-all">
+            <Trash2 className="w-3.5 h-3.5" /> Wipe
+          </button>
+
           {isDeployed ? (
             <button onClick={handleLeaveUnit} className="hidden md:flex items-center gap-2 px-3 py-1.5 border border-red-900/40 bg-red-950/10 hover:bg-red-950 text-red-500 hover:text-white rounded-lg text-xs font-mono font-bold tracking-wider uppercase transition-all">
               <X className="w-3.5 h-3.5" /> Quitter Service
@@ -180,7 +191,7 @@ const MapInterface = () => {
         unitData={unitData}
         setUnitData={setUnitData}
         isDeployed={isDeployed}
-        onDeploy={handleDeploy}
+        onDeploy={handleDeploy} // Utilise la nouvelle fonction modifiée
         activeUnitsList={activeUnitsList}
         factionLabel={factionLabel}
         onDeleteGlobalUnit={(callsign) => socket.emit('delete_global_unit', { callsign, faction: factionLabel })}
@@ -194,7 +205,6 @@ const MapInterface = () => {
         strokeWidth={strokeWidth} 
         setStrokeWidth={setStrokeWidth} 
         onUndo={handleUndo}
-        onClearAll={handleClearAll}
       />
 
       <SanAndreasMap 
@@ -208,7 +218,7 @@ const MapInterface = () => {
         factionLabel={factionLabel}
       />
 
-      <div className="absolute bottom-4 left-4 z-[1000] pointer-events-none font-mono text-[10px] text-neutral-600 tracking-widest uppercase">
+      <div className="absolute bottom-4 left-4 z-[1000] pointer-events-none font-mono text-[10px] text-white/50 tracking-widest uppercase bg-black/40 px-3 py-1 rounded backdrop-blur">
         [SYS_OP: {isDeployed ? 'ACTIVE_TRACKING' : 'DISPATCH_READY'}]
       </div>
     </div>

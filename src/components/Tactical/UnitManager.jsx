@@ -12,8 +12,8 @@ const UnitManager = ({ isOpen, onClose, unitData, setUnitData, isDeployed, onDep
   }, []);
 
   const handleJoinUnit = (unit) => {
-    setUnitData({ callsign: unit.callsign, agents: unit.agents, color: unit.color });
-    setTimeout(() => onDeploy(), 100); 
+    // On passe directement l'objet unit pour éviter le décalage d'état de React
+    onDeploy(unit); 
   };
 
   return (
@@ -106,7 +106,7 @@ const UnitManager = ({ isOpen, onClose, unitData, setUnitData, isDeployed, onDep
 
       {(activeTab === 'create' || isDeployed) && (
         <div className="p-6 border-t border-neutral-900 bg-[#020202]">
-          <button onClick={onDeploy} disabled={!unitData.callsign} className="relative w-full py-4 rounded overflow-hidden group disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-500" style={{ backgroundColor: unitData.callsign ? `${unitData.color}15` : '#111', border: `1px solid ${unitData.callsign ? unitData.color : '#333'}`, color: unitData.callsign ? unitData.color : '#666' }}>
+          <button onClick={() => onDeploy(null)} disabled={!unitData.callsign} className="relative w-full py-4 rounded overflow-hidden group disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-500" style={{ backgroundColor: unitData.callsign ? `${unitData.color}15` : '#111', border: `1px solid ${unitData.callsign ? unitData.color : '#333'}`, color: unitData.callsign ? unitData.color : '#666' }}>
             {unitData.callsign && <div className="absolute inset-0 opacity-20 pointer-events-none transition-transform duration-700 group-hover:scale-150" style={{ background: `radial-gradient(circle at center, ${unitData.color} 0%, transparent 70%)` }}></div>}
             <span className="relative z-10 font-mono text-sm tracking-[0.2em] uppercase font-bold flex items-center justify-center gap-3">
               {isDeployed ? <Activity className="w-4 h-4 animate-pulse" /> : <Fingerprint className="w-4 h-4" />}
