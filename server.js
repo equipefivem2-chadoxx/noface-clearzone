@@ -32,6 +32,7 @@ const ALLOWED_ROLES = ['1427651124231405610', '1427651123606589446'];
 const DATA_FILE = path.join(__dirname, 'data.json');
 let activeUnits = [];
 let activeZones = [];
+let isMaintenance = false; // Variable globale pour la maintenance
 
 const loadData = () => {
   if (fs.existsSync(DATA_FILE)) {
@@ -51,10 +52,20 @@ loadData(); // Chargement au démarrage
 // --- WEBSOCKET (SOCKET.IO) : GESTION DE LA CARTE ---
 io.on('connection', (socket) => {
   console.log(`[SYS] Nouvel agent connecté : ${socket.id}`);
+  
+  // Envoi de la data + l'état de la maintenance au nouvel arrivant
   socket.emit('sync_data', { units: activeUnits, zones: activeZones });
+  socket.emit('maintenance_state', isMaintenance);
 
   socket.on('request_sync', () => {
     socket.emit('sync_data', { units: activeUnits, zones: activeZones });
+  });
+
+  // --- MAINTENANCE ---
+  socket.on('toggle_maintenance', (state) => {
+    isMaintenance = state;
+    io.emit('maintenance_state', isMaintenance);
+    console.log(`[SYS] Maintenance: ${isMaintenance ? 'ACTIVE' : 'INACTIVE'}`);
   });
 
   // --- UNITÉS ---
@@ -144,6 +155,7 @@ app.get('/auth/discord/callback', async (req, res) => {
       headers: { Authorization: `Bearer ${accessToken}` }
     });
     const userId = userResponse.data.id;
+    const username = userResponse.data.username; // On récupère le pseudo
 
     // C. Vérifie les rôles sur le serveur Discord de la faction
     const memberResponse = await axios.get(`https://discord.com/api/guilds/${DISCORD_GUILD_ID}/members/${userId}`, {
@@ -157,8 +169,8 @@ app.get('/auth/discord/callback', async (req, res) => {
       return res.redirect('/login?error=unauthorized');
     }
 
-    // D. Crée le token du site pour maintenir la session ouverte
-    const siteToken = jwt.sign({ id: userId }, JWT_SECRET || 'fallback_secret', { expiresIn: '24h' });
+    // D. Crée le token du site pour maintenir la session ouverte (avec ID et Username)
+    const siteToken = jwt.sign({ id: userId, username }, JWT_SECRET || 'fallback_secret', { expiresIn: '24h' });
 
     // E. Redirige vers le front avec le token validé
     res.redirect(`/login?token=${siteToken}`);
