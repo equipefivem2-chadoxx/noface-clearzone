@@ -21,7 +21,6 @@ const DrawingController = ({ activeTool, activeColor, socket, strokeWidth }) => 
 
     if (!activeTool || activeTool === 'hand' || activeTool === 'eraser') return;
 
-    // 1. GESTION DU CRAYON (Utilise strokeWidth dynamique)
     if (activeTool === 'pen') {
       map.dragging.disable();
       const onMouseDown = (e) => {
@@ -51,7 +50,6 @@ const DrawingController = ({ activeTool, activeColor, socket, strokeWidth }) => 
       return () => { map.off('mousedown mousemove mouseup'); map.dragging.enable(); };
     }
 
-    // 2. GESTION DES FORMES (Cercle / Polygone) -> Épaisseur fixe à 3
     const options = { shapeOptions: { color: activeColor, weight: 3, fillOpacity: 0.2 } };
     if (activeTool === 'circle') drawControlRef.current = new L.Draw.Circle(map, options);
     else if (activeTool === 'polygon') drawControlRef.current = new L.Draw.Polygon(map, options);
@@ -59,7 +57,6 @@ const DrawingController = ({ activeTool, activeColor, socket, strokeWidth }) => 
 
     const handleDrawCreated = (e) => {
       const { layerType, layer } = e;
-      // On force le weight à 3 pour la sauvegarde dans le serveur
       let zoneData = { type: layerType, color: activeColor, weight: 3 };
       
       if (layerType === 'circle') {
@@ -94,7 +91,11 @@ const SanAndreasMap = ({
   };
 
   return (
-    <div className={`absolute inset-0 z-0 bg-black ${activeTool === 'eraser' ? 'cursor-crosshair' : activeTool === 'pen' ? 'cursor-default' : 'cursor-grab'}`}>
+    <div className={`absolute inset-0 z-0 bg-[#143d6b] ${activeTool === 'eraser' ? 'cursor-crosshair' : activeTool === 'pen' ? 'cursor-default' : 'cursor-grab'}`}>
+      
+      {/* CSS MAGIQUE POUR Tuer LE LAG : Force l'accélération matérielle sur l'image */}
+      <style>{`.gpu-accelerated-image { will-change: transform; backface-visibility: hidden; transform: translateZ(0); }`}</style>
+      
       <MapContainer 
         crs={gtaCrs} 
         bounds={bounds} 
@@ -105,15 +106,13 @@ const SanAndreasMap = ({
         zoomControl={false}
         maxBounds={bounds} 
         maxBoundsViscosity={1.0}
-        zoomSnap={0.1} // Permet un zoom fluide fractionné
-        zoomDelta={0.5} // Adoucit les crans de la molette
-        wheelPxPerZoomLevel={120} // Vitesse de la molette optimisée
-        style={{ height: '100%', width: '100%', backgroundColor: '#000000' }}
-        preferCanvas={true} // Ultime optimisation pour le dessin
+        zoomSnap={0.1} 
+        zoomDelta={0.5} 
+        wheelPxPerZoomLevel={120} 
+        style={{ height: '100%', width: '100%', backgroundColor: '#143d6b' }}
+        preferCanvas={true} 
       >
-        
-        {/* On repasse sur l'image ultra-légère en WebP */}
-        <ImageOverlay url="/map.webp" bounds={bounds} />
+        <ImageOverlay url="/map.webp" bounds={bounds} className="gpu-accelerated-image" />
         
         {isDeployed && (
           <DrawingController activeTool={activeTool} activeColor={activeColor} socket={socket} strokeWidth={strokeWidth} />

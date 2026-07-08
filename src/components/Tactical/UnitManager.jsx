@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Crosshair, Users, Activity, Fingerprint, Plus, LogIn, Radio, Trash2 } from 'lucide-react';
 
-const UnitManager = ({ isOpen, onClose, unitData, setUnitData, isDeployed, onDeploy, activeUnitsList = [], onDeleteGlobalUnit }) => {
+const UnitManager = ({ isOpen, onClose, unitData, setUnitData, isDeployed, onDeploy, activeUnitsList = [], factionLabel, onDeleteGlobalUnit }) => {
   const [activeTab, setActiveTab] = useState('create');
 
   useEffect(() => {
@@ -12,7 +12,6 @@ const UnitManager = ({ isOpen, onClose, unitData, setUnitData, isDeployed, onDep
   }, []);
 
   const handleJoinUnit = (unit) => {
-    // Fusionne directement l'unité et la déploie
     setUnitData({ callsign: unit.callsign, agents: unit.agents, color: unit.color });
     setTimeout(() => onDeploy(), 100); 
   };
@@ -20,7 +19,6 @@ const UnitManager = ({ isOpen, onClose, unitData, setUnitData, isDeployed, onDep
   return (
     <div className={`absolute top-0 right-0 h-full w-[400px] bg-[#030303]/95 backdrop-blur-3xl border-l border-neutral-800/50 z-[1050] flex flex-col shadow-[-30px_0_50px_rgba(0,0,0,0.9)] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
       
-      {/* En-tête industriel */}
       <div className="p-6 border-b border-neutral-900 bg-black/40 flex flex-col relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-neutral-500 to-transparent opacity-30"></div>
         <div className="flex items-center justify-between mb-6">
@@ -35,7 +33,6 @@ const UnitManager = ({ isOpen, onClose, unitData, setUnitData, isDeployed, onDep
           </button>
         </div>
 
-        {/* ONGLETS */}
         <div className="flex gap-2">
           <button onClick={() => setActiveTab('create')} className={`flex-1 py-3 flex items-center justify-center gap-2 text-xs font-mono font-bold tracking-widest uppercase transition-all border-b-2 ${activeTab === 'create' ? 'border-white text-white bg-white/5' : 'border-transparent text-neutral-600 hover:text-neutral-400'}`}>
             <Plus className="w-3 h-3" /> Créer
@@ -46,7 +43,6 @@ const UnitManager = ({ isOpen, onClose, unitData, setUnitData, isDeployed, onDep
         </div>
       </div>
 
-      {/* Corps du formulaire */}
       <div className="flex-1 p-6 overflow-y-auto space-y-8">
         {activeTab === 'create' ? (
           <>
@@ -68,7 +64,7 @@ const UnitManager = ({ isOpen, onClose, unitData, setUnitData, isDeployed, onDep
           </>
         ) : (
           <div className="space-y-4">
-            <h3 className="text-[10px] font-mono tracking-[0.3em] text-neutral-500 uppercase">Unités sur le terrain ({activeUnitsList.length})</h3>
+            <h3 className="text-[10px] font-mono tracking-[0.3em] text-neutral-500 uppercase">Unités {factionLabel} actives ({activeUnitsList.length})</h3>
             {activeUnitsList.length === 0 ? (
                <div className="flex flex-col items-center justify-center py-10 text-neutral-600 font-mono text-xs text-center space-y-4">
                  <Radio className="w-8 h-8 opacity-50" />
@@ -86,11 +82,10 @@ const UnitManager = ({ isOpen, onClose, unitData, setUnitData, isDeployed, onDep
                       </div>
                     </div>
                     
-                    {/* NOUVEAU : Actions (Supprimer et Rejoindre) */}
                     <div className="flex items-center gap-2">
                       <button 
                         onClick={(e) => {
-                          e.stopPropagation(); // Empêche de déclencher handleJoinUnit
+                          e.stopPropagation(); 
                           if (onDeleteGlobalUnit) onDeleteGlobalUnit(unit.callsign);
                         }}
                         className="p-2 text-neutral-600 hover:text-red-500 hover:bg-red-950/30 rounded transition-colors"
@@ -108,7 +103,6 @@ const UnitManager = ({ isOpen, onClose, unitData, setUnitData, isDeployed, onDep
         )}
       </div>
 
-      {/* Bouton d'action (visible uniquement dans "Créer" ou si déjà déployé) */}
       {(activeTab === 'create' || isDeployed) && (
         <div className="p-6 border-t border-neutral-900 bg-[#020202]">
           <button onClick={onDeploy} disabled={!unitData.callsign} className="relative w-full py-4 rounded overflow-hidden group disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-500" style={{ backgroundColor: unitData.callsign ? `${unitData.color}15` : '#111', border: `1px solid ${unitData.callsign ? unitData.color : '#333'}`, color: unitData.callsign ? unitData.color : '#666' }}>

@@ -11,8 +11,8 @@ const socket = io(window.location.origin.includes('localhost') ? 'http://localho
 const MapInterface = () => {
   const { faction } = useParams();
   const navigate = useNavigate();
+  const factionLabel = faction ? faction.toUpperCase() : 'UNKNOWN';
 
-  // ÉTATS DE BASE : Utilisation du LocalStorage pour ne pas perdre son unité si on fait F5
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [unitData, setUnitData] = useState(() => {
     const savedData = localStorage.getItem(`unitData_${faction}`);
@@ -22,21 +22,16 @@ const MapInterface = () => {
     return localStorage.getItem(`isDeployed_${faction}`) === 'true';
   });
 
-  // ÉTATS TEMPS RÉEL (HUD & DESSIN)
-  const [activeTool, setActiveTool] = useState('hand'); // 'hand' par défaut pour bouger
-  const [strokeWidth, setStrokeWidth] = useState(3); // Épaisseur du trait par défaut
+  const [activeTool, setActiveTool] = useState('hand'); 
+  const [strokeWidth, setStrokeWidth] = useState(3); 
   const [activeUnitsList, setActiveUnitsList] = useState([]);
   const [zones, setZones] = useState([]);
 
-  const factionLabel = faction ? faction.toUpperCase() : 'UNKNOWN';
-
   useEffect(() => {
-    // 1. Dès que le composant est monté, on demande au serveur l'état actuel de la carte
     socket.emit('request_sync');
 
-    // 2. Si on était déjà déployé avant le F5, on renvoie notre unité au serveur au cas où
     if (isDeployed && unitData.callsign) {
-      socket.emit('deploy_unit', unitData);
+      socket.emit('deploy_unit', { ...unitData, faction: factionLabel });
     }
 
     socket.on('sync_data', (data) => {
@@ -60,9 +55,8 @@ const MapInterface = () => {
       socket.off('sync_zones');
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, []); // Exécuté une seule fois au montage
+  }, []); 
 
-  // NOUVEAU : On sauvegarde la session dans le LocalStorage à chaque changement
   useEffect(() => {
     if (isDeployed) {
       localStorage.setItem(`unitData_${faction}`, JSON.stringify(unitData));
@@ -74,13 +68,12 @@ const MapInterface = () => {
     if (unitData.callsign.trim() === '') return;
     setIsDeployed(true);
     setIsSidebarOpen(false);
-    socket.emit('deploy_unit', unitData);
+    socket.emit('deploy_unit', { ...unitData, faction: factionLabel });
   };
 
-  // NOUVEAU : Fonction pour quitter / supprimer son unité et nettoyer la session locale
   const handleLeaveUnit = () => {
     if (unitData.callsign) {
-      socket.emit('delete_global_unit', unitData.callsign);
+      socket.emit('delete_global_unit', { callsign: unitData.callsign, faction: factionLabel });
     }
     setIsDeployed(false);
     setUnitData({ callsign: '', agents: '', color: '#ffffff' });
@@ -91,10 +84,12 @@ const MapInterface = () => {
   const handleUndo = () => socket.emit('undo_last_zone');
   const handleClearAll = () => socket.emit('clear_all_zones');
 
+  // FILTRE : On ne garde que les unités de CETTE faction
+  const myFactionUnits = activeUnitsList.filter(u => u.faction === factionLabel);
+
   return (
-    <div translate="no" className="w-screen h-screen flex flex-col bg-black text-slate-200 overflow-hidden select-none relative font-sans">
+    <div translate="no" className="w-screen h-screen flex flex-col bg-[#143d6b] text-slate-200 overflow-hidden select-none relative font-sans">
       
-      {/* HEADER TACTIQUE */}
       <header className="absolute top-4 left-4 right-4 h-16 bg-[#050505]/80 backdrop-blur-xl z-[1000] flex items-center justify-between px-6 border border-neutral-800 rounded-xl shadow-[0_0_30px_rgba(0,0,0,0.8)]">
         <div className="flex items-center gap-4">
           <button onClick={() => navigate('/')} className="p-2 border border-neutral-800 hover:border-white bg-black hover:bg-white hover:text-black rounded-lg transition-all duration-300 cursor-pointer group">
@@ -110,9 +105,9 @@ const MapInterface = () => {
           </div>
         </div>
 
-        {/* BARRE DES UNITÉS ACTIVES AU CENTRE */}
+        {/* N'AFFICHE QUE LES UNITÉS DE LA FACTION COURANTE */}
         <div className="flex-1 flex justify-center items-center gap-3 px-4 overflow-x-auto no-scrollbar">
-          {activeUnitsList.map((u, i) => (
+          {myFactionUnits.map((u, i) => (
             <div key={i} className="flex items-center gap-2 px-3 py-1 rounded-full border border-neutral-700 bg-neutral-900/50" style={{ borderColor: `${u.color}40` }}>
               <div className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: u.color, boxShadow: `0 0 8px ${u.color}` }}></div>
               <span className="text-xs font-bold tracking-wider" style={{ color: u.color }}>
@@ -123,7 +118,6 @@ const MapInterface = () => {
         </div>
 
         <div className="flex items-center gap-4 font-mono text-xs">
-          {/* Bouton pour quitter si on est déployé */}
           {isDeployed && (
             <button onClick={handleLeaveUnit} className="flex items-center gap-1 px-3 py-1.5 bg-red-950/30 border border-red-900/50 text-red-500 hover:bg-red-900/50 hover:text-white rounded transition-colors cursor-pointer">
               <X className="w-3 h-3" />
@@ -146,8 +140,9 @@ const MapInterface = () => {
         setUnitData={setUnitData}
         isDeployed={isDeployed}
         onDeploy={handleDeploy}
-        activeUnitsList={activeUnitsList}
-        onDeleteGlobalUnit={(callsign) => socket.emit('delete_global_unit', callsign)}
+        activeUnitsList={myFactionUnits}
+        factionLabel={factionLabel}
+        onDeleteGlobalUnit={(callsign) => socket.emit('delete_global_unit', { callsign, faction: factionLabel })}
       />
 
       <DrawToolbar 

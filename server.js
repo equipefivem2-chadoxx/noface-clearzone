@@ -20,7 +20,6 @@ const io = new Server(server, { cors: { origin: '*' } });
 
 app.use(cors());
 
-// Récupération de toutes tes variables d'environnement
 const {
   DISCORD_CLIENT_ID, DISCORD_CLIENT_SECRET, DISCORD_BOT_TOKEN,
   DISCORD_GUILD_ID, DISCORD_REDIRECT_URI, JWT_SECRET, PORT
@@ -28,11 +27,10 @@ const {
 
 const ALLOWED_ROLES = ['1427651124231405610', '1427651123606589446'];
 
-// --- SYSTÈME DE SAUVEGARDE PERSISTANTE ---
 const DATA_FILE = path.join(__dirname, 'data.json');
 let activeUnits = [];
 let activeZones = [];
-let isMaintenance = false; // Variable globale pour la maintenance
+let isMaintenance = false; 
 
 const loadData = () => {
   if (fs.existsSync(DATA_FILE)) {
@@ -47,13 +45,11 @@ const saveData = () => {
   fs.writeFileSync(DATA_FILE, JSON.stringify({ units: activeUnits, zones: activeZones }, null, 2));
 };
 
-loadData(); // Chargement au démarrage
+loadData(); 
 
-// --- WEBSOCKET (SOCKET.IO) : GESTION DE LA CARTE ---
 io.on('connection', (socket) => {
   console.log(`[SYS] Nouvel agent connecté : ${socket.id}`);
   
-  // Envoi de la data + l'état de la maintenance au nouvel arrivant
   socket.emit('sync_data', { units: activeUnits, zones: activeZones });
   socket.emit('maintenance_state', isMaintenance);
 
@@ -61,21 +57,19 @@ io.on('connection', (socket) => {
     socket.emit('sync_data', { units: activeUnits, zones: activeZones });
   });
 
-  // LA CORRECTION EST ICI : Le serveur répond à React pour débloquer l'écran
   socket.on('check_maintenance', () => {
     socket.emit('maintenance_state', isMaintenance);
   });
 
-  // --- MAINTENANCE ---
   socket.on('toggle_maintenance', (state) => {
     isMaintenance = state;
     io.emit('maintenance_state', isMaintenance);
     console.log(`[SYS] Maintenance: ${isMaintenance ? 'ACTIVE' : 'INACTIVE'}`);
   });
 
-  // --- UNITÉS ---
+  // --- UNITÉS (Mise à jour avec la Faction) ---
   socket.on('deploy_unit', (unitData) => {
-    const existingIndex = activeUnits.findIndex(u => u.callsign === unitData.callsign);
+    const existingIndex = activeUnits.findIndex(u => u.callsign === unitData.callsign && u.faction === unitData.faction);
     if (existingIndex !== -1) {
       activeUnits[existingIndex] = { ...activeUnits[existingIndex], ...unitData };
     } else {
@@ -85,8 +79,9 @@ io.on('connection', (socket) => {
     io.emit('sync_units', activeUnits);
   });
 
-  socket.on('delete_global_unit', (callsign) => {
-    activeUnits = activeUnits.filter(u => u.callsign !== callsign);
+  // Suppression par Callsign ET Faction
+  socket.on('delete_global_unit', ({ callsign, faction }) => {
+    activeUnits = activeUnits.filter(u => !(u.callsign === callsign && u.faction === faction));
     saveData();
     io.emit('sync_units', activeUnits);
   });
@@ -119,8 +114,6 @@ io.on('connection', (socket) => {
     io.emit('sync_zones', activeZones);
   });
 });
-
-// --- ROUTES D'AUTHENTIFICATION DISCORD ---
 
 app.get('/auth/discord', (req, res) => {
   if (!DISCORD_CLIENT_ID || !DISCORD_REDIRECT_URI) {
@@ -179,11 +172,9 @@ app.get('/auth/discord/callback', async (req, res) => {
   }
 });
 
-// --- SERVEUR STATIQUE POUR LE FRONTEND (REACT) ---
 app.use(express.static(path.join(__dirname, 'dist')));
 app.get(/.*/, (req, res) => res.sendFile(path.join(__dirname, 'dist', 'index.html')));
 
-// --- DÉMARRAGE DU SERVEUR ---
 server.listen(PORT || 3001, () => {
   console.log(`[SYS] Serveur tactique en ligne sur le port ${PORT || 3001}`);
 });
