@@ -37,7 +37,8 @@ const DrawingController = ({ activeTool, activeColor, socket, strokeWidth }) => 
         if (!isDrawingRef.current) return;
         isDrawingRef.current = false;
         const latlngs = currentLineRef.current.getLatLngs();
-        if (latlngs.length > 1) {
+        // Sécurité : on vérifie que le socket existe avant d'envoyer
+        if (latlngs.length > 1 && socket) {
           socket.emit('add_zone', { type: 'polyline', color: activeColor, latlngs, weight: strokeWidth });
         }
         currentLineRef.current.remove(); 
@@ -63,7 +64,8 @@ const DrawingController = ({ activeTool, activeColor, socket, strokeWidth }) => 
       } else {
         zoneData.latlngs = layer.getLatLngs();
       }
-      socket.emit('add_zone', zoneData);
+      // Sécurité : on vérifie que le socket existe
+      if (socket) socket.emit('add_zone', zoneData);
       if (drawControlRef.current) drawControlRef.current.enable();
     };
 
@@ -74,9 +76,18 @@ const DrawingController = ({ activeTool, activeColor, socket, strokeWidth }) => 
   return null;
 };
 
-const SanAndreasMap = ({ activeColor, isDeployed, activeTool, setActiveTool, strokeWidth, zones, socket }) => {
+// AJOUT DES VALEURS PAR DÉFAUT pour éviter les crashs si les variables ne sont pas encore chargées
+const SanAndreasMap = ({ 
+  activeColor = '#ef4444', 
+  isDeployed = false, 
+  activeTool = 'hand', 
+  setActiveTool, 
+  strokeWidth = 3, 
+  zones = [], 
+  socket = null 
+}) => {
   const handleZoneClick = (zoneId) => {
-    if (activeTool === 'eraser') socket.emit('delete_zone', zoneId);
+    if (activeTool === 'eraser' && socket) socket.emit('delete_zone', zoneId);
   };
 
   return (
@@ -85,16 +96,17 @@ const SanAndreasMap = ({ activeColor, isDeployed, activeTool, setActiveTool, str
         crs={gtaCrs} 
         bounds={bounds} 
         center={[4096, 4096]} 
-        zoom={-2} 
-        minZoom={-3} 
-        maxZoom={2} 
+        // CORRECTION DU ZOOM : On démarre à 0 car tes dossiers commencent à 0
+        zoom={0} 
+        minZoom={0} 
+        maxZoom={4} 
         zoomControl={false}
         maxBounds={bounds} 
         maxBoundsViscosity={1.0}
         style={{ height: '100%', width: '100%', backgroundColor: '#000000' }}
         preferCanvas={true}
       >
-        {/* NOUVEAU : Chargement des tuiles MapTiler (avec le -y obligatoire pour ce CRS) */}
+        {/* Chargement des tuiles avec le -y obligatoire et extension .jpg (comme sur ton screen) */}
         <TileLayer
           url="/tuiles/{z}/{x}/{-y}.jpg"
           noWrap={true}
