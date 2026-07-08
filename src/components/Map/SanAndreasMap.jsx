@@ -5,7 +5,15 @@ import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw/dist/leaflet.draw.css';
 import 'leaflet-draw';
 
-const gtaCrs = L.CRS.Simple;
+// ------------------------------------------------------------------------
+// 🚨 LA MAGIE EST ICI : On crée un système de coordonnées sur mesure.
+// Ça convertit tes coordonnées (8192x8192) vers le format des tuiles web
+// pour que Leaflet arrête de chercher des tuiles négatives (-1.jpg) !
+const gtaCrs = L.extend({}, L.CRS.Simple, {
+  transformation: new L.Transformation(1/32, 0, -1/32, 256)
+});
+// ------------------------------------------------------------------------
+
 const bounds = [[0, 0], [8192, 8192]];
 
 const DrawingController = ({ activeTool, activeColor, socket, strokeWidth, factionLabel }) => {
@@ -52,7 +60,6 @@ const DrawingController = ({ activeTool, activeColor, socket, strokeWidth, facti
       return () => { map.off('mousedown mousemove mouseup'); map.dragging.enable(); };
     }
 
-    // Épaisseur fixée à 3 pour les formes géométriques
     const options = { shapeOptions: { color: activeColor, weight: 3, fillOpacity: 0.2 } };
     if (activeTool === 'circle') drawControlRef.current = new L.Draw.Circle(map, options);
     else if (activeTool === 'polygon') drawControlRef.current = new L.Draw.Polygon(map, options);
@@ -92,7 +99,6 @@ const SanAndreasMap = ({
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    // Petite animation d'apparition pour rendre le tout plus pro
     const timer = setTimeout(() => setIsVisible(true), 100);
     return () => clearTimeout(timer);
   }, []);
@@ -116,12 +122,12 @@ const SanAndreasMap = ({
       `}</style>
       
       <MapContainer 
-        crs={gtaCrs} 
+        crs={gtaCrs} // <-- Notre système magique est injecté ici
         bounds={bounds} 
         center={[4096, 4096]} 
         zoom={2} 
         minZoom={0} 
-        maxZoom={5} 
+        maxZoom={6} // J'ai monté à 6 pour te laisser zoomer plus près de l'action
         zoomControl={false}
         maxBounds={bounds} 
         maxBoundsViscosity={1.0}
@@ -129,12 +135,13 @@ const SanAndreasMap = ({
         style={{ height: '100%', width: '100%' }}
         preferCanvas={true} 
       >
-        {/* LE NOUVEAU SYSTÈME DE TUILES FLUIDE */}
         <TileLayer 
           url="https://soukapic.github.io/LSPD-Carte-10-20/mapStyles/styleSatelite/{z}/{x}/{y}.jpg" 
           bounds={bounds}
           noWrap={true}
           zIndex={1}
+          minNativeZoom={2} // Assure qu'il n'y a pas d'erreur si on dézoome au max
+          maxNativeZoom={5} // Étire les images proprement si on zoome très près
         />
         
         {isDeployed && (
