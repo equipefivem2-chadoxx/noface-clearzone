@@ -1,14 +1,14 @@
 import React, { useEffect, useRef } from 'react';
-import { MapContainer, ImageOverlay, Circle, Polygon, Polyline, FeatureGroup, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Circle, Polygon, Polyline, FeatureGroup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw/dist/leaflet.draw.css';
 import 'leaflet-draw';
 
 const gtaCrs = L.CRS.Simple;
+// Avec les tuiles, on définit une zone d'affichage plus classique
 const bounds = [[0, 0], [8192, 8192]];
 
-// Contrôleur de dessin optimisé
 const DrawingController = ({ activeTool, activeColor, socket, strokeWidth }) => {
   const map = useMap();
   const drawControlRef = useRef(null);
@@ -16,105 +16,91 @@ const DrawingController = ({ activeTool, activeColor, socket, strokeWidth }) => 
   const isDrawingRef = useRef(false);
 
   useEffect(() => {
-    // 1. Nettoyage des outils précédents
     if (drawControlRef.current) drawControlRef.current.disable();
     map.off('mousedown mousemove mouseup');
-    map.dragging.enable(); // Réactive le mouvement de carte par défaut (la "Main")
+    map.dragging.enable(); 
 
     if (!activeTool || activeTool === 'hand' || activeTool === 'eraser') return;
 
-    // 2. CRAYON FLUO (Dessin libre 100% fluide)
     if (activeTool === 'pen') {
-      map.dragging.disable(); // Bloque le déplacement de la carte pendant le dessin
-      
+      map.dragging.disable();
       const onMouseDown = (e) => {
         isDrawingRef.current = true;
-        // Utilisation de strokeWidth ici
         currentLineRef.current = L.polyline([e.latlng], { 
           color: activeColor, weight: strokeWidth, opacity: 0.6, lineCap: 'round', lineJoin: 'round' 
         }).addTo(map);
       };
-
       const onMouseMove = (e) => {
         if (!isDrawingRef.current || !currentLineRef.current) return;
         currentLineRef.current.addLatLng(e.latlng);
       };
-
       const onMouseUp = () => {
         if (!isDrawingRef.current) return;
         isDrawingRef.current = false;
-        
-        // On NE réactive PAS map.dragging.enable() ici pour garder le mode "dessin" actif
         const latlngs = currentLineRef.current.getLatLngs();
         if (latlngs.length > 1) {
-          // On envoie le weight au serveur pour que les autres voient la même épaisseur
           socket.emit('add_zone', { type: 'polyline', color: activeColor, latlngs, weight: strokeWidth });
         }
-        
         currentLineRef.current.remove(); 
         currentLineRef.current = null;
-        // On NE met PLUS setActiveTool(null) ici pour garder l'outil actif !
       };
-
       map.on('mousedown', onMouseDown);
       map.on('mousemove', onMouseMove);
       map.on('mouseup', onMouseUp);
-      
       return () => { map.off('mousedown mousemove mouseup'); map.dragging.enable(); };
     }
 
-    // 3. OUTILS LEAFLET-DRAW (Cercle/Polygone)
     const options = { shapeOptions: { color: activeColor, weight: strokeWidth, fillOpacity: 0.2 } };
-    
     if (activeTool === 'circle') drawControlRef.current = new L.Draw.Circle(map, options);
     else if (activeTool === 'polygon') drawControlRef.current = new L.Draw.Polygon(map, options);
-
     if (drawControlRef.current) drawControlRef.current.enable();
 
     const handleDrawCreated = (e) => {
       const { layerType, layer } = e;
       let zoneData = { type: layerType, color: activeColor, weight: strokeWidth };
-
       if (layerType === 'circle') {
         zoneData.center = layer.getLatLng();
         zoneData.radius = layer.getRadius();
       } else {
         zoneData.latlngs = layer.getLatLngs();
       }
-
       socket.emit('add_zone', zoneData);
-      // On NE met PLUS setActiveTool(null) ici non plus.
-      
-      // Réactivation manuelle de l'outil Leaflet-Draw pour qu'on puisse enchaîner les ronds/polygones sans recliquer sur la barre
       if (drawControlRef.current) drawControlRef.current.enable();
     };
 
     map.on(L.Draw.Event.CREATED, handleDrawCreated);
     return () => { map.off(L.Draw.Event.CREATED, handleDrawCreated); };
-
   }, [activeTool, map, activeColor, socket, strokeWidth]);
 
   return null;
 };
 
 const SanAndreasMap = ({ activeColor, isDeployed, activeTool, setActiveTool, strokeWidth, zones, socket }) => {
-  
   const handleZoneClick = (zoneId) => {
-    if (activeTool === 'eraser') {
-      socket.emit('delete_zone', zoneId);
-    }
+    if (activeTool === 'eraser') socket.emit('delete_zone', zoneId);
   };
 
   return (
     <div className={`absolute inset-0 z-0 bg-black ${activeTool === 'eraser' ? 'cursor-crosshair' : activeTool === 'pen' ? 'cursor-default' : 'cursor-grab'}`}>
       <MapContainer 
-        crs={gtaCrs} bounds={bounds} center={[4096, 4096]} 
-        zoom={-2} minZoom={-3} maxZoom={2} zoomControl={false}
-        maxBounds={bounds} maxBoundsViscosity={1.0}
+        crs={gtaCrs} 
+        bounds={bounds} 
+        center={[4096, 4096]} 
+        zoom={-2} 
+        minZoom={-3} 
+        maxZoom={2} 
+        zoomControl={false}
+        maxBounds={bounds} 
+        maxBoundsViscosity={1.0}
         style={{ height: '100%', width: '100%', backgroundColor: '#000000' }}
         preferCanvas={true}
       >
-        <ImageOverlay url="/map.jpg" bounds={bounds} />
+        {/* NOUVEAU : Chargement des tuiles MapTiler */}
+        <TileLayer
+          url="/tuiles/{z}/{x}/{y}.png"
+          noWrap={true}
+          bounds={bounds}
+        />
         
         {isDeployed && (
           <DrawingController activeTool={activeTool} activeColor={activeColor} socket={socket} strokeWidth={strokeWidth} />
@@ -123,7 +109,6 @@ const SanAndreasMap = ({ activeColor, isDeployed, activeTool, setActiveTool, str
         <FeatureGroup>
           {zones.map((zone) => {
             const isEraser = activeTool === 'eraser';
-            // On récupère le zone.weight pour avoir l'épaisseur correcte stockée sur le serveur (ou on met un par défaut)
             const pathOptions = zone.type === 'polyline' 
               ? { color: isEraser ? '#ef4444' : zone.color, weight: zone.weight || 8, opacity: isEraser ? 0.5 : 0.6, lineCap: 'round', lineJoin: 'round', dashArray: isEraser ? '5, 15' : '' }
               : { color: isEraser ? '#ef4444' : zone.color, weight: zone.weight || 3, fillOpacity: isEraser ? 0.5 : 0.2, dashArray: isEraser ? '5, 10' : '' };
@@ -131,7 +116,6 @@ const SanAndreasMap = ({ activeColor, isDeployed, activeTool, setActiveTool, str
             if (zone.type === 'circle') return <Circle key={zone.id} center={zone.center} radius={zone.radius} pathOptions={pathOptions} eventHandlers={{ click: () => handleZoneClick(zone.id) }} />;
             if (zone.type === 'polygon') return <Polygon key={zone.id} positions={zone.latlngs} pathOptions={pathOptions} eventHandlers={{ click: () => handleZoneClick(zone.id) }} />;
             if (zone.type === 'polyline') return <Polyline key={zone.id} positions={zone.latlngs} pathOptions={pathOptions} eventHandlers={{ click: () => handleZoneClick(zone.id) }} />;
-            
             return null;
           })}
         </FeatureGroup>

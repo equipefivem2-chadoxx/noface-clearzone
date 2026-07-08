@@ -1,0 +1,14 @@
+{
+  "name": "TEST",
+  "version": "1.1.0",
+  "description": "",
+  "attribution": "<a href=\"https://www.maptiler.com/engine/\">Rendered with MapTiler Engine</a>, non-commercial use only",
+  "type": "baselayer",
+  "color": "#FFFFFF",
+  "format": "jpg",
+  "minzoom": "0",
+  "maxzoom": "1",
+  "scale": "1.000000",
+  "bounds": [-180.00000000, -85.05112878, 179.99543245, 85.05112878],
+  "profile": "mercator"
+}
