@@ -38,7 +38,7 @@ function Maintenance({ socket }) {
           </h1>
           <div className="h-[1px] w-24 bg-red-900/50"></div>
           <h2 className="text-xl font-bold tracking-[0.3em] text-white uppercase mt-2">
-            Réseau Hors Ligne
+            Réseau Actuellement en maintenance 
           </h2>
         </div>
 
