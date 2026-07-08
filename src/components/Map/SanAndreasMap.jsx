@@ -6,7 +6,6 @@ import 'leaflet-draw/dist/leaflet.draw.css';
 import 'leaflet-draw';
 
 const gtaCrs = L.CRS.Simple;
-// Avec les tuiles, on définit une zone d'affichage plus classique
 const bounds = [[0, 0], [8192, 8192]];
 
 const DrawingController = ({ activeTool, activeColor, socket, strokeWidth }) => {
@@ -95,11 +94,12 @@ const SanAndreasMap = ({ activeColor, isDeployed, activeTool, setActiveTool, str
         style={{ height: '100%', width: '100%', backgroundColor: '#000000' }}
         preferCanvas={true}
       >
-        {/* NOUVEAU : Chargement des tuiles MapTiler */}
+        {/* NOUVEAU : Chargement des tuiles MapTiler (avec le -y obligatoire pour ce CRS) */}
         <TileLayer
-          url="/tuiles/{z}/{x}/{y}.jpg"
+          url="/tuiles/{z}/{x}/{-y}.jpg"
           noWrap={true}
           bounds={bounds}
+          tileSize={256}
         />
         
         {isDeployed && (
