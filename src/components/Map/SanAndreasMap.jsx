@@ -21,6 +21,7 @@ const DrawingController = ({ activeTool, activeColor, socket, strokeWidth }) => 
 
     if (!activeTool || activeTool === 'hand' || activeTool === 'eraser') return;
 
+    // 1. GESTION DU CRAYON (Utilise strokeWidth dynamique)
     if (activeTool === 'pen') {
       map.dragging.disable();
       const onMouseDown = (e) => {
@@ -37,7 +38,7 @@ const DrawingController = ({ activeTool, activeColor, socket, strokeWidth }) => 
         if (!isDrawingRef.current) return;
         isDrawingRef.current = false;
         const latlngs = currentLineRef.current.getLatLngs();
-        // Sécurité : on vérifie que le socket existe avant d'envoyer
+        
         if (latlngs.length > 1 && socket) {
           socket.emit('add_zone', { type: 'polyline', color: activeColor, latlngs, weight: strokeWidth });
         }
@@ -50,21 +51,24 @@ const DrawingController = ({ activeTool, activeColor, socket, strokeWidth }) => 
       return () => { map.off('mousedown mousemove mouseup'); map.dragging.enable(); };
     }
 
-    const options = { shapeOptions: { color: activeColor, weight: strokeWidth, fillOpacity: 0.2 } };
+    // 2. GESTION DES FORMES (Cercle / Polygone) -> Épaisseur fixe à 3
+    const options = { shapeOptions: { color: activeColor, weight: 3, fillOpacity: 0.2 } };
     if (activeTool === 'circle') drawControlRef.current = new L.Draw.Circle(map, options);
     else if (activeTool === 'polygon') drawControlRef.current = new L.Draw.Polygon(map, options);
     if (drawControlRef.current) drawControlRef.current.enable();
 
     const handleDrawCreated = (e) => {
       const { layerType, layer } = e;
-      let zoneData = { type: layerType, color: activeColor, weight: strokeWidth };
+      // On force le weight à 3 pour la sauvegarde dans le serveur
+      let zoneData = { type: layerType, color: activeColor, weight: 3 };
+      
       if (layerType === 'circle') {
         zoneData.center = layer.getLatLng();
         zoneData.radius = layer.getRadius();
       } else {
         zoneData.latlngs = layer.getLatLngs();
       }
-      // Sécurité : on vérifie que le socket existe
+      
       if (socket) socket.emit('add_zone', zoneData);
       if (drawControlRef.current) drawControlRef.current.enable();
     };
@@ -76,7 +80,6 @@ const DrawingController = ({ activeTool, activeColor, socket, strokeWidth }) => 
   return null;
 };
 
-// AJOUT DES VALEURS PAR DÉFAUT pour éviter les crashs si les variables ne sont pas encore chargées
 const SanAndreasMap = ({ 
   activeColor = '#ef4444', 
   isDeployed = false, 
@@ -96,7 +99,6 @@ const SanAndreasMap = ({
         crs={gtaCrs} 
         bounds={bounds} 
         center={[4096, 4096]} 
-        // CORRECTION DU ZOOM : On démarre à 0 car tes dossiers commencent à 0
         zoom={0} 
         minZoom={0} 
         maxZoom={4} 
@@ -106,12 +108,13 @@ const SanAndreasMap = ({
         style={{ height: '100%', width: '100%', backgroundColor: '#000000' }}
         preferCanvas={true}
       >
-        {/* Chargement des tuiles avec le -y obligatoire et extension .jpg (comme sur ton screen) */}
+        {/* CORRECTION : On retire le -y pour tester l'axe normal de ton dossier */}
         <TileLayer
-          url="/tuiles/{z}/{x}/{-y}.jpg"
+          url="/tuiles/{z}/{x}/{y}.jpg"
           noWrap={true}
           bounds={bounds}
           tileSize={256}
+          errorTileUrl="/map.jpg" // Sécurité : si une tuile manque, il mettra ton ancienne map à la place pour éviter le blanc
         />
         
         {isDeployed && (
@@ -121,6 +124,7 @@ const SanAndreasMap = ({
         <FeatureGroup>
           {zones.map((zone) => {
             const isEraser = activeTool === 'eraser';
+            // Le weight s'applique correctement : soit celui du tracé, soit 3 par défaut pour les cercles
             const pathOptions = zone.type === 'polyline' 
               ? { color: isEraser ? '#ef4444' : zone.color, weight: zone.weight || 8, opacity: isEraser ? 0.5 : 0.6, lineCap: 'round', lineJoin: 'round', dashArray: isEraser ? '5, 15' : '' }
               : { color: isEraser ? '#ef4444' : zone.color, weight: zone.weight || 3, fillOpacity: isEraser ? 0.5 : 0.2, dashArray: isEraser ? '5, 10' : '' };
