@@ -12,8 +12,9 @@ const UnitManager = ({ isOpen, onClose, unitData, setUnitData, isDeployed, onDep
   }, []);
 
   const handleJoinUnit = (unit) => {
-    // On passe directement l'objet unit pour éviter le décalage d'état de React
-    onDeploy(unit); 
+    // Te connecte à l'unité en direct (vous partagez désormais le même callsign)
+    onDeploy(unit);
+    setActiveTab('create'); // Ramène sur l'onglet Création pour que tu puisses t'ajouter aux agents
   };
 
   return (
@@ -35,7 +36,7 @@ const UnitManager = ({ isOpen, onClose, unitData, setUnitData, isDeployed, onDep
 
         <div className="flex gap-2">
           <button onClick={() => setActiveTab('create')} className={`flex-1 py-3 flex items-center justify-center gap-2 text-xs font-mono font-bold tracking-widest uppercase transition-all border-b-2 ${activeTab === 'create' ? 'border-white text-white bg-white/5' : 'border-transparent text-neutral-600 hover:text-neutral-400'}`}>
-            <Plus className="w-3 h-3" /> Créer
+            <Plus className="w-3 h-3" /> {isDeployed ? "Modifier" : "Créer"}
           </button>
           <button onClick={() => setActiveTab('join')} className={`flex-1 py-3 flex items-center justify-center gap-2 text-xs font-mono font-bold tracking-widest uppercase transition-all border-b-2 ${activeTab === 'join' ? 'border-white text-white bg-white/5' : 'border-transparent text-neutral-600 hover:text-neutral-400'}`}>
             <LogIn className="w-3 h-3" /> Rejoindre
@@ -47,25 +48,27 @@ const UnitManager = ({ isOpen, onClose, unitData, setUnitData, isDeployed, onDep
         {activeTab === 'create' ? (
           <div className="space-y-6">
             <div className="space-y-2">
-              <label className="text-[10px] font-mono uppercase tracking-widest text-neutral-500">Indicatif Unité (Callsign)</label>
+              <label className="text-[10px] font-mono uppercase tracking-widest text-neutral-500">Indicatif Unité (Fixe en OP)</label>
               <div className="flex items-center bg-black border border-neutral-800 focus-within:border-white rounded px-3 transition-colors">
                 <Radio className="w-4 h-4 text-neutral-600 mr-3" />
-                <input disabled={isDeployed} type="text" value={unitData.callsign} onChange={e => setUnitData(p => ({ ...p, callsign: e.target.value }))} className="w-full bg-transparent py-3 text-sm text-white font-mono uppercase focus:outline-none placeholder-neutral-700" placeholder="Ex: LINCOLN-10" />
+                <input disabled={isDeployed} type="text" value={unitData.callsign} onChange={e => setUnitData(p => ({ ...p, callsign: e.target.value }))} className={`w-full bg-transparent py-3 text-sm text-white font-mono uppercase focus:outline-none ${isDeployed ? 'opacity-50 cursor-not-allowed' : 'placeholder-neutral-700'}`} placeholder="Ex: LINCOLN-10" />
               </div>
             </div>
 
             <div className="space-y-2">
-              <label className="text-[10px] font-mono uppercase tracking-widest text-neutral-500">Agents Matricules</label>
+              <label className="text-[10px] font-mono uppercase tracking-widest text-neutral-500">Agents Matricules (Modifiable)</label>
               <div className="flex items-center bg-black border border-neutral-800 focus-within:border-white rounded px-3 transition-colors">
                 <Users className="w-4 h-4 text-neutral-600 mr-3" />
-                <input disabled={isDeployed} type="text" value={unitData.agents} onChange={e => setUnitData(p => ({ ...p, agents: e.target.value }))} className="w-full bg-transparent py-3 text-sm text-white font-mono uppercase focus:outline-none placeholder-neutral-700" placeholder="Ex: 01 | 43 | 12" />
+                {/* Le champ Agent n'est PLUS désactivé quand déployé */}
+                <input type="text" value={unitData.agents} onChange={e => setUnitData(p => ({ ...p, agents: e.target.value }))} className="w-full bg-transparent py-3 text-sm text-white font-mono uppercase focus:outline-none placeholder-neutral-700" placeholder="Ex: 01 | 43 | 12" />
               </div>
             </div>
 
             <div className="space-y-2">
               <label className="text-[10px] font-mono uppercase tracking-widest text-neutral-500">Couleur d'identification</label>
               <div className="flex items-center gap-4 bg-black border border-neutral-800 p-3 rounded">
-                <input disabled={isDeployed} type="color" value={unitData.color} onChange={e => setUnitData(p => ({ ...p, color: e.target.value }))} className="w-8 h-8 rounded border-0 bg-transparent cursor-pointer" />
+                {/* Couleur modifiable en direct aussi */}
+                <input type="color" value={unitData.color} onChange={e => setUnitData(p => ({ ...p, color: e.target.value }))} className="w-8 h-8 rounded border-0 bg-transparent cursor-pointer" />
                 <span className="text-xs font-mono text-neutral-400">{unitData.color.toUpperCase()}</span>
               </div>
             </div>
@@ -92,7 +95,7 @@ const UnitManager = ({ isOpen, onClose, unitData, setUnitData, isDeployed, onDep
                       <button onClick={() => onDeleteGlobalUnit(unit.callsign)} className="p-2 hover:bg-red-950/40 border border-transparent hover:border-red-900/50 rounded transition-colors" title="Supprimer définitivement">
                         <Trash2 className="w-3.5 h-3.5 text-red-500" />
                       </button>
-                      <button onClick={() => handleJoinUnit(unit)} className="p-2 hover:bg-neutral-900 border border-transparent hover:border-neutral-800 rounded transition-colors" title="Prendre l'indicatif">
+                      <button onClick={() => handleJoinUnit(unit)} className="p-2 hover:bg-neutral-900 border border-transparent hover:border-neutral-800 rounded transition-colors" title="Rejoindre l'unité">
                         <LogIn className="w-3.5 h-3.5 text-white" />
                       </button>
                     </div>
@@ -106,11 +109,11 @@ const UnitManager = ({ isOpen, onClose, unitData, setUnitData, isDeployed, onDep
 
       {(activeTab === 'create' || isDeployed) && (
         <div className="p-6 border-t border-neutral-900 bg-[#020202]">
-          <button onClick={() => onDeploy(null)} disabled={!unitData.callsign} className="relative w-full py-4 rounded overflow-hidden group disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-500" style={{ backgroundColor: unitData.callsign ? `${unitData.color}15` : '#111', border: `1px solid ${unitData.callsign ? unitData.color : '#333'}`, color: unitData.callsign ? unitData.color : '#666' }}>
+          <button onClick={() => onDeploy(null)} disabled={!unitData.callsign || isDeployed} className="relative w-full py-4 rounded overflow-hidden group disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-500" style={{ backgroundColor: unitData.callsign ? `${unitData.color}15` : '#111', border: `1px solid ${unitData.callsign ? unitData.color : '#333'}`, color: unitData.callsign ? unitData.color : '#666' }}>
             {unitData.callsign && <div className="absolute inset-0 opacity-20 pointer-events-none transition-transform duration-700 group-hover:scale-150" style={{ background: `radial-gradient(circle at center, ${unitData.color} 0%, transparent 70%)` }}></div>}
             <span className="relative z-10 font-mono text-sm tracking-[0.2em] uppercase font-bold flex items-center justify-center gap-3">
               {isDeployed ? <Activity className="w-4 h-4 animate-pulse" /> : <Fingerprint className="w-4 h-4" />}
-              {isDeployed ? "Module Connecté" : "Initialiser Module"}
+              {isDeployed ? "Module Déployé (Synchro Auto)" : "Initialiser Module"}
             </span>
           </button>
         </div>

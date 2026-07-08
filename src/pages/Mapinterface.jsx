@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Radio, Target, Activity, Menu, X, Trash2 } from 'lucide-react';
+import { ArrowLeft, Radio, Target, Activity, Menu, X, Trash2, AlertOctagon } from 'lucide-react';
 import { io } from 'socket.io-client';
 import SanAndreasMap from '../components/Map/SanAndreasMap';
 import UnitManager from '../components/Tactical/UnitManager';
@@ -67,14 +67,16 @@ const MapInterface = () => {
     };
   }, [factionLabel, isDeployed, unitData.callsign]); 
 
+  // SAUVEGARDE ET MISE À JOUR EN DIRECT
   useEffect(() => {
     if (isDeployed) {
       localStorage.setItem(`unitData_${faction}`, JSON.stringify(unitData));
       localStorage.setItem(`isDeployed_${faction}`, 'true');
+      // Met à jour la BDD pour tout le monde instantanément quand tu modifies tes agents
+      socket.emit('deploy_unit', { ...unitData, faction: factionLabel });
     }
   }, [unitData, isDeployed, faction]);
 
-  // Modifié pour accepter une unité injectée directement depuis "Rejoindre"
   const handleDeploy = (overrideUnit = null) => {
     const targetUnit = (overrideUnit && overrideUnit.callsign) ? overrideUnit : unitData;
     if (targetUnit.callsign.trim() === '') return;
@@ -95,9 +97,8 @@ const MapInterface = () => {
 
   const handleUndo = () => socket.emit('undo_last_zone', { faction: factionLabel });
   
-  // Fonction globale pour tout raser
   const handleClearOperation = () => {
-    if (window.confirm("🔴 DANGER : Confirmer la réinitialisation TOTALE de l'opération ? (Unités, Tracés et Titre effacés pour tout le monde)")) {
+    if (window.confirm("🔴 DANGER : Confirmer la réinitialisation TOTALE de l'opération ?")) {
       socket.emit('clear_operation', { faction: factionLabel });
       if (isDeployed) handleLeaveUnit();
     }
@@ -122,9 +123,7 @@ const MapInterface = () => {
           >
             <ArrowLeft className="w-4 h-4" />
           </button>
-          
           <div className="h-6 w-[1px] bg-neutral-800"></div>
-
           <div className="flex flex-col">
             <span className="text-[9px] font-mono text-neutral-500 tracking-widest uppercase">DISPATCH // {factionLabel}</span>
             <input 
@@ -153,9 +152,8 @@ const MapInterface = () => {
 
         <div className="flex items-center gap-4">
           
-          {/* NOUVEAU BOUTON : CLEAR OPÉRATION */}
-          <button onClick={handleClearOperation} className="hidden md:flex items-center gap-2 px-3 py-1.5 border border-red-900/40 bg-red-950/20 hover:bg-red-900 hover:border-red-500 text-red-500 hover:text-white rounded-lg text-[10px] font-mono font-bold tracking-wider uppercase transition-all">
-            <Trash2 className="w-3.5 h-3.5" /> Wipe
+          <button onClick={handleClearOperation} className="hidden md:flex items-center gap-2 px-4 py-2 border border-red-900/60 bg-red-950/40 hover:bg-red-900 hover:border-red-500 text-red-500 hover:text-white rounded-lg text-[10px] font-mono font-bold tracking-wider uppercase transition-all shadow-[0_0_15px_rgba(220,38,38,0.2)] hover:shadow-[0_0_25px_rgba(220,38,38,0.5)]">
+            <AlertOctagon className="w-4 h-4" /> Clear Opération
           </button>
 
           {isDeployed ? (
@@ -191,7 +189,7 @@ const MapInterface = () => {
         unitData={unitData}
         setUnitData={setUnitData}
         isDeployed={isDeployed}
-        onDeploy={handleDeploy} // Utilise la nouvelle fonction modifiée
+        onDeploy={handleDeploy} 
         activeUnitsList={activeUnitsList}
         factionLabel={factionLabel}
         onDeleteGlobalUnit={(callsign) => socket.emit('delete_global_unit', { callsign, faction: factionLabel })}

@@ -52,14 +52,16 @@ const DrawingController = ({ activeTool, activeColor, socket, strokeWidth, facti
       return () => { map.off('mousedown mousemove mouseup'); map.dragging.enable(); };
     }
 
-    const options = { shapeOptions: { color: activeColor, weight: strokeWidth, fillOpacity: 0.2 } };
+    // CORRECTION : Épaisseur fixée à 3 pour les formes géométriques
+    const options = { shapeOptions: { color: activeColor, weight: 3, fillOpacity: 0.2 } };
     if (activeTool === 'circle') drawControlRef.current = new L.Draw.Circle(map, options);
     else if (activeTool === 'polygon') drawControlRef.current = new L.Draw.Polygon(map, options);
     if (drawControlRef.current) drawControlRef.current.enable();
 
     const handleDrawCreated = (e) => {
       const { layerType, layer } = e;
-      let zoneData = { type: layerType, color: activeColor, weight: strokeWidth, faction: factionLabel };
+      // Le crayon garde strokeWidth, le reste prend 3
+      let zoneData = { type: layerType, color: activeColor, weight: layerType === 'polyline' ? strokeWidth : 3, faction: factionLabel };
       if (layerType === 'circle') {
         zoneData.center = layer.getLatLng();
         zoneData.radius = layer.getRadius();
@@ -91,8 +93,7 @@ const SanAndreasMap = ({
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    // Animation d'apparition au chargement
-    const timer = setTimeout(() => setIsVisible(true), 150);
+    const timer = setTimeout(() => setIsVisible(true), 100);
     return () => clearTimeout(timer);
   }, []);
 
@@ -107,23 +108,35 @@ const SanAndreasMap = ({
   return (
     <div 
       onContextMenu={(e) => e.preventDefault()} 
-      className={`absolute inset-0 z-0 transition-opacity duration-1000 ease-in-out ${isVisible ? 'opacity-100' : 'opacity-0'} ${activeTool === 'eraser' ? 'cursor-crosshair' : activeTool === 'pen' ? 'cursor-crosshair' : 'cursor-grab'}`}
+      className={`absolute inset-0 z-0 transition-opacity duration-700 ease-out ${isVisible ? 'opacity-100' : 'opacity-0'} ${activeTool === 'eraser' ? 'cursor-crosshair' : activeTool === 'pen' ? 'cursor-crosshair' : 'cursor-grab'}`}
       style={{ backgroundColor: '#143d6b' }}
     >
+      <style>{`
+        .gpu-accelerated-image {
+          will-change: transform;
+          backface-visibility: hidden;
+          transform: translateZ(0);
+        }
+        .leaflet-container { background: #143d6b !important; }
+      `}</style>
+      
       <MapContainer 
         crs={gtaCrs} 
         bounds={bounds} 
         center={[4096, 4096]} 
         zoom={-1} 
-        minZoom={-2} 
+        minZoom={-4} 
         maxZoom={4} 
         zoomControl={false}
         maxBounds={bounds} 
         maxBoundsViscosity={1.0}
-        style={{ height: '100%', width: '100%', backgroundColor: '#143d6b' }}
+        zoomSnap={0.1}
+        zoomDelta={0.5}
+        wheelPxPerZoomLevel={120}
+        style={{ height: '100%', width: '100%' }}
         preferCanvas={true} 
       >
-        <ImageOverlay url="/map.webp" bounds={bounds} zIndex={1} />
+        <ImageOverlay url="/map.webp" bounds={bounds} zIndex={1} className="gpu-accelerated-image" />
         
         {isDeployed && (
           <DrawingController activeTool={activeTool} activeColor={activeColor} socket={socket} strokeWidth={strokeWidth} factionLabel={factionLabel} />
