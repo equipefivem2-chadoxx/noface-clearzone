@@ -62,6 +62,7 @@ const ProtectedRoute = ({ children }) => {
 // Garde du corps spécifique pour la page Admin (Sécurité Max)
 const AdminRoute = ({ children }) => {
   const user = getUserData();
+  // Correction ici : Retrait des antislashs qui cassaient le code
   if (!user || user.id !== ADMIN_DISCORD_ID) return <Navigate to="/" replace />;
   return children;
 };
