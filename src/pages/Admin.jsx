@@ -7,8 +7,16 @@ function Admin({ socket }) {
   const [isMaintenance, setIsMaintenance] = useState(false);
 
   useEffect(() => {
-    socket.on('maintenance_state', (state) => setIsMaintenance(state));
-    return () => socket.off('maintenance_state');
+    const onMaintenanceState = (state) => {
+      setIsMaintenance(state);
+    };
+
+    socket.on('maintenance_state', onMaintenanceState);
+    
+    // LA CORRECTION : La page Admin demande l'état en direct dès qu'on l'ouvre
+    socket.emit('check_maintenance');
+
+    return () => socket.off('maintenance_state', onMaintenanceState);
   }, [socket]);
 
   const toggleMaintenance = () => {

@@ -28,19 +28,28 @@ const ProtectedRoute = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    socket.on('maintenance_state', (state) => {
+    // On isole la fonction pour pouvoir la supprimer proprement ensuite
+    const onMaintenanceState = (state) => {
       setIsMaintenance(state);
-      setLoading(false); // Débloque l'écran de chargement
-    });
+      setLoading(false); 
+    };
 
-    // LA CORRECTION EST ICI : On force la demande au serveur 
+    socket.on('maintenance_state', onMaintenanceState);
     socket.emit('check_maintenance');
 
-    return () => socket.off('maintenance_state');
+    // LA CORRECTION : On ne supprime QUE cette écoute spécifique, pas toutes les écoutes
+    return () => socket.off('maintenance_state', onMaintenanceState);
   }, []);
 
   if (!user) return <Navigate to="/login" replace />;
-  if (loading) return <div className="h-screen w-screen bg-black text-neutral-500 flex items-center justify-center font-mono text-xs">SYSTÈME EN LIGNE...</div>;
+  
+  if (loading) {
+    return (
+      <div className="h-screen w-screen bg-black text-neutral-500 flex items-center justify-center font-mono text-xs uppercase tracking-widest">
+        Connexion au réseau ClearZone...
+      </div>
+    );
+  }
   
   // Redirection forcée si maintenance active (sauf pour l'Admin)
   if (isMaintenance && user.id !== ADMIN_DISCORD_ID) {
@@ -63,17 +72,14 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         
-        {/* On passe le socket à la page Maintenance pour le retour automatique */}
         <Route path="/maintenance" element={<Maintenance socket={socket} />} />
 
-        {/* 🔒 Les routes protégées */}
         <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
         <Route path="/map/:faction" element={<ProtectedRoute><MapInterface /></ProtectedRoute>} /> 
 
-        {/* 🛡️ La route Administrateur */}
         <Route path="/admin" element={<AdminRoute><Admin socket={socket} /></AdminRoute>} />
 
-        <Route path="*" element={<div className="text-white text-center mt-20 font-mono">Page introuvable (Erreur 404)</div>} />
+        <Route path="*" element={<div className="h-screen bg-black flex items-center justify-center text-white font-mono uppercase tracking-widest">Secteur introuvable (Erreur 404)</div>} />
       </Routes>
     </BrowserRouter>
   );
