@@ -61,6 +61,11 @@ io.on('connection', (socket) => {
     socket.emit('sync_data', { units: activeUnits, zones: activeZones });
   });
 
+  // LA CORRECTION EST ICI : Le serveur répond à React pour débloquer l'écran
+  socket.on('check_maintenance', () => {
+    socket.emit('maintenance_state', isMaintenance);
+  });
+
   // --- MAINTENANCE ---
   socket.on('toggle_maintenance', (state) => {
     isMaintenance = state;
@@ -117,7 +122,6 @@ io.on('connection', (socket) => {
 
 // --- ROUTES D'AUTHENTIFICATION DISCORD ---
 
-// 1. Redirige l'utilisateur vers la page de connexion Discord
 app.get('/auth/discord', (req, res) => {
   if (!DISCORD_CLIENT_ID || !DISCORD_REDIRECT_URI) {
     console.error("[SYS] Variables d'environnement Discord manquantes !");
@@ -128,7 +132,6 @@ app.get('/auth/discord', (req, res) => {
   res.redirect(authUrl);
 });
 
-// 2. Gère le retour de Discord avec le code d'autorisation
 app.get('/auth/discord/callback', async (req, res) => {
   const { code } = req.query;
   
@@ -137,7 +140,6 @@ app.get('/auth/discord/callback', async (req, res) => {
   }
 
   try {
-    // A. Échange le code contre un token d'accès Discord
     const tokenResponse = await axios.post('https://discord.com/api/oauth2/token', new URLSearchParams({
       client_id: DISCORD_CLIENT_ID,
       client_secret: DISCORD_CLIENT_SECRET,
@@ -150,14 +152,12 @@ app.get('/auth/discord/callback', async (req, res) => {
 
     const accessToken = tokenResponse.data.access_token;
 
-    // B. Récupère l'ID de l'utilisateur
     const userResponse = await axios.get('https://discord.com/api/users/@me', {
       headers: { Authorization: `Bearer ${accessToken}` }
     });
     const userId = userResponse.data.id;
-    const username = userResponse.data.username; // On récupère le pseudo
+    const username = userResponse.data.username; 
 
-    // C. Vérifie les rôles sur le serveur Discord de la faction
     const memberResponse = await axios.get(`https://discord.com/api/guilds/${DISCORD_GUILD_ID}/members/${userId}`, {
       headers: { Authorization: `Bot ${DISCORD_BOT_TOKEN}` }
     });
@@ -169,10 +169,8 @@ app.get('/auth/discord/callback', async (req, res) => {
       return res.redirect('/login?error=unauthorized');
     }
 
-    // D. Crée le token du site pour maintenir la session ouverte (avec ID et Username)
     const siteToken = jwt.sign({ id: userId, username }, JWT_SECRET || 'fallback_secret', { expiresIn: '24h' });
 
-    // E. Redirige vers le front avec le token validé
     res.redirect(`/login?token=${siteToken}`);
 
   } catch (error) {

@@ -9,7 +9,7 @@ import Login from './pages/Login.jsx';
 import Admin from './pages/Admin.jsx';
 import Maintenance from './pages/Maintenance.jsx';
 
-// ⚠️ METS TON ID DISCORD ICI ⚠️
+// ⚠️ TON ID DISCORD
 export const ADMIN_DISCORD_ID = "1247264549489610897"; 
 
 const socket = io(window.location.origin.includes('localhost') ? 'http://localhost:3001' : window.location.origin);
@@ -30,8 +30,12 @@ const ProtectedRoute = ({ children }) => {
   useEffect(() => {
     socket.on('maintenance_state', (state) => {
       setIsMaintenance(state);
-      setLoading(false);
+      setLoading(false); // Débloque l'écran de chargement
     });
+
+    // LA CORRECTION EST ICI : On force la demande au serveur 
+    socket.emit('check_maintenance');
+
     return () => socket.off('maintenance_state');
   }, []);
 
