@@ -97,7 +97,7 @@ const SanAndreasMap = ({ activeColor, isDeployed, activeTool, setActiveTool, str
       >
         {/* NOUVEAU : Chargement des tuiles MapTiler */}
         <TileLayer
-          url="/tuiles/{z}/{x}/{y}.png"
+          url="/tuiles/{z}/{x}/{y}.jpg"
           noWrap={true}
           bounds={bounds}
         />
