@@ -10,7 +10,7 @@ import Admin from './pages/Admin.jsx';
 import Maintenance from './pages/Maintenance.jsx';
 
 // ⚠️ METS TON ID DISCORD ICI ⚠️
-export const ADMIN_DISCORD_ID = "TON_ID_DISCORD_ICI"; 
+export const ADMIN_DISCORD_ID = "1247264549489610897"; 
 
 const socket = io(window.location.origin.includes('localhost') ? 'http://localhost:3001' : window.location.origin);
 
