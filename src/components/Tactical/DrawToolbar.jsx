@@ -19,7 +19,7 @@ const DrawToolbar = ({ activeColor, isDeployed, activeTool, setActiveTool, strok
         <Hand className="w-4 h-4" />
       </button>
 
-      <div className="relative group w-full flex flex-col items-center">
+      <div className="relative w-full flex flex-col items-center">
         <button 
           onClick={() => setActiveTool('pen')}
           className={`p-3 w-full flex justify-center rounded-lg transition-colors ${activeTool === 'pen' ? 'bg-white text-black' : 'text-neutral-500 hover:text-white hover:bg-neutral-900'}`} 
@@ -27,6 +27,20 @@ const DrawToolbar = ({ activeColor, isDeployed, activeTool, setActiveTool, strok
         >
           <PenTool className="w-4 h-4" />
         </button>
+        {/* CURSEUR D'ÉPAISSEUR APPARAÎT QUAND LE CRAYON EST ACTIF */}
+        {activeTool === 'pen' && (
+          <div className="w-full flex flex-col items-center mt-2 px-1">
+            <input 
+              type="range" 
+              min="1" 
+              max="15" 
+              value={strokeWidth} 
+              onChange={(e) => setStrokeWidth(Number(e.target.value))} 
+              className="w-full h-1 bg-neutral-700 rounded-lg appearance-none cursor-pointer accent-white" 
+              title="Épaisseur du trait"
+            />
+          </div>
+        )}
       </div>
 
       <button 
@@ -54,12 +68,11 @@ const DrawToolbar = ({ activeColor, isDeployed, activeTool, setActiveTool, strok
       <button 
         onClick={() => setActiveTool('eraser')} 
         className={`p-3 rounded-lg transition-colors ${activeTool === 'eraser' ? 'bg-red-500 text-black' : 'text-neutral-500 hover:bg-red-900/20 hover:text-red-500'}`} 
-        title="Gomme de zone"
+        title="Gomme (Clic sur élément) ou Clic Droit"
       >
         <Eraser className="w-4 h-4" />
       </button>
 
-      {/* BOUTON RAJOUTÉ : EFFACER TOUT D'UN COUP AVEC DEMANDE DE SÉCURITÉ */}
       <button 
         onClick={() => {
           if (window.confirm("🔴 ATTENTION : Voulez-vous effacer TOUS les tracés tactiques de cette carte ?")) {

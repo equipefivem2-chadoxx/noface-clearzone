@@ -26,10 +26,11 @@ const MapInterface = () => {
   const [strokeWidth, setStrokeWidth] = useState(3); 
   const [activeUnitsList, setActiveUnitsList] = useState([]);
   const [zones, setZones] = useState([]);
+  
   const [operationTitle, setOperationTitle] = useState('OPÉRATION STANDARD');
+  const [localTitle, setLocalTitle] = useState('OPÉRATION STANDARD');
 
   useEffect(() => {
-    // Ordre de connexion au salon étanche de la faction
     socket.emit('join_faction', { faction: factionLabel });
 
     if (isDeployed && unitData.callsign) {
@@ -40,11 +41,15 @@ const MapInterface = () => {
       setActiveUnitsList(data.units || []);
       setZones(data.zones || []);
       setOperationTitle(data.operationTitle || 'OPÉRATION STANDARD');
+      setLocalTitle(data.operationTitle || 'OPÉRATION STANDARD');
     });
 
     socket.on('sync_units', (units) => setActiveUnitsList(units));
     socket.on('sync_zones', (updatedZones) => setZones(updatedZones));
-    socket.on('sync_operation_title', (title) => setOperationTitle(title));
+    socket.on('sync_operation_title', (title) => {
+      setOperationTitle(title);
+      setLocalTitle(title);
+    });
 
     const handleKeyDown = (e) => {
       if (e.ctrlKey && e.key === 'z') {
@@ -60,7 +65,7 @@ const MapInterface = () => {
       socket.off('sync_operation_title');
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [factionLabel]); 
+  }, [factionLabel, isDeployed, unitData.callsign]); // Correction de dépendances
 
   useEffect(() => {
     if (isDeployed) {
@@ -77,9 +82,7 @@ const MapInterface = () => {
   };
 
   const handleLeaveUnit = () => {
-    if (unitData.callsign) {
-      socket.emit('delete_global_unit', { callsign: unitData.callsign, faction: factionLabel });
-    }
+    // On se déconnecte LOCALEMENT, on ne supprime PAS l'unité pour les autres.
     setIsDeployed(false);
     setUnitData({ callsign: '', agents: '', color: '#ffffff' });
     localStorage.removeItem(`unitData_${faction}`);
@@ -89,16 +92,16 @@ const MapInterface = () => {
   const handleUndo = () => socket.emit('undo_last_zone', { faction: factionLabel });
   const handleClearAll = () => socket.emit('clear_all_zones', { faction: factionLabel });
 
-  const handleTitleChange = (e) => {
-    const nextTitle = e.target.value;
-    setOperationTitle(nextTitle);
-    socket.emit('update_operation_title', { faction: factionLabel, title: nextTitle });
+  const handleTitleBlurOrEnter = () => {
+    if (localTitle !== operationTitle) {
+      setOperationTitle(localTitle);
+      socket.emit('update_operation_title', { faction: factionLabel, title: localTitle });
+    }
   };
 
   return (
     <div translate="no" className="w-screen h-screen flex flex-col bg-black text-slate-200 overflow-hidden select-none relative font-sans">
       
-      {/* HEADER TACTIQUE AVEC TITRE DYNAMIQUE & AFFICHAGE DES UNITÉS FILTRÉES */}
       <header className="absolute top-4 left-4 right-4 h-16 bg-[#050505]/90 backdrop-blur-xl z-[1000] flex items-center justify-between px-6 border border-neutral-800 rounded-xl shadow-[0_0_30px_rgba(0,0,0,0.9)]">
         
         <div className="flex items-center gap-4">
@@ -111,20 +114,20 @@ const MapInterface = () => {
           
           <div className="h-6 w-[1px] bg-neutral-800"></div>
 
-          {/* SYSTÈME DE TITRE MUTABLE EN DIRECT */}
           <div className="flex flex-col">
             <span className="text-[9px] font-mono text-neutral-500 tracking-widest uppercase">DISPATCH // {factionLabel}</span>
             <input 
               type="text" 
-              value={operationTitle} 
-              onChange={handleTitleChange}
+              value={localTitle} 
+              onChange={(e) => setLocalTitle(e.target.value)}
+              onBlur={handleTitleBlurOrEnter}
+              onKeyDown={(e) => e.key === 'Enter' && handleTitleBlurOrEnter()}
               className="bg-transparent text-white font-black tracking-wider text-sm uppercase focus:outline-none border-b border-transparent hover:border-neutral-800 focus:border-white transition-all py-0.5 max-w-[150px] md:max-w-[280px]"
               placeholder="NOMMER L'OPÉRATION..."
             />
           </div>
         </div>
 
-        {/* AFFICHAGE EN HAUT : SEULEMENT LES UNITÉS ACTIVES DE CETTE PAGE */}
         <div className="hidden lg:flex items-center gap-2 max-w-[40%]" style={{ contentVisibility: 'auto' }}>
           <div className="flex items-center gap-2 overflow-x-auto py-1 px-2 no-scrollbar">
             {activeUnitsList.map((unit) => (

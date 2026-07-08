@@ -55,13 +55,11 @@ io.on('connection', (socket) => {
   
   socket.emit('maintenance_state', isMaintenance);
 
-  // Connexion sécurisée à une faction spécifique (Isolation des salons)
   socket.on('join_faction', ({ faction }) => {
     socket.join(faction);
     socket.currentFaction = faction;
     console.log(`[SYS] Agent ${socket.id} a rejoint le salon tactique : ${faction}`);
     
-    // Synchronisation exclusive des données de CETTE faction
     socket.emit('sync_faction_data', {
       units: activeUnits.filter(u => u.faction === faction),
       zones: activeZones.filter(z => z.faction === faction),
@@ -79,14 +77,19 @@ io.on('connection', (socket) => {
     console.log(`[SYS] Maintenance: ${isMaintenance ? 'ACTIVE' : 'INACTIVE'}`);
   });
 
-  // --- GESTION DES UNITÉS PAR ROOM ---
   socket.on('deploy_unit', (unitData) => {
-    // Nettoyage de l'ancienne position pour éviter les doublons
-    activeUnits = activeUnits.filter(u => !(u.callsign === unitData.callsign && u.faction === unitData.faction));
-    activeUnits.push({ id: socket.id, ...unitData });
-    saveData();
+    // CORRECTION : On cherche si l'unité existe déjà.
+    const existingIndex = activeUnits.findIndex(u => u.callsign === unitData.callsign && u.faction === unitData.faction);
     
-    // Diffusion uniquement aux membres de la même faction
+    if (existingIndex !== -1) {
+      // Si elle existe, on la met à jour sans la supprimer
+      activeUnits[existingIndex] = { ...activeUnits[existingIndex], ...unitData };
+    } else {
+      // Sinon on l'ajoute
+      activeUnits.push({ id: socket.id, ...unitData });
+    }
+    
+    saveData();
     io.to(unitData.faction).emit('sync_units', activeUnits.filter(u => u.faction === unitData.faction));
   });
 
@@ -96,7 +99,6 @@ io.on('connection', (socket) => {
     io.to(faction).emit('sync_units', activeUnits.filter(u => u.faction === faction));
   });
 
-  // --- DESSINS TACTIQUES PAR ROOM ---
   socket.on('add_zone', (zoneData) => {
     const faction = zoneData.faction || socket.currentFaction;
     if (!faction) return;
@@ -133,7 +135,6 @@ io.on('connection', (socket) => {
     io.to(faction).emit('sync_zones', []);
   });
 
-  // --- TITRE DE L'OPÉRATION ---
   socket.on('update_operation_title', ({ faction, title }) => {
     operationTitles[faction] = title;
     saveData();
@@ -145,7 +146,6 @@ io.on('connection', (socket) => {
   });
 });
 
-// --- AUTH DISCORD OAUTH2 ---
 app.get('/auth/discord', (req, res) => {
   const url = `https://discord.com/api/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${encodeURIComponent(DISCORD_REDIRECT_URI)}&response_type=code&scope=identify`;
   res.redirect(url);
@@ -189,10 +189,8 @@ app.get('/auth/discord/callback', async (req, res) => {
   }
 });
 
-// --- LA CORRECTION EST ICI ---
 app.use(express.static(path.join(__dirname, 'dist')));
 
-// On utilise l'expression régulière /.*/ au lieu du * pour ne pas faire crasher Express 5 !
 app.get(/.*/, (req, res) => {
   res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });

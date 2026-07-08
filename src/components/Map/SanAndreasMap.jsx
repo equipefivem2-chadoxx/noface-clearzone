@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { MapContainer, TileLayer, Circle, Polygon, Polyline, FeatureGroup, useMap } from 'react-leaflet';
+import { MapContainer, ImageOverlay, Circle, Polygon, Polyline, FeatureGroup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw/dist/leaflet.draw.css';
@@ -47,8 +47,10 @@ const DrawingController = ({ activeTool, activeColor, socket, strokeWidth, facti
             faction: factionLabel 
           });
         }
-        currentLineRef.current.remove(); 
-        currentLineRef.current = null;
+        if (currentLineRef.current) {
+          currentLineRef.current.remove(); 
+          currentLineRef.current = null;
+        }
       };
       map.on('mousedown', onMouseDown);
       map.on('mousemove', onMouseMove);
@@ -91,20 +93,28 @@ const SanAndreasMap = ({
   socket = null,
   factionLabel = 'GLOBAL'
 }) => {
-  const handleZoneClick = (zoneId) => {
-    if (activeTool === 'eraser' && socket) {
+  
+  const handleDeleteZone = (zoneId, e) => {
+    if (e) {
+      e.originalEvent?.preventDefault();
+      e.originalEvent?.stopPropagation();
+    }
+    if (socket) {
       socket.emit('delete_zone', { id: zoneId, faction: factionLabel });
     }
   };
 
   return (
-    <div className={`absolute inset-0 z-0 bg-black ${activeTool === 'eraser' ? 'cursor-crosshair' : activeTool === 'pen' ? 'cursor-default' : 'cursor-grab'}`}>
+    <div 
+      onContextMenu={(e) => e.preventDefault()} 
+      className={`absolute inset-0 z-0 bg-black ${activeTool === 'eraser' ? 'cursor-crosshair' : activeTool === 'pen' ? 'cursor-crosshair' : 'cursor-grab'}`}
+    >
       <MapContainer 
         crs={gtaCrs} 
         bounds={bounds} 
         center={[4096, 4096]} 
         zoom={0} 
-        minZoom={0} 
+        minZoom={-1} 
         maxZoom={4} 
         zoomControl={false}
         maxBounds={bounds} 
@@ -112,31 +122,33 @@ const SanAndreasMap = ({
         style={{ height: '100%', width: '100%', backgroundColor: '#000000' }}
         preferCanvas={true} 
       >
-        <TileLayer
-          // CORRECTION : On remet {y} normal mais on utilise tms={true} pour inverser l'axe de manière sécurisée
-          url="/tuiles/{z}/{x}/{y}.jpg"
-          tms={true}
-          noWrap={true}
+        <ImageOverlay
+          url="/map.webp"
           bounds={bounds}
-          tileSize={256}
-          updateWhenIdle={true}  
-          keepBuffer={12}         
+          zIndex={1}
         />
         
         {isDeployed && (
           <DrawingController activeTool={activeTool} activeColor={activeColor} socket={socket} strokeWidth={strokeWidth} factionLabel={factionLabel} />
         )}
 
-        <FeatureGroup>
+        <FeatureGroup zIndex={10}>
           {zones.map((zone) => {
             const isEraser = activeTool === 'eraser';
             const pathOptions = zone.type === 'polyline' 
               ? { color: isEraser ? '#ef4444' : zone.color, weight: zone.weight || 8, opacity: isEraser ? 0.5 : 0.6, lineCap: 'round', lineJoin: 'round', dashArray: isEraser ? '5, 15' : '' }
               : { color: isEraser ? '#ef4444' : zone.color, weight: zone.weight || 3, fillOpacity: isEraser ? 0.5 : 0.2, dashArray: isEraser ? '5, 10' : '' };
 
-            if (zone.type === 'circle') return <Circle key={zone.id} center={zone.center} radius={zone.radius} pathOptions={pathOptions} eventHandlers={{ click: () => handleZoneClick(zone.id) }} />;
-            if (zone.type === 'polygon') return <Polygon key={zone.id} positions={zone.latlngs} pathOptions={pathOptions} eventHandlers={{ click: () => handleZoneClick(zone.id) }} />;
-            if (zone.type === 'polyline') return <Polyline key={zone.id} positions={zone.latlngs} pathOptions={pathOptions} eventHandlers={{ click: () => handleZoneClick(zone.id) }} />;
+            const eventHandlers = {
+              click: (e) => {
+                if (activeTool === 'eraser') handleDeleteZone(zone.id, e);
+              },
+              contextmenu: (e) => handleDeleteZone(zone.id, e)
+            };
+
+            if (zone.type === 'circle') return <Circle key={zone.id} center={zone.center} radius={zone.radius} pathOptions={pathOptions} eventHandlers={eventHandlers} />;
+            if (zone.type === 'polygon') return <Polygon key={zone.id} positions={zone.latlngs} pathOptions={pathOptions} eventHandlers={eventHandlers} />;
+            if (zone.type === 'polyline') return <Polyline key={zone.id} positions={zone.latlngs} pathOptions={pathOptions} eventHandlers={eventHandlers} />;
             return null;
           })}
         </FeatureGroup>
