@@ -63,6 +63,7 @@ const DrawingController = ({ activeTool, activeColor, socket, strokeWidth, facti
     const options = { shapeOptions: { color: activeColor, weight: 3, fillOpacity: 0.2 } };
     if (activeTool === 'circle') drawControlRef.current = new L.Draw.Circle(map, options);
     else if (activeTool === 'polygon') drawControlRef.current = new L.Draw.Polygon(map, options);
+    
     if (drawControlRef.current) drawControlRef.current.enable();
 
     const handleDrawCreated = (e) => {
@@ -74,8 +75,17 @@ const DrawingController = ({ activeTool, activeColor, socket, strokeWidth, facti
       } else {
         zoneData.latlngs = layer.getLatLngs();
       }
+      
       if (socket) socket.emit('add_zone', zoneData);
-      if (drawControlRef.current) drawControlRef.current.enable();
+      
+      // LA CORRECTION EST ICI : 
+      // On utilise un setTimeout pour forcer Leaflet à réactiver l'outil immédiatement
+      // après qu'il ait essayé de le désactiver par défaut.
+      setTimeout(() => {
+        if (drawControlRef.current) {
+          drawControlRef.current.enable();
+        }
+      }, 10);
     };
 
     map.on(L.Draw.Event.CREATED, handleDrawCreated);
